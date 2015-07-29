@@ -1,12 +1,16 @@
 package at.yawk.fiction.android.ui;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
@@ -16,6 +20,7 @@ import at.yawk.fiction.impl.fanfiction.FfnSearchQuery;
 import at.yawk.fiction.impl.fanfiction.FfnSubCategory;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -56,6 +61,7 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         queryArrayAdapter = new StringArrayAdapter<>(this, queries, QueryWrapper::getName);
 
         DrawerLayout drawerParent = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //drawerParent.setDrawerListener(this);
 
         ListView drawer = (ListView) findViewById(R.id.left_drawer);
         drawer.setAdapter(queryArrayAdapter);
@@ -77,5 +83,29 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         if (actionBar != null) {
             actionBar.setTitle(query.getName());
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.query_overview, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.create_query:
+            editQuery(null);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void editQuery(@Nullable SearchQuery query) {
+        Intent intent = new Intent(this, QueryWrapperActivity.class);
+        if (query != null) {
+            intent.putExtra("query", getContext().objectToParcelable(query));
+        }
+        startActivity(intent);
     }
 }

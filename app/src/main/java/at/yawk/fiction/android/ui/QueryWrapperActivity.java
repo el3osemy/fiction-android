@@ -3,6 +3,8 @@ package at.yawk.fiction.android.ui;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -13,6 +15,7 @@ import at.yawk.fiction.android.context.FictionContext;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import java.util.*;
+import javax.annotation.Nullable;
 
 /**
  * @author yawkat
@@ -47,9 +50,17 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
         List<AndroidFictionProvider> providers = new ArrayList<>(getContext().getProviderManager().getProviders());
         Spinner providerSpinner = (Spinner) findViewById(R.id.provider);
         providerSpinner.setAdapter(new StringArrayAdapter<>(this, providers, AndroidFictionProvider::getName));
-        providerSpinner.setOnItemClickListener(
-                (parent, view, position, id) -> selectProvider((AndroidFictionProvider) providerSpinner
-                        .getSelectedItem()));
+        providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectProvider((AndroidFictionProvider) providerSpinner.getSelectedItem());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectProvider(null);
+            }
+        });
 
         updateSavable();
     }
@@ -66,18 +77,29 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
         getContext().getStorageManager().getQueryManager().saveQuery(query);
     }
 
-    private void selectProvider(AndroidFictionProvider provider) {
-        SearchQuery query = queriesByProvider.get(provider);
-        if (query == null) {
-            queriesByProvider.put(provider, query = provider.createQuery());
-        }
+    private void selectProvider(@Nullable AndroidFictionProvider provider) {
+        if (provider != null) {
+            SearchQuery query = queriesByProvider.get(provider);
+            if (query == null) {
+                queriesByProvider.put(provider, query = provider.createQuery());
+            }
 
-        queryEditorFragment = provider.createQueryEditorFragment();
-        //noinspection unchecked
-        queryEditorFragment.setQuery(getContext(), query);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.providerQueryEditor, queryEditorFragment)
-                .commit();
+            queryEditorFragment = provider.createQueryEditorFragment();
+            //noinspection unchecked
+            queryEditorFragment.setQuery(getContext(), query);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.providerQueryEditor, queryEditorFragment)
+                    .commit();
+        } else {
+            if (queryEditorFragment != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .remove(queryEditorFragment)
+                        .commit();
+            }
+
+            queryEditorFragment = null;
+        }
 
         updateSavable();
     }

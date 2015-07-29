@@ -54,7 +54,7 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragmen
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return createView(inflater, container);
     }
 
     protected abstract View createView(LayoutInflater inflater, ViewGroup container);

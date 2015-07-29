@@ -45,4 +45,9 @@ public class StringArrayAdapter<T> extends ArrayAdapter<T> {
         ((TextView) convertView).setText(toString.apply(getItem(position)));
         return convertView;
     }
+
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        return getView(position, convertView, parent);
+    }
 }
