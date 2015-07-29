@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.SearchQuery;
+import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
 import at.yawk.fiction.impl.fanfiction.FfnAuthor;
 import at.yawk.fiction.impl.fanfiction.FfnChapter;
 import at.yawk.fiction.impl.fanfiction.FfnSearchQuery;

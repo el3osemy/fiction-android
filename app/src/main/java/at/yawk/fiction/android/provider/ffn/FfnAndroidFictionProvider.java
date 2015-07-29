@@ -1,5 +1,7 @@
-package at.yawk.fiction.android.provider;
+package at.yawk.fiction.android.provider.ffn;
 
+import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ProviderContext;
 import at.yawk.fiction.impl.fanfiction.FfnFictionProvider;
 
 /**

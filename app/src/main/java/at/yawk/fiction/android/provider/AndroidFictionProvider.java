@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.*;
+import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import lib.org.apache.http.client.HttpClient;
