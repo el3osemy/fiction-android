@@ -90,6 +90,14 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragmen
         }
     }
 
+    public boolean isSavable() {
+        return true;
+    }
+
+    public void updateSavable() {
+        ((QueryWrapperActivity) getActivity()).updateSavable();
+    }
+
     public interface Getter<O, T> {
         T get(O obj);
     }

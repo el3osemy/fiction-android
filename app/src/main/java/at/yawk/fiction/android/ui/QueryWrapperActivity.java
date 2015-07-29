@@ -63,6 +63,15 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
         });
 
         updateSavable();
+
+        findViewById(R.id.accept).setOnClickListener(v -> {
+            updateSavable();
+            if (isSavable()) {
+                save();
+                finish();
+            }
+        });
+        findViewById(R.id.cancel).setOnClickListener(v -> finish());
     }
 
     private void save() {
@@ -104,12 +113,12 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
         updateSavable();
     }
 
-    private void updateSavable() {
+    void updateSavable() {
         findViewById(R.id.accept).setEnabled(isSavable());
     }
 
     private boolean isSavable() {
-        return queryEditorFragment != null;
+        return queryEditorFragment != null && queryEditorFragment.isSavable();
     }
 
     @Override

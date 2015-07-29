@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +38,19 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                 getActivity(), new ArrayList<>(), FfnSubCategory::getName);
 
         ((Spinner) editor.findViewById(R.id.subCategory)).setAdapter(subCategoryArrayAdapter);
+        ((Spinner) editor.findViewById(R.id.subCategory)).setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        updateSavable();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        updateSavable();
+                    }
+                });
+
         ((Spinner) editor.findViewById(R.id.category)).setAdapter(
                 new StringArrayAdapter<>(getActivity(), FfnCategory.values(), FfnCategory::getName));
         ((Spinner) editor.findViewById(R.id.category)).setOnItemSelectedListener(
@@ -113,7 +127,19 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     @Override
     public void save() {
         super.save();
-        getQuery().setCategory((FfnSubCategory) ((Spinner) editor.findViewById(R.id.subCategory)).getSelectedItem());
+        getQuery().setCategory(getSelectedSubCategory());
+    }
+
+    @Nullable
+    private FfnSubCategory getSelectedSubCategory() {
+        return editor == null ?
+                null :
+                (FfnSubCategory) ((Spinner) editor.findViewById(R.id.subCategory)).getSelectedItem();
+    }
+
+    @Override
+    public boolean isSavable() {
+        return super.isSavable() && getSelectedSubCategory() != null;
     }
 
     @Override
