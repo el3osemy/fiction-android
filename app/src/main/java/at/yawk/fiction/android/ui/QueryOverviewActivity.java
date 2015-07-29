@@ -5,11 +5,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
@@ -56,16 +53,7 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
             queries = Collections.singletonList(queryWrapper);
         }
 
-        queryArrayAdapter = new ArrayAdapter<QueryWrapper>(this, android.R.layout.simple_list_item_1, queries) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = getLayoutInflater().inflate(android.R.layout.simple_list_item_1, parent, false);
-                }
-                ((TextView) convertView).setText(getItem(position).getName());
-                return convertView;
-            }
-        };
+        queryArrayAdapter = new StringArrayAdapter<>(this, queries, QueryWrapper::getName);
 
         DrawerLayout drawerParent = (DrawerLayout) findViewById(R.id.drawer_layout);
 

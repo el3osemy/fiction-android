@@ -17,6 +17,7 @@ public class StorageManager {
     final LoadingCache<String, StoryWrapper> storyCache;
     final PojoMerger pojoMerger;
     final TextStorage textStorage;
+    final QueryManager queryManager;
 
     public StorageManager(ObjectMapper objectMapper, File root) {
         this.objectMapper = objectMapper;
@@ -33,6 +34,7 @@ public class StorageManager {
         }));
         this.pojoMerger = new PojoMerger(objectMapper);
         this.textStorage = new TextStorage(objectStorage);
+        this.queryManager = QueryManager.load(objectStorage);
     }
 
     String getObjectId(Story story) {
@@ -58,5 +60,9 @@ public class StorageManager {
 
     public TextStorage getTextStorage() {
         return textStorage;
+    }
+
+    public QueryManager getQueryManager() {
+        return queryManager;
     }
 }

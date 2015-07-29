@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.storage;
 
 import at.yawk.fiction.SearchQuery;
+import java.util.UUID;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class QueryWrapper {
+    private UUID id;
     private String name;
     private SearchQuery query;
 }

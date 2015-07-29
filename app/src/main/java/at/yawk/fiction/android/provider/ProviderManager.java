@@ -7,6 +7,7 @@ import at.yawk.fiction.impl.fanfiction.FfnChapter;
 import at.yawk.fiction.impl.fanfiction.FfnSearchQuery;
 import at.yawk.fiction.impl.fanfiction.FfnStory;
 import com.google.common.collect.ImmutableMap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -41,6 +42,10 @@ public class ProviderManager {
 
     public AndroidFictionProvider getProvider(SearchQuery query) {
         return getProvider0(query);
+    }
+
+    public Collection<AndroidFictionProvider> getProviders() {
+        return providers.values();
     }
 
     private AndroidFictionProvider getProvider0(Object o) {
