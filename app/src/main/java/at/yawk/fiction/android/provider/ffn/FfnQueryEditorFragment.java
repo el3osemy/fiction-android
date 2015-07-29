@@ -10,9 +10,7 @@ import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
-import at.yawk.fiction.impl.fanfiction.FfnCategory;
-import at.yawk.fiction.impl.fanfiction.FfnSearchQuery;
-import at.yawk.fiction.impl.fanfiction.FfnSubCategory;
+import at.yawk.fiction.impl.fanfiction.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +79,12 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
 
+        bindChoice((Spinner) editor.findViewById(R.id.searchOrder),
+                   FfnSearchQuery::getOrder,
+                   FfnSearchQuery::setOrder,
+                   FfnSearchOrder::getName,
+                   FfnSearchOrder.values());
+
         return editor;
     }
 
@@ -88,6 +92,10 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     public void save() {
         super.save();
         getQuery().setCategory((FfnSubCategory) ((Spinner) editor.findViewById(R.id.subCategory)).getSelectedItem());
+
+        // todo more editors
+        getQuery().setMinRating(FfnRating.CHILDREN);
+        getQuery().setMaxRating(FfnRating.MATURE);
     }
 
     @Override
