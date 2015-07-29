@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
@@ -96,7 +97,10 @@ public class QueryFragment extends ListFragment implements ContextProvider {
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        log.info("Click #{}: {}", position, id);
+        StoryWrapper wrapper = (StoryWrapper) l.getItemAtPosition(position);
+        Intent intent = new Intent(getActivity(), StoryActivity.class);
+        intent.putExtra("story", getContext().objectToParcelable(wrapper.getStory()));
+        startActivity(intent);
     }
 
     private void decorateEntry(StoryWrapper wrapper, View view) {

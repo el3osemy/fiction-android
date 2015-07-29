@@ -27,6 +27,10 @@
             android:name=".ui.QueryWrapperActivity"
             android:theme="@style/Base.Theme.AppCompat.Dialog" />
 
+        <activity
+            android:name=".ui.StoryActivity"
+            android:theme="@style/Base.Theme.AppCompat.Dialog" />
+
     </application>
 
 </manifest>

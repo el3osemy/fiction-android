@@ -53,9 +53,13 @@ public class StorageManager {
      * the saved story if necessary.
      */
     public StoryWrapper mergeStory(Story story) {
-        StoryWrapper wrapper = storyCache.getUnchecked(getObjectId(story));
+        StoryWrapper wrapper = getStory(story);
         wrapper.updateStory(story);
         return wrapper;
+    }
+
+    public StoryWrapper getStory(Story story) {
+        return storyCache.getUnchecked(getObjectId(story));
     }
 
     public TextStorage getTextStorage() {
