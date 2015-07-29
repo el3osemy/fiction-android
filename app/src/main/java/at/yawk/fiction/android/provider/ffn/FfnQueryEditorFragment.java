@@ -11,7 +11,10 @@ import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -92,23 +95,17 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                                    FfnRating::getName,
                                    FfnRating.values());
 
-        List<TimeRange> ranges = new ArrayList<>();
-        ranges.add(null);
-        ranges.addAll(Arrays.asList(TimeRange.values()));
         bindChoice((Spinner) editor.findViewById(R.id.timeRange),
                    FfnSearchQuery::getTimeRange,
                    FfnSearchQuery::setTimeRange,
                    timeRange -> timeRange == null ? "All" : timeRange.getLabel(),
-                   ranges);
+                   andNull(TimeRange.values()));
 
-        List<FfnStatus> statuses = new ArrayList<>();
-        statuses.add(null);
-        statuses.addAll(Arrays.asList(FfnStatus.values()));
         bindChoice((Spinner) editor.findViewById(R.id.status),
                    FfnSearchQuery::getStatus,
                    FfnSearchQuery::setStatus,
                    status -> status == null ? "All" : status.getName(),
-                   statuses);
+                   andNull(FfnStatus.values()));
 
         return editor;
     }

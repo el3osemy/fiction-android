@@ -97,4 +97,14 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragmen
     public interface Setter<O, T> {
         void set(O obj, T value);
     }
+
+    /**
+     * Return a list containing null and the given item array.
+     */
+    protected static <T> List<T> andNull(T[] items) {
+        List<T> list = new ArrayList<>(items.length + 1);
+        list.add(null);
+        list.addAll(Arrays.asList(items));
+        return list;
+    }
 }
