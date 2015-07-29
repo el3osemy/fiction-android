@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.ui;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -83,5 +84,10 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, QueryFragment.create(getContext(), query));
         ft.commit();
+
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(query.getName());
+        }
     }
 }
