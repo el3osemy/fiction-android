@@ -15,6 +15,11 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
     }
 
     @Override
+    public FfnFictionProvider getFictionProvider() {
+        return (FfnFictionProvider) super.getFictionProvider();
+    }
+
+    @Override
     public void init(ProviderContext context) {
         super.init(context);
 

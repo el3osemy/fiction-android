@@ -84,7 +84,7 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragmen
         saveTasks.add(() -> setter.set(getQuery(), (C) spinner.getSelectedItem()));
     }
 
-    void save() {
+    public void save() {
         for (Runnable saveTask : saveTasks) {
             saveTask.run();
         }

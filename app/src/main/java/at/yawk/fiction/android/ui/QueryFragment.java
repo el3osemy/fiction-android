@@ -183,4 +183,10 @@ public class QueryFragment extends ListFragment implements ContextProvider {
         }
         return ok;
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        taskContext.destroy();
+    }
 }

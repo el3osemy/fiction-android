@@ -28,7 +28,7 @@ public abstract class AndroidFictionProvider {
     }
 
     @JsonIgnore
-    protected FictionProvider getFictionProvider() {
+    public FictionProvider getFictionProvider() {
         return fictionProvider;
     }
 
