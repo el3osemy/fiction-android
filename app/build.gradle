@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'retrolambda'
+apply plugin: 'de.undercouch.download'
+apply plugin: 'imagemagick'
 
 android {
     compileSdkVersion 22
@@ -28,4 +30,23 @@ dependencies {
     provided 'org.projectlombok:lombok:1.16.4'
     provided 'com.google.code.findbugs:annotations:2.0.2'
     compile 'org.slf4j:slf4j-android:1.7.12'
+}
+
+task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {
+    convert projectDir.toString() + "/tmp", { include '*' }
+    into 'src/main/res/drawable'
+    actions {
+        inputFile()
+        -sample('500x500')
+        outputFile()
+    }
+}
+
+task downloadResources << {
+    download {
+        src 'https://www.fanfiction.net/static/images/favicon_2010_site.png'
+        dest new File(projectDir, 'tmp/icon.png')
+    }
+    tasks.resizeResources.execute()
+    new File(projectDir, 'tmp').deleteDir()
 }
