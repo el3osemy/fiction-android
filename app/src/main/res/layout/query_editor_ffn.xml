@@ -44,6 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/searchOrder"
         android:layout_alignParentLeft="true"
+        android:id="@+id/linearLayout2"
         android:layout_alignParentStart="true">
 
         <Spinner
@@ -58,5 +59,13 @@
             android:id="@+id/ratingMax"
             android:layout_weight="1" />
     </LinearLayout>
+
+    <Spinner
+        android:id="@+id/timeRange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/linearLayout2" />
 
 </RelativeLayout>
