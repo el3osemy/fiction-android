@@ -2,6 +2,7 @@ package at.yawk.fiction.android.storage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import lombok.Setter;
 public class QueryManager {
     private transient ObjectStorageManager objectStorageManager;
     @Getter @Setter private List<QueryWrapper> queries;
+    @Getter @Setter private UUID selectedQueryId;
 
     public void saveQuery(QueryWrapper wrapper) {
         boolean found = false;

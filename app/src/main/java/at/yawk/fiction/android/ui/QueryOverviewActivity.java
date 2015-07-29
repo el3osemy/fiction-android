@@ -14,11 +14,9 @@ import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
-import at.yawk.fiction.impl.fanfiction.FfnCategory;
-import at.yawk.fiction.impl.fanfiction.FfnSearchQuery;
-import at.yawk.fiction.impl.fanfiction.FfnSubCategory;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +26,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class QueryOverviewActivity extends FragmentActivity implements ContextProvider {
-    private List<QueryWrapper> queries;
-    private ArrayAdapter<?> queryArrayAdapter;
+    private ArrayAdapter<QueryWrapper> queryArrayAdapter;
+    private DrawerLayout drawerParent;
+    private ListView drawer;
 
     @Override
     public FictionContext getContext() {
@@ -44,44 +43,68 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
 
         log.info("Creating query overview");
 
-        {
-            // todo editable query list
-            FfnSearchQuery query = new FfnSearchQuery();
-            FfnSubCategory category = new FfnSubCategory();
-            category.setCategory(FfnCategory.GAMES);
-            category.setName("Elder Scroll series");
-            query.setCategory(category);
+        queryArrayAdapter = new StringArrayAdapter<>(this, new ArrayList<>(),
+                                                     QueryOverviewActivity::getName);
 
-            QueryWrapper queryWrapper = new QueryWrapper();
-            queryWrapper.setName("Test");
-            queryWrapper.setQuery(query);
-            queries = Collections.singletonList(queryWrapper);
-        }
+        updateQueries(true);
 
-        queryArrayAdapter = new StringArrayAdapter<>(this, queries, QueryWrapper::getName);
-
-        DrawerLayout drawerParent = (DrawerLayout) findViewById(R.id.drawer_layout);
-        //drawerParent.setDrawerListener(this);
-
-        ListView drawer = (ListView) findViewById(R.id.left_drawer);
+        drawer = (ListView) findViewById(R.id.left_drawer);
         drawer.setAdapter(queryArrayAdapter);
+        drawerParent = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         drawer.setOnItemClickListener((parent, view, position, id) -> {
-            showQuery(queries.get(position));
+            showQuery(queryArrayAdapter.getItem(position), true);
             drawerParent.closeDrawers();
         });
-
-        showQuery(queries.get(0)); // todo save position
     }
 
-    private void showQuery(QueryWrapper query) {
+    private void updateQueries(boolean first) {
+        List<QueryWrapper> queries = getQueryManager().getQueries();
+        queryArrayAdapter.clear();
+        queryArrayAdapter.addAll(queries);
+
+        for (QueryWrapper query : queries) {
+            if (query.getId().equals(getQueryManager().getSelectedQueryId())) {
+                showQuery(query, first);
+                break;
+            }
+        }
+    }
+
+    private void showQuery(QueryWrapper query, boolean forceRedraw) {
+        if (!forceRedraw && query.getId().equals(getQueryManager().getSelectedQueryId())) {
+            return;
+        }
+
         log.info("ShowQuery {}", query);
+
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, QueryFragment.create(getContext(), query));
         ft.commit();
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(query.getName());
+            actionBar.setTitle(getName(query));
+        }
+
+        getQueryManager().setSelectedQueryId(query.getId());
+    }
+
+    private static String getName(QueryWrapper query) {
+        String name = query.getName();
+        return name == null || name.isEmpty() ? "Unnamed Query" : name;
+    }
+
+    private QueryManager getQueryManager() {
+        return getContext().getStorageManager().getQueryManager();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+
+        if (hasFocus) {
+            updateQueries(false);
         }
     }
 
