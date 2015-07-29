@@ -51,6 +51,7 @@ class WrapperParcelable implements Parcelable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        dest.writeString(value.getClass().getName());
         dest.writeByteArray(bos.getBuf(), 0, bos.size());
     }
 

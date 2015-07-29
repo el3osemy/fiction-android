@@ -39,10 +39,12 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
             queriesByProvider.put(provider, query.getQuery());
             selectProvider(provider);
             ((Button) findViewById(R.id.accept)).setText(R.string.update_query);
+            findViewById(R.id.remove).setVisibility(View.VISIBLE);
         } else {
             query = new QueryWrapper();
             query.setId(UUID.randomUUID());
             ((Button) findViewById(R.id.accept)).setText(R.string.create_query);
+            findViewById(R.id.remove).setVisibility(View.GONE);
         }
 
         ((EditText) findViewById(R.id.queryName)).setText(query.getName());
@@ -72,6 +74,10 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
             }
         });
         findViewById(R.id.cancel).setOnClickListener(v -> finish());
+        findViewById(R.id.remove).setOnClickListener(v -> {
+            getContext().getStorageManager().getQueryManager().removeQuery(query);
+            finish();
+        });
     }
 
     private void save() {

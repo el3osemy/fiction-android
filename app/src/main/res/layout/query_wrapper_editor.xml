@@ -36,6 +36,14 @@
             android:text="Cancel" />
 
         <Button
+            style="?android:attr/buttonBarStyle"
+            android:id="@+id/remove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/remove" />
+
+        <Button
             android:id="@+id/accept"
             style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"

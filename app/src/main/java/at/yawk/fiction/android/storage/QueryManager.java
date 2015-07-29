@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.storage;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -24,6 +25,19 @@ public class QueryManager {
             }
         }
         if (!found) { queries.add(wrapper); }
+        save();
+    }
+
+    public void removeQuery(QueryWrapper wrapper) {
+        for (Iterator<QueryWrapper> iterator = queries.iterator(); iterator.hasNext(); ) {
+            if (iterator.next().getId().equals(wrapper.getId())) {
+                iterator.remove();
+            }
+        }
+        save();
+    }
+
+    private void save() {
         objectStorageManager.save(this, "queryManager");
     }
 

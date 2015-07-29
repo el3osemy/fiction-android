@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
@@ -55,6 +54,10 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         drawer.setOnItemClickListener((parent, view, position, id) -> {
             showQuery(queryArrayAdapter.getItem(position), true);
             drawerParent.closeDrawers();
+        });
+        drawer.setOnItemLongClickListener((parent, view, position, id) -> {
+            editQuery(queryArrayAdapter.getItem(position));
+            return true;
         });
     }
 
@@ -124,7 +127,7 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         return super.onOptionsItemSelected(item);
     }
 
-    private void editQuery(@Nullable SearchQuery query) {
+    private void editQuery(@Nullable QueryWrapper query) {
         Intent intent = new Intent(this, QueryWrapperActivity.class);
         if (query != null) {
             intent.putExtra("query", getContext().objectToParcelable(query));
