@@ -92,7 +92,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                                    FfnRating::getName,
                                    FfnRating.values());
 
-        ArrayList<TimeRange> ranges = new ArrayList<>();
+        List<TimeRange> ranges = new ArrayList<>();
         ranges.add(null);
         ranges.addAll(Arrays.asList(TimeRange.values()));
         bindChoice((Spinner) editor.findViewById(R.id.timeRange),
@@ -100,6 +100,15 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                    FfnSearchQuery::setTimeRange,
                    timeRange -> timeRange == null ? "All" : timeRange.getLabel(),
                    ranges);
+
+        List<FfnStatus> statuses = new ArrayList<>();
+        statuses.add(null);
+        statuses.addAll(Arrays.asList(FfnStatus.values()));
+        bindChoice((Spinner) editor.findViewById(R.id.status),
+                   FfnSearchQuery::getStatus,
+                   FfnSearchQuery::setStatus,
+                   status -> status == null ? "All" : status.getName(),
+                   statuses);
 
         return editor;
     }
