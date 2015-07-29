@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '1.2.2'
+}
+
+dependencies {
+    compile 'at.yawk.fiction:fiction:1.0-SNAPSHOT'
+}
+
+shadowJar {
+    relocate 'org.apache.http', 'lib.org.apache.http'
+    /*
+    dependencies {
+        include(dependency('org.apache.httpcomponents:httpclient'))
+        include(dependency('at.yawk.fiction:fiction'))
+    }
+    */
+}

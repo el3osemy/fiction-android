@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+apply plugin: 'retrolambda'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        applicationId "at.yawk.fiction.android"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile files('../dep/build/libs/dep-all.jar')
+    provided 'org.projectlombok:lombok:1.16.4'
+    provided 'com.google.code.findbugs:annotations:2.0.2'
+    compile 'org.slf4j:slf4j-android:1.7.12'
+}
