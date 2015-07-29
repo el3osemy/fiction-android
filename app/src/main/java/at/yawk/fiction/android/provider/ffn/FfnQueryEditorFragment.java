@@ -84,6 +84,16 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                    FfnSearchQuery::setOrder,
                    FfnSearchOrder::getName,
                    FfnSearchOrder.values());
+        this.<FfnRating>bindChoice((Spinner) editor.findViewById(R.id.ratingMin),
+                                   FfnSearchQuery::getMinRating,
+                                   FfnSearchQuery::setMinRating,
+                                   FfnRating::getName,
+                                   FfnRating.values());
+        this.<FfnRating>bindChoice((Spinner) editor.findViewById(R.id.ratingMax),
+                                   FfnSearchQuery::getMaxRating,
+                                   FfnSearchQuery::setMaxRating,
+                                   FfnRating::getName,
+                                   FfnRating.values());
 
         return editor;
     }
@@ -92,10 +102,6 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     public void save() {
         super.save();
         getQuery().setCategory((FfnSubCategory) ((Spinner) editor.findViewById(R.id.subCategory)).getSelectedItem());
-
-        // todo more editors
-        getQuery().setMinRating(FfnRating.CHILDREN);
-        getQuery().setMaxRating(FfnRating.MATURE);
     }
 
     @Override
