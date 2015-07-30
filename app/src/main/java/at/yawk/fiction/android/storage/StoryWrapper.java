@@ -57,12 +57,10 @@ public class StoryWrapper {
     public synchronized void setChapterRead(Chapter chapter, boolean read) {
         FormattedText text = chapter.getText();
         if (text == null) { return; }
-        if (read) {
-            readChapters.add(text);
-        } else {
-            readChapters.remove(text);
+        boolean changed = read ? readChapters.add(text) : readChapters.remove(text);
+        if (changed) {
+            save();
         }
-        save();
     }
 
     public synchronized boolean isChapterRead(Chapter chapter) {
