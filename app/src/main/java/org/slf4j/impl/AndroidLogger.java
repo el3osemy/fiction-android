@@ -58,6 +58,13 @@ final class AndroidLogger implements Logger {
         }
     }
 
+    private void log(Marker marker, int level, String format, Object[] argArray) {
+        if (isEnabled(marker, level)) {
+            FormattingTuple tuple = MessageFormatter.arrayFormat(format, argArray);
+            doLog(marker, level, tuple.getMessage(), tuple.getThrowable());
+        }
+    }
+
     private void log(Marker marker, int level, String msg, Throwable t) {
         if (isEnabled(marker, level)) {
             doLog(marker, level, msg, t);
