@@ -7,8 +7,8 @@
     tools:context=".ui.StoryActivity">
 
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="18sp"
+        android:layout_width="20sp"
+        android:layout_height="20sp"
         android:id="@+id/downloadWrapper"
         android:layout_gravity="center"
         android:layout_centerVertical="true"
@@ -17,7 +17,7 @@
 
         <ImageButton
             android:id="@+id/chapterDownload"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
             android:src="@android:drawable/stat_sys_download"
@@ -27,7 +27,7 @@
 
         <ImageButton
             android:id="@+id/chapterRefresh"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:background="@android:color/transparent"
@@ -37,8 +37,8 @@
 
         <ProgressBar
             android:id="@+id/chapterDownloading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:contentDescription="Downloading Chapter"
             android:indeterminate="false"
             android:visibility="invisible" />
@@ -53,7 +53,8 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/downloadWrapper"
-        android:layout_toEndOf="@+id/downloadWrapper" />
+        android:layout_toLeftOf="@+id/chapterRead"
+        android:layout_toStartOf="@+id/chapterRead" />
 
     <CheckBox
         android:layout_width="wrap_content"
