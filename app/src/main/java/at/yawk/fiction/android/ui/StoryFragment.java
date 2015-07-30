@@ -19,6 +19,7 @@ import at.yawk.fiction.android.storage.StoryWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author yawkat
@@ -74,6 +75,9 @@ public class StoryFragment extends Fragment implements ContextProvider {
     private void refresh() {
         ((TextView) root.findViewById(R.id.title)).setText(wrapper.getStory().getTitle());
         ((TextView) root.findViewById(R.id.author)).setText(wrapper.getStory().getAuthor().getName());
+        AndroidFictionProvider provider = getContext().getProviderManager().getProvider(wrapper.getStory());
+        ((TextView) root.findViewById(R.id.tags)).setText(
+                StringUtils.join(provider.getTags(wrapper.getStory()), " • "));
 
         TextView descriptionView = (TextView) root.findViewById(R.id.description);
         FormattedText description = wrapper.getStory().getDescription();

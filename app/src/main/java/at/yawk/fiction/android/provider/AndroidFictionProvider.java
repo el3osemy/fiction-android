@@ -5,6 +5,7 @@ import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import java.util.List;
 import lib.org.apache.http.client.HttpClient;
 
 /**
@@ -57,4 +58,6 @@ public abstract class AndroidFictionProvider {
     public abstract QueryEditorFragment<?> createQueryEditorFragment();
 
     public abstract String getStoryId(Story story, String separator);
+
+    public abstract List<String> getTags(Story story);
 }
