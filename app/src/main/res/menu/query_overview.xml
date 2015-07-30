@@ -6,4 +6,9 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="Create Query"
         app:showAsAction="ifRoom" />
+    <item
+        android:visible="false"
+        android:id="@+id/import_ffn"
+        android:title="Import FFN"
+        app:showAsAction="never" />
 </menu>

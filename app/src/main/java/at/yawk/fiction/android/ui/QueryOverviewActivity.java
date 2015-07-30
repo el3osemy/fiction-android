@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
@@ -123,11 +124,9 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         case R.id.create_query:
             editQuery(null);
             return true;
-        /*
         case R.id.import_ffn:
             new Thread(new Importer(getContext())).start();
             return true;
-        */
         }
         return super.onOptionsItemSelected(item);
     }
