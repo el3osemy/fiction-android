@@ -26,6 +26,6 @@
         android:layout_centerVertical="true"
         android:padding="2dp"
         android:text="5/10"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/chaptersReadSome" />
 </RelativeLayout>
