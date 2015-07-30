@@ -90,7 +90,6 @@ public class StoryFragment extends Fragment implements ContextProvider {
             if (name == null) {
                 name = "Chapter " + (i + 1);
             }
-            log.info("{} : {}", name, chapterGroup.indexOfChild(view));
             ((TextView) view.findViewById(R.id.chapterName)).setText(name);
         }
 
