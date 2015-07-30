@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.ui;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -115,10 +117,26 @@ public class StoryFragment extends Fragment implements ContextProvider {
         }
     }
 
+    void refreshAsync() {
+        getActivity().runOnUiThread(StoryFragment.this::refresh);
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         taskContext.destroy();
+    }
+
+    void showDialog(AsyncAction... actions) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        String[] actionNames = new String[actions.length];
+        for (int i = 0; i < actions.length; i++) {
+            actionNames[i] = getResources().getString(actions[i].description);
+        }
+        builder.setItems(actionNames, (dialog, which) -> {
+            getContext().getTaskManager().execute(taskContext, actions[which].task);
+        });
+        builder.show();
     }
 
     private class ChapterHolder {
@@ -133,11 +151,24 @@ public class StoryFragment extends Fragment implements ContextProvider {
             this.index = index;
 
             readBox = (CheckBox) view.findViewById(R.id.chapterRead);
-            readBox.setOnCheckedChangeListener((buttonView, isChecked) -> wrapper.setChapterRead(chapter, isChecked));
+            readBox.setOnCheckedChangeListener((buttonView, isChecked) -> setRead(isChecked));
+            readBox.setOnLongClickListener(v -> {
+                showDialog(new AsyncAction(R.string.read_until_here, () -> {
+                    for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
+                        chapterHolders.get(i).setRead(true);
+                    }
+                    refreshAsync();
+                }));
+                return true;
+            });
 
             View.OnClickListener refreshListener = v -> fetchChapter();
             view.findViewById(R.id.chapterDownload).setOnClickListener(refreshListener);
             view.findViewById(R.id.chapterRefresh).setOnClickListener(refreshListener);
+        }
+
+        void setRead(boolean read) {
+            wrapper.setChapterRead(chapter, read);
         }
 
         void setChapter(Chapter chapter) {
@@ -169,7 +200,7 @@ public class StoryFragment extends Fragment implements ContextProvider {
                     getContext().getStorageManager().getTextStorage().externalize(chapter);
 
                     getContext().getStorageManager().mergeStory(storyClone);
-                    getActivity().runOnUiThread(StoryFragment.this::refresh);
+                    refreshAsync();
                 } catch (Exception e) {
                     log.error("Failed to fetch chapter", e);
                     getContext().toast(getActivity(), "Failed to fetch chapter", e);
@@ -184,5 +215,11 @@ public class StoryFragment extends Fragment implements ContextProvider {
                 child.setVisibility(child.getId() == statusId ? View.VISIBLE : View.INVISIBLE);
             }
         }
+    }
+
+    @RequiredArgsConstructor
+    private static class AsyncAction {
+        final int description;
+        final Runnable task;
     }
 }
