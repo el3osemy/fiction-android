@@ -1,9 +1,7 @@
 package at.yawk.fiction.android.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +22,7 @@ class ObjectStorageManager {
         File file = new File(root, key);
         if (file.exists()) {
             try {
-                T o = objectMapper.readValue(file, type);
-                log.info("loaded {}", Files.toString(file, Charsets.UTF_8));
-                log.info("loaded -> {}", o);
-                return o;
+                return objectMapper.readValue(file, type);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -38,14 +33,19 @@ class ObjectStorageManager {
 
     public void save(Object o, String key) {
         File file = new File(root, key);
+        File tmp = new File(root, key + ".tmp");
         //noinspection ResultOfMethodCallIgnored
         file.getParentFile().mkdirs();
         try {
-            objectMapper.writeValue(file, o);
-            log.info("stored {}", o);
-            log.info("stored -> {}", Files.toString(file, Charsets.UTF_8));
+            objectMapper.writeValue(tmp, o);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException();
+        }
+        if (!tmp.renameTo(file)) {
+            throw new RuntimeException();
         }
     }
 
