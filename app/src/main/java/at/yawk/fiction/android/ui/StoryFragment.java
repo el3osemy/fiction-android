@@ -8,18 +8,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import at.yawk.fiction.FormattedText;
-import at.yawk.fiction.HtmlText;
-import at.yawk.fiction.RawText;
-import at.yawk.fiction.Story;
+import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
 import at.yawk.fiction.android.storage.StoryWrapper;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 public class StoryFragment extends Fragment implements ContextProvider {
     private StoryWrapper wrapper;
     private FictionContext fictionContext;
@@ -55,6 +56,8 @@ public class StoryFragment extends Fragment implements ContextProvider {
         return root;
     }
 
+    private List<View> chapterViews = new ArrayList<>();
+
     private void refresh() {
         ((TextView) root.findViewById(R.id.title)).setText(wrapper.getStory().getTitle());
         ((TextView) root.findViewById(R.id.author)).setText(wrapper.getStory().getAuthor().getName());
@@ -67,6 +70,36 @@ public class StoryFragment extends Fragment implements ContextProvider {
             descriptionView.setText(((RawText) description).getText());
         } else {
             descriptionView.setText("");
+        }
+
+        ViewGroup chapterGroup = (ViewGroup) root.findViewById(R.id.chapters);
+
+        List<? extends Chapter> chapters = wrapper.getStory().getChapters();
+        for (int i = 0; i < chapters.size(); i++) {
+            View view;
+            if (i >= chapterViews.size()) {
+                view = getActivity().getLayoutInflater().inflate(R.layout.chapter, chapterGroup, false);
+                chapterGroup.addView(view);
+                chapterViews.add(view);
+            } else {
+                view = chapterViews.get(i);
+            }
+
+            Chapter chapter = chapters.get(i);
+            String name = chapter.getName();
+            if (name == null) {
+                name = "Chapter " + (i + 1);
+            }
+            log.info("{} : {}", name, chapterGroup.indexOfChild(view));
+            ((TextView) view.findViewById(R.id.chapterName)).setText(name);
+        }
+
+        if (chapters.size() < chapterViews.size()) {
+            List<View> toRemove = chapterViews.subList(chapters.size(), chapterViews.size());
+            for (int i = 0; i < toRemove.size(); i++) {
+                chapterGroup.removeViewAt(chapters.size() + i);
+            }
+            toRemove.clear();
         }
     }
 }
