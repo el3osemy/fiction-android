@@ -71,7 +71,17 @@ public class StoryWrapper {
     }
 
     private synchronized void save() {
+        externalize();
         manager.objectStorage.save(this, getObjectId());
+    }
+
+    private synchronized void externalize() {
+        manager.textStorage.externalize(story);
+        Set<FormattedText> read = new HashSet<>();
+        for (FormattedText readChapter : readChapters) {
+            read.add(manager.textStorage.externalize(readChapter));
+        }
+        readChapters = read;
     }
 
     @JsonIgnore
