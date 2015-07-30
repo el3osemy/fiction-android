@@ -1,6 +1,8 @@
 package at.yawk.fiction.android.ui;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -70,6 +72,14 @@ public class StoryFragment extends Fragment implements ContextProvider {
                 getContext().toast(getActivity(), "Failed to open epub", e);
             }
         }));
+        root.findViewById(R.id.title).setOnLongClickListener(v -> {
+            showDialog(new AsyncAction(R.string.open_in_browser, () -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(wrapper.getStory().getUri().toString()));
+                getActivity().startActivity(intent);
+            }));
+            return false;
+        });
         refresh();
         return root;
     }
