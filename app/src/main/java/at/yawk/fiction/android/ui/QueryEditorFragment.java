@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import at.yawk.fiction.SearchQuery;
@@ -82,6 +83,11 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragmen
         int position = choices.indexOf(getter.get(getQuery()));
         if (position != -1) { spinner.setSelection(position); }
         saveTasks.add(() -> setter.set(getQuery(), (C) spinner.getSelectedItem()));
+    }
+
+    protected void bindBoolean(CheckBox editor, Getter<S, Boolean> getter, Setter<S, Boolean> setter) {
+        editor.setChecked(getter.get(getQuery()));
+        saveTasks.add(() -> setter.set(getQuery(), editor.isChecked()));
     }
 
     public void save() {

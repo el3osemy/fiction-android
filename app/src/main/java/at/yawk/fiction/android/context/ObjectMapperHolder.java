@@ -1,7 +1,7 @@
 package at.yawk.fiction.android.context;
 
+import at.yawk.fiction.android.provider.local.LocalSearchQuery;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -18,5 +18,7 @@ class ObjectMapperHolder {
         OBJECT_MAPPER = new ObjectMapper();
         OBJECT_MAPPER.findAndRegisterModules();
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+
+        OBJECT_MAPPER.registerSubtypes(LocalSearchQuery.class);
     }
 }

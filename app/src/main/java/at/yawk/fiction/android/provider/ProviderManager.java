@@ -3,6 +3,9 @@ package at.yawk.fiction.android.provider;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
+import at.yawk.fiction.android.provider.local.LocalAndroidFictionProvider;
+import at.yawk.fiction.android.provider.local.LocalSearchQuery;
+import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.impl.fanfiction.FfnAuthor;
 import at.yawk.fiction.impl.fanfiction.FfnChapter;
 import at.yawk.fiction.impl.fanfiction.FfnSearchQuery;
@@ -22,11 +25,11 @@ public class ProviderManager {
                     FfnSearchQuery.class, FfnAndroidFictionProvider.class,
                     FfnStory.class, FfnAndroidFictionProvider.class,
                     FfnChapter.class, FfnAndroidFictionProvider.class,
-                    FfnAuthor.class, FfnAndroidFictionProvider.class
+                    FfnAuthor.class, FfnAndroidFictionProvider.class,
+                    LocalSearchQuery.class, LocalAndroidFictionProvider.class
             );
 
-    private final ProviderContext context = new ProviderContext();
-    @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
+    private ProviderContext context;
     private final Map<Class<? extends AndroidFictionProvider>, AndroidFictionProvider> providers = new HashMap<>();
 
     private void addProvider(AndroidFictionProvider provider) {
@@ -37,8 +40,10 @@ public class ProviderManager {
         provider.init(context);
     }
 
-    {
+    public void init(StorageManager storageManager) {
+        context = new ProviderContext(storageManager);
         addProvider(new FfnAndroidFictionProvider());
+        addProvider(new LocalAndroidFictionProvider());
     }
 
     public AndroidFictionProvider getProvider(SearchQuery query) {

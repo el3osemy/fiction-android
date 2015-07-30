@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,5 +53,69 @@ class ObjectStorageManager {
 
     public boolean exists(String key) {
         return new File(root, key).exists();
+    }
+
+    public Iterable<String> list(String key) {
+        return () -> new Iterator<String>() {
+            private DirectoryNode node = new DirectoryNode(null, key + '/', new File(root, key));
+            private String next;
+
+            @Override
+            public boolean hasNext() {
+                findNext();
+                return next != null;
+            }
+
+            @Override
+            public String next() {
+                findNext();
+                if (next == null) { throw new NoSuchElementException(); }
+                String e = this.next;
+                next = null;
+                return e;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            void findNext() {
+                while (node != null && next == null) {
+                    node.findNextHere();
+                }
+            }
+
+            class DirectoryNode {
+                final DirectoryNode parent;
+                final String path;
+                final String[] entries;
+                int index = 0;
+
+                DirectoryNode(DirectoryNode parent, String path, File dir) {
+                    this.parent = parent;
+                    this.path = path;
+                    this.entries = dir.list();
+                }
+
+                void findNextHere() {
+                    if (index >= entries.length) {
+                        node = parent;
+                        return;
+                    }
+
+                    String entry = entries[index++];
+                    if (entry.endsWith(".tmp")) { return; }
+
+                    String entryPath = path + entry;
+                    File file = new File(root, entryPath);
+                    if (file.isDirectory()) {
+                        node = new DirectoryNode(this, entryPath + '/', file);
+                    } else {
+                        next = entryPath;
+                    }
+                }
+            }
+        };
     }
 }

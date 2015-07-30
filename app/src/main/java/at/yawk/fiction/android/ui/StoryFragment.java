@@ -88,7 +88,16 @@ public class StoryFragment extends Fragment implements ContextProvider {
 
     private void refresh() {
         ((TextView) root.findViewById(R.id.title)).setText(wrapper.getStory().getTitle());
-        ((TextView) root.findViewById(R.id.author)).setText(wrapper.getStory().getAuthor().getName());
+
+        TextView authorView = (TextView) root.findViewById(R.id.author);
+        Author author = wrapper.getStory().getAuthor();
+        if (author == null) {
+            authorView.setVisibility(View.GONE);
+        } else {
+            authorView.setVisibility(View.VISIBLE);
+            authorView.setText(author.getName());
+        }
+
         AndroidFictionProvider provider = getContext().getProviderManager().getProvider(wrapper.getStory());
         ((TextView) root.findViewById(R.id.tags)).setText(
                 StringUtils.join(provider.getTags(wrapper.getStory()), " • "));

@@ -37,6 +37,7 @@ public class FictionContext {
         this.application = application;
         this.objectMapper = ObjectMapperHolder.getObjectMapper();
         this.storageManager = new StorageManager(providerManager, objectMapper, root);
+        providerManager.init(storageManager);
     }
 
     public Parcelable objectToParcelable(Object o) {

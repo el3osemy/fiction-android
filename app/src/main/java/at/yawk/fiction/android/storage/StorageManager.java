@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Iterables;
 import java.io.File;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,15 @@ public class StorageManager {
     }
 
     public StoryWrapper getStory(Story story) {
-        return storyCache.getUnchecked(getObjectId(story));
+        return getStory0(getObjectId(story));
+    }
+
+    private StoryWrapper getStory0(String id) {
+        return storyCache.getUnchecked(id);
+    }
+
+    public Iterable<StoryWrapper> listStories() {
+        return Iterables.transform(objectStorage.list("story"), this::getStory0);
     }
 
     public TextStorage getTextStorage() {

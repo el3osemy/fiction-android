@@ -1,20 +1,16 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.*;
-import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import java.util.List;
 import lib.org.apache.http.client.HttpClient;
 
 /**
  * @author yawkat
  */
-@JsonSubTypes({ @JsonSubTypes.Type(FfnAndroidFictionProvider.class) })
 public abstract class AndroidFictionProvider {
     private transient HttpClient httpClient;
-    private transient FictionProvider fictionProvider;
 
     public abstract String getName();
 
@@ -26,14 +22,7 @@ public abstract class AndroidFictionProvider {
     }
 
     @JsonIgnore
-    protected void setFictionProvider(FictionProvider fictionProvider) {
-        this.fictionProvider = fictionProvider;
-    }
-
-    @JsonIgnore
-    public FictionProvider getFictionProvider() {
-        return fictionProvider;
-    }
+    public abstract FictionProvider getFictionProvider();
 
     public void init(ProviderContext context) {
         httpClient = context.createClient();

@@ -14,6 +14,8 @@ import java.util.List;
  * @author yawkat
  */
 public class FfnAndroidFictionProvider extends AndroidFictionProvider {
+    private FfnFictionProvider fictionProvider;
+
     @Override
     public String getName() {
         return "FanFiction.net";
@@ -26,14 +28,14 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
 
     @Override
     public FfnFictionProvider getFictionProvider() {
-        return (FfnFictionProvider) super.getFictionProvider();
+        return fictionProvider;
     }
 
     @Override
     public void init(ProviderContext context) {
         super.init(context);
 
-        setFictionProvider(new FfnFictionProvider(context.getPageParserProvider(), getHttpClient()));
+        fictionProvider = new FfnFictionProvider(context.getPageParserProvider(), getHttpClient());
     }
 
     @Override
@@ -52,8 +54,10 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
         list.add("Favorites: " + ((FfnStory) story).getFavorites());
         list.add("Follows: " + ((FfnStory) story).getFollows());
         list.add("Words: " + ((FfnStory) story).getWords());
-        for (FfnGenre genre : ((FfnStory) story).getGenres()) {
-            list.add(genre.getName());
+        if (((FfnStory) story).getGenres() != null) {
+            for (FfnGenre genre : ((FfnStory) story).getGenres()) {
+                list.add(genre.getName());
+            }
         }
         return list;
     }
