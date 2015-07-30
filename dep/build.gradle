@@ -5,14 +5,11 @@ plugins {
 
 dependencies {
     compile 'at.yawk.fiction:fiction:1.0-SNAPSHOT'
+    compile 'nl.siegmann.epublib:epublib-core:3.1'
+    compile 'org.slf4j:slf4j-android:1.7.12'
+    compile 'org.apache.commons:commons-lang3:3.4'
 }
 
 shadowJar {
     relocate 'org.apache.http', 'lib.org.apache.http'
-    /*
-    dependencies {
-        include(dependency('org.apache.httpcomponents:httpclient'))
-        include(dependency('at.yawk.fiction:fiction'))
-    }
-    */
 }

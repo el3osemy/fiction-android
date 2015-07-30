@@ -29,7 +29,6 @@ dependencies {
     compile files('../dep/build/libs/dep-all.jar')
     provided 'org.projectlombok:lombok:1.16.4'
     provided 'com.google.code.findbugs:annotations:2.0.2'
-    compile 'org.slf4j:slf4j-android:1.7.12'
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {

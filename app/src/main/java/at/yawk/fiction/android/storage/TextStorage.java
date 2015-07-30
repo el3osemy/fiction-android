@@ -7,6 +7,7 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * @author yawkat
@@ -20,12 +21,13 @@ public class TextStorage {
         this.objectStorage = objectStorage;
     }
 
-    public FormattedText load(FormattedText text) {
+    @Nullable
+    public FormattedText load(@Nullable FormattedText text) {
         if (text instanceof ExternalizedText) {
             try {
                 return objectStorage.load(FormattedText.class, getStorageId(((ExternalizedText) text).hash));
             } catch (NotFoundException e) {
-                throw new RuntimeException(e);
+                return null;
             }
         } else {
             return text;

@@ -23,6 +23,7 @@ public class StorageManager {
     @Getter final PojoMerger pojoMerger;
     final TextStorage textStorage;
     final QueryManager queryManager;
+    @Getter final EpubBuilder epubBuilder;
 
     public StorageManager(ProviderManager providerManager, ObjectMapper objectMapper, File root) {
         this.providerManager = providerManager;
@@ -41,6 +42,7 @@ public class StorageManager {
         this.pojoMerger = new PojoMerger(objectMapper);
         this.textStorage = new TextStorage(objectStorage);
         this.queryManager = QueryManager.load(objectStorage);
+        this.epubBuilder = new EpubBuilder(this, root);
     }
 
     String getObjectId(Story story) {

@@ -22,5 +22,8 @@ allprojects {
         jcenter()
         mavenCentral()
         mavenLocal()
+        maven {
+            url "http://mvn.yawk.at"
+        }
     }
 }

@@ -57,6 +57,14 @@ public class StoryFragment extends Fragment implements ContextProvider {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.story, container, false);
+        root.findViewById(R.id.title).setOnClickListener(v -> getContext().getTaskManager().execute(taskContext, () -> {
+            try {
+                getContext().getStorageManager().getEpubBuilder().openEpub(getActivity(), wrapper.getStory());
+            } catch (Exception e) {
+                log.error("Failed to open epub", e);
+                getContext().toast(getActivity(), "Failed to open epub", e);
+            }
+        }));
         refresh();
         return root;
     }
