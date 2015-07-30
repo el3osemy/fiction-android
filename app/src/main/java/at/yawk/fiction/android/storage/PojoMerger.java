@@ -51,21 +51,11 @@ public class PojoMerger {
 
         if (a.isArray()) {
             ArrayNode joined = new ArrayNode(JsonNodeFactory.instance);
-            for (int i = 0; ; i++) {
-                boolean la = i < a.size();
-                boolean lb = i < b.size();
-                if (la) {
-                    if (lb) {
-                        joined.add(merge(a.get(i), b.get(i)));
-                    } else {
-                        joined.add(a.get(i));
-                    }
+            for (int i = 0; i < a.size(); i++) {
+                if (i < b.size()) {
+                    joined.add(merge(a.get(i), b.get(i)));
                 } else {
-                    if (lb) {
-                        joined.add(b.get(i));
-                    } else {
-                        break;
-                    }
+                    joined.add(a.get(i));
                 }
             }
             return joined;
