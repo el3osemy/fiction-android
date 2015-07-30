@@ -1,19 +1,19 @@
 package at.yawk.fiction.android.storage;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author yawkat
  */
 public class QueryManager {
     private transient ObjectStorageManager objectStorageManager;
-    @Getter @Setter private List<QueryWrapper> queries;
-    @Getter @Setter private UUID selectedQueryId;
+    @JsonProperty private List<QueryWrapper> queries;
+    @JsonProperty private UUID selectedQueryId;
 
     public void saveQuery(QueryWrapper wrapper) {
         boolean found = false;
@@ -37,6 +37,20 @@ public class QueryManager {
         save();
     }
 
+    public UUID getSelectedQueryId() {
+        return selectedQueryId;
+    }
+
+    @JsonIgnore
+    public void setSelectedQueryId(UUID selectedQueryId) {
+        this.selectedQueryId = selectedQueryId;
+        save();
+    }
+
+    public List<QueryWrapper> getQueries() {
+        return queries;
+    }
+
     private void save() {
         objectStorageManager.save(this, "queryManager");
     }
@@ -47,7 +61,7 @@ public class QueryManager {
             manager = objectStorageManager.load(QueryManager.class, "queryManager");
         } catch (NotFoundException e) {
             manager = new QueryManager();
-            manager.setQueries(new ArrayList<>());
+            manager.queries = new ArrayList<>();
         }
         manager.objectStorageManager = objectStorageManager;
         return manager;
