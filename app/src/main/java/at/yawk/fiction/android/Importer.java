@@ -67,6 +67,8 @@ public class Importer implements ContextProvider, Runnable {
                         if (chapter.getText() == null) {
                             log.info("Fetching chapter {}/{}", keyStory.getId(), i);
                             provider.fetchChapter(keyStory, chapter);
+                            context.getStorageManager().getTextStorage().externalize(chapter);
+                            context.getStorageManager().getTextStorage().externalize(keyStory);
                             story.updateStory(keyStory);
                         }
 
