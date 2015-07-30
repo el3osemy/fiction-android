@@ -1,25 +1,29 @@
 package at.yawk.fiction.android.storage;
 
 import at.yawk.fiction.Story;
-import at.yawk.fiction.impl.fanfiction.FfnStory;
+import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ProviderManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.io.File;
+import lombok.Getter;
 
 /**
  * @author yawkat
  */
 public class StorageManager {
+    final ProviderManager providerManager;
     final ObjectMapper objectMapper;
     final ObjectStorageManager objectStorage;
     final LoadingCache<String, StoryWrapper> storyCache;
-    final PojoMerger pojoMerger;
+    @Getter final PojoMerger pojoMerger;
     final TextStorage textStorage;
     final QueryManager queryManager;
 
-    public StorageManager(ObjectMapper objectMapper, File root) {
+    public StorageManager(ProviderManager providerManager, ObjectMapper objectMapper, File root) {
+        this.providerManager = providerManager;
         this.objectMapper = objectMapper;
         this.objectStorage = new ObjectStorageManager(root, objectMapper);
         this.storyCache = CacheBuilder.newBuilder().softValues().build(CacheLoader.from(input -> {
@@ -39,11 +43,9 @@ public class StorageManager {
 
     String getObjectId(Story story) {
         StringBuilder builder = new StringBuilder("story/");
-        if (story instanceof FfnStory) {
-            builder.append("ffn/").append(((FfnStory) story).getId());
-        } else {
-            throw new UnsupportedOperationException("Unsupported story type " + story.getClass().getName());
-        }
+        AndroidFictionProvider provider = providerManager.getProvider(story);
+        builder.append(provider.getId()).append('/');
+        builder.append(provider.getStoryId(story, "/"));
 
         return builder.toString();
     }

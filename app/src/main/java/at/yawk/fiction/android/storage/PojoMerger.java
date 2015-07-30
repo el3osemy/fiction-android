@@ -6,16 +6,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
 import java.util.Iterator;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 /**
  * @author yawkat
  */
-@RequiredArgsConstructor
-class PojoMerger {
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+public class PojoMerger {
     private final ObjectMapper mapper;
+
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    public <T> T clone(T obj) {
+        TokenBuffer buffer = new TokenBuffer(mapper, false);
+        mapper.writeValue(buffer, obj);
+        return mapper.readValue(buffer.asParser(), (Class<? extends T>) obj.getClass());
+    }
 
     /**
      * Merge two pojos. Values from the first parameter will take priority.

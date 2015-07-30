@@ -2,6 +2,7 @@ package at.yawk.fiction.android.storage;
 
 import android.util.Base64;
 import at.yawk.fiction.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import java.util.List;
@@ -21,7 +22,7 @@ public class TextStorage {
     public FormattedText load(FormattedText text) {
         if (text instanceof ExternalizedText) {
             try {
-                return objectStorage.load(FormattedText.class, encodeHash(((ExternalizedText) text).hash));
+                return objectStorage.load(FormattedText.class, getStorageId(((ExternalizedText) text).hash));
             } catch (NotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -55,7 +56,7 @@ public class TextStorage {
         ExternalizationStrategy<? super T> strategy = getStrategy(text);
         if (strategy.isExternalizable(text)) {
             byte[] hash = strategy.hash(text);
-            String encoded = encodeHash(hash);
+            String encoded = getStorageId(hash);
             if (!objectStorage.exists(encoded)) {
                 synchronized (this) {
                     objectStorage.save(text, encoded);
@@ -67,8 +68,8 @@ public class TextStorage {
         }
     }
 
-    private static String encodeHash(byte[] hash) {
-        return Base64.encodeToString(hash, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+    private static String getStorageId(byte[] hash) {
+        return "text/" + Base64.encodeToString(hash, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
     }
 
     @SuppressWarnings("unchecked")
@@ -136,10 +137,14 @@ public class TextStorage {
             };
 
     public static class ExternalizedText implements FormattedText {
-        final byte[] hash;
+        @JsonProperty byte[] hash;
 
         ExternalizedText(byte[] hash) {
             this.hash = hash;
         }
+
+        // jackson constructor
+        @SuppressWarnings("unused")
+        ExternalizedText() {}
     }
 }

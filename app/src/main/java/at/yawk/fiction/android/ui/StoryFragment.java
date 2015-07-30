@@ -12,6 +12,8 @@ import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.ContextProvider;
 import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.context.TaskContext;
+import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class StoryFragment extends Fragment implements ContextProvider {
+    private TaskContext taskContext = new TaskContext();
+
     private StoryWrapper wrapper;
     private FictionContext fictionContext;
     private View root;
@@ -91,6 +95,12 @@ public class StoryFragment extends Fragment implements ContextProvider {
                 name = "Chapter " + (i + 1);
             }
             ((TextView) view.findViewById(R.id.chapterName)).setText(name);
+
+            int buttonId = chapter.getText() == null ? R.id.chapterDownload : R.id.chapterRefresh;
+            setChapterViewStatus(view, buttonId);
+
+            final int finalI = i;
+            view.findViewById(buttonId).setOnClickListener(v -> fetchChapter(view, finalI));
         }
 
         if (chapters.size() < chapterViews.size()) {
@@ -100,5 +110,39 @@ public class StoryFragment extends Fragment implements ContextProvider {
             }
             toRemove.clear();
         }
+    }
+
+    private void setChapterViewStatus(View chapterView, int statusId) {
+        ViewGroup group = (ViewGroup) chapterView.findViewById(R.id.downloadWrapper);
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View child = group.getChildAt(i);
+            child.setVisibility(child.getId() == statusId ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    private void fetchChapter(View chapterView, int index) {
+        setChapterViewStatus(chapterView, R.id.chapterDownloading);
+
+        Story storyClone = getContext().getStorageManager().getPojoMerger().clone(wrapper.getStory());
+        Chapter chapter = storyClone.getChapters().get(index);
+        AndroidFictionProvider provider = getContext().getProviderManager().getProvider(storyClone);
+        getContext().getTaskManager().execute(taskContext, () -> {
+            try {
+                provider.fetchChapter(storyClone, chapter);
+                getContext().getStorageManager().getTextStorage().externalize(chapter);
+
+                getContext().getStorageManager().mergeStory(storyClone);
+                getActivity().runOnUiThread(this::refresh);
+            } catch (Exception e) {
+                log.error("Failed to fetch chapter", e);
+                getContext().toast(getActivity(), "Failed to fetch chapter", e);
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        taskContext.destroy();
     }
 }

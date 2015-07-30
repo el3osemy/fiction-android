@@ -17,6 +17,8 @@ public abstract class AndroidFictionProvider {
 
     public abstract String getName();
 
+    public abstract String getId();
+
     @JsonIgnore
     protected HttpClient getHttpClient() {
         return httpClient;
@@ -36,7 +38,7 @@ public abstract class AndroidFictionProvider {
         httpClient = context.createClient();
     }
 
-    public void fetchStory(Story story) {
+    public void fetchStory(Story story) throws Exception {
         getFictionProvider().fetchStory(story);
     }
 
@@ -44,7 +46,7 @@ public abstract class AndroidFictionProvider {
         return getFictionProvider().search(searchQuery);
     }
 
-    public void fetchChapter(Story story, Chapter chapter) {
+    public void fetchChapter(Story story, Chapter chapter) throws Exception {
         getFictionProvider().fetchChapter(story, chapter);
     }
 
@@ -53,4 +55,6 @@ public abstract class AndroidFictionProvider {
     }
 
     public abstract QueryEditorFragment<?> createQueryEditorFragment();
+
+    public abstract String getStoryId(Story story, String separator);
 }

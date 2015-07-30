@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.SearchQuery;
+import at.yawk.fiction.Story;
 import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
 import at.yawk.fiction.impl.fanfiction.FfnAuthor;
 import at.yawk.fiction.impl.fanfiction.FfnChapter;
@@ -42,6 +43,10 @@ public class ProviderManager {
 
     public AndroidFictionProvider getProvider(SearchQuery query) {
         return getProvider0(query);
+    }
+
+    public AndroidFictionProvider getProvider(Story story) {
+        return getProvider0(story);
     }
 
     public Collection<AndroidFictionProvider> getProviders() {
