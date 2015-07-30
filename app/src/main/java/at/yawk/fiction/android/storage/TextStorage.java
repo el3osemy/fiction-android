@@ -5,6 +5,7 @@ import at.yawk.fiction.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -146,5 +147,18 @@ public class TextStorage {
         // jackson constructor
         @SuppressWarnings("unused")
         ExternalizedText() {}
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) { return true; }
+            if (!(o instanceof ExternalizedText)) { return false; }
+            ExternalizedText that = (ExternalizedText) o;
+            return Arrays.equals(hash, that.hash);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(hash);
+        }
     }
 }

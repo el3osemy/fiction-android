@@ -18,6 +18,5 @@ class ObjectMapperHolder {
         OBJECT_MAPPER = new ObjectMapper();
         OBJECT_MAPPER.findAndRegisterModules();
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
-        OBJECT_MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE, JsonTypeInfo.As.PROPERTY);
     }
 }

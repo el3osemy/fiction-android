@@ -7,6 +7,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
@@ -96,11 +97,19 @@ public class StoryFragment extends Fragment implements ContextProvider {
             }
             ((TextView) view.findViewById(R.id.chapterName)).setText(name);
 
-            int buttonId = chapter.getText() == null ? R.id.chapterDownload : R.id.chapterRefresh;
-            setChapterViewStatus(view, buttonId);
+            boolean hasText = chapter.getText() != null;
+
+            setChapterViewStatus(view, hasText ? R.id.chapterRefresh : R.id.chapterDownload);
 
             final int finalI = i;
-            view.findViewById(buttonId).setOnClickListener(v -> fetchChapter(view, finalI));
+            View.OnClickListener refreshListener = v -> fetchChapter(view, finalI);
+            view.findViewById(R.id.chapterDownload).setOnClickListener(refreshListener);
+            view.findViewById(R.id.chapterRefresh).setOnClickListener(refreshListener);
+
+            CheckBox readBox = (CheckBox) view.findViewById(R.id.chapterRead);
+            readBox.setVisibility(hasText ? View.VISIBLE : View.INVISIBLE);
+            readBox.setChecked(wrapper.isChapterRead(chapter));
+            readBox.setOnCheckedChangeListener((buttonView, isChecked) -> wrapper.setChapterRead(chapter, isChecked));
         }
 
         if (chapters.size() < chapterViews.size()) {

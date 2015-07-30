@@ -45,6 +45,10 @@ public class PojoMerger {
     }
 
     private static JsonNode merge(JsonNode a, JsonNode b) {
+        if (a.isNull()) {
+            return b;
+        }
+
         if (a.getNodeType() != b.getNodeType()) {
             return a;
         }

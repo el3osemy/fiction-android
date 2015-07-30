@@ -9,10 +9,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.io.File;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 public class StorageManager {
     final ProviderManager providerManager;
     final ObjectMapper objectMapper;

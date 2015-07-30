@@ -1,14 +1,18 @@
 package at.yawk.fiction.android.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 @RequiredArgsConstructor
 class ObjectStorageManager {
     static final Joiner SLASH_JOINER = Joiner.on('/');
@@ -20,7 +24,10 @@ class ObjectStorageManager {
         File file = new File(root, key);
         if (file.exists()) {
             try {
-                return objectMapper.readValue(file, type);
+                T o = objectMapper.readValue(file, type);
+                log.info("loaded {}", Files.toString(file, Charsets.UTF_8));
+                log.info("loaded -> {}", o);
+                return o;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -35,6 +42,8 @@ class ObjectStorageManager {
         file.getParentFile().mkdirs();
         try {
             objectMapper.writeValue(file, o);
+            log.info("stored {}", o);
+            log.info("stored -> {}", Files.toString(file, Charsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
