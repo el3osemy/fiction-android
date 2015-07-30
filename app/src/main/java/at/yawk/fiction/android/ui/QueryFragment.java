@@ -59,9 +59,6 @@ public class QueryFragment extends ListFragment implements ContextProvider {
         });
 
         pageable = getContext().getProviderManager().getProvider(query.getQuery()).search(query.getQuery());
-
-        footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, null);
-        updateLoading();
     }
 
     @Override
@@ -76,7 +73,11 @@ public class QueryFragment extends ListFragment implements ContextProvider {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, getListView(), false);
+        getListView().addFooterView(footerView);
+
         checkFetchMore();
+
         getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {}
@@ -86,7 +87,6 @@ public class QueryFragment extends ListFragment implements ContextProvider {
                 checkFetchMore();
             }
         });
-        getListView().addFooterView(footerView);
     }
 
     private void updateEntries() {
@@ -135,7 +135,6 @@ public class QueryFragment extends ListFragment implements ContextProvider {
     private boolean fetching = false;
 
     private synchronized void checkFetchMore() {
-        updateLoading();
         if (fetching || !isVisible()) { return; }
         if (hasMore) {
             ListView listView = getListView();
@@ -147,7 +146,6 @@ public class QueryFragment extends ListFragment implements ContextProvider {
                     }
                     synchronized (QueryFragment.this) {
                         fetching = false;
-                        updateLoading();
                         checkFetchMore();
                     }
                 });
@@ -155,6 +153,7 @@ public class QueryFragment extends ListFragment implements ContextProvider {
                 log.trace("Last item not visible, not fetching more");
             }
         }
+        updateLoading();
     }
 
     private void updateLoading() {
