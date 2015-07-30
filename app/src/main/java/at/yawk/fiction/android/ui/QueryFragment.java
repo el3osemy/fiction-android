@@ -105,6 +105,18 @@ public class QueryFragment extends ListFragment implements ContextProvider {
 
     private void decorateEntry(StoryWrapper wrapper, View view) {
         ((TextView) view.findViewById(R.id.storyTitle)).setText(wrapper.getStory().getTitle());
+
+        TextView readChapterDisplay = (TextView) view.findViewById(R.id.readChapterDisplay);
+        int chapterCount = wrapper.getStory().getChapters().size();
+        int readChapterCount = wrapper.getReadChapterCount();
+        readChapterDisplay.setText(readChapterCount + "/" + chapterCount);
+        if (readChapterCount >= chapterCount) {
+            readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadAll));
+        } else if (readChapterCount > 0) {
+            readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadSome));
+        } else {
+            readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadNone));
+        }
     }
 
     @Override

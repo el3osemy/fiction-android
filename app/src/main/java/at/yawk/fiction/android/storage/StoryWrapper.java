@@ -72,4 +72,9 @@ public class StoryWrapper {
     private synchronized void save() {
         manager.objectStorage.save(this, getObjectId());
     }
+
+    @JsonIgnore
+    public synchronized int getReadChapterCount() {
+        return readChapters.size();
+    }
 }

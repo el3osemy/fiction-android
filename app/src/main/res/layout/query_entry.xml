@@ -7,10 +7,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_toLeftOf="@+id/readChapterDisplay"
         android:text="Story Title"
         android:id="@+id/storyTitle"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:textColor="?android:attr/textColorPrimary"
         android:padding="2dp" />
+
+    <TextView
+        android:id="@+id/readChapterDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
+        android:padding="2dp"
+        android:text="5/10"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/chaptersReadSome" />
 </RelativeLayout>

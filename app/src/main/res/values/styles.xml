@@ -8,4 +8,7 @@
         <item name="windowActionBarOverlay">false</item>
     </style>
 
+    <color name="chaptersReadNone">@color/secondary_text_default_material_dark</color>
+    <color name="chaptersReadSome">#ff9800</color>
+    <color name="chaptersReadAll">#2196f3</color>
 </resources>
