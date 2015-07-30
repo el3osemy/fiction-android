@@ -162,9 +162,31 @@ public class StoryFragment extends Fragment implements ContextProvider {
                 return true;
             });
 
-            View.OnClickListener refreshListener = v -> fetchChapter();
+            View.OnClickListener refreshListener = v -> fetchChapter(false);
             view.findViewById(R.id.chapterDownload).setOnClickListener(refreshListener);
+            view.findViewById(R.id.chapterDownload).setOnLongClickListener(v -> {
+                showDialog(new AsyncAction(R.string.download_until_here, () -> {
+                    for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
+                        ChapterHolder holder = chapterHolders.get(i);
+                        // don't redownload
+                        if (holder.chapter.getText() == null) {
+                            holder.fetchChapter(true);
+                        }
+                    }
+                    refreshAsync();
+                }));
+                return true;
+            });
             view.findViewById(R.id.chapterRefresh).setOnClickListener(refreshListener);
+            view.findViewById(R.id.chapterRefresh).setOnLongClickListener(v -> {
+                showDialog(new AsyncAction(R.string.refresh_until_here, () -> {
+                    for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
+                        chapterHolders.get(i).fetchChapter(true);
+                    }
+                    refreshAsync();
+                }));
+                return true;
+            });
         }
 
         void setRead(boolean read) {
@@ -188,13 +210,14 @@ public class StoryFragment extends Fragment implements ContextProvider {
             readBox.setChecked(wrapper.isChapterRead(chapter));
         }
 
-        void fetchChapter() {
-            setChapterViewStatus(R.id.chapterDownloading);
+        void fetchChapter(boolean sync) {
+            getActivity().runOnUiThread(() -> setChapterViewStatus(R.id.chapterDownloading));
 
             Story storyClone = getContext().getStorageManager().getPojoMerger().clone(wrapper.getStory());
             Chapter chapter = storyClone.getChapters().get(index);
             AndroidFictionProvider provider = getContext().getProviderManager().getProvider(storyClone);
-            getContext().getTaskManager().execute(taskContext, () -> {
+
+            Runnable task = () -> {
                 try {
                     provider.fetchChapter(storyClone, chapter);
                     getContext().getStorageManager().getTextStorage().externalize(chapter);
@@ -205,7 +228,12 @@ public class StoryFragment extends Fragment implements ContextProvider {
                     log.error("Failed to fetch chapter", e);
                     getContext().toast(getActivity(), "Failed to fetch chapter", e);
                 }
-            });
+            };
+            if (sync) {
+                task.run();
+            } else {
+                getContext().getTaskManager().execute(taskContext, task);
+            }
         }
 
         private void setChapterViewStatus(int statusId) {

@@ -5,4 +5,6 @@
     <string name="update_query">Update Query</string>
     <string name="remove">Remove</string>
     <string name="read_until_here">Read Until Here</string>
+    <string name="download_until_here">Download Until Here</string>
+    <string name="refresh_until_here">Refresh Until Here</string>
 </resources>
