@@ -3,6 +3,8 @@ package at.yawk.fiction.android.context;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,7 +12,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class TaskManager {
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactory() {
+        private AtomicInteger index = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = new Thread(r);
+            thread.setName("taskManager-thread-" + index.getAndIncrement());
+            return thread;
+        }
+    });
 
     public void execute(TaskContext context, Runnable task) {
         TaskContext.FutureHolder holder = context.add();

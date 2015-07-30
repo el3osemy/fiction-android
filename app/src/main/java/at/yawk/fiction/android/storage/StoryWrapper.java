@@ -38,20 +38,23 @@ public class StoryWrapper {
     }
 
     public synchronized void updateStory(Story changes) {
-        if (!changes.equals(story)) { // story can be null
-            story = story == null ? changes : manager.pojoMerger.merge(changes, story);
-            if (changes.getChapters() != null) {
-                Set<FormattedText> read = new HashSet<>();
-                for (Chapter chapter : story.getChapters()) { // use story chapters because we need merged values
-                    FormattedText text = chapter.getText();
-                    if (text != null && this.readChapters.contains(text)) {
-                        read.add(text);
-                    }
+        log.trace("merging");
+        Story merged = this.story == null ? changes : manager.pojoMerger.merge(changes, this.story);
+        if (merged.equals(story)) { return; }
+        story = merged;
+        if (changes.getChapters() != null) {
+            log.trace("checking chapters");
+            Set<FormattedText> read = new HashSet<>();
+            for (Chapter chapter : this.story.getChapters()) { // use story chapters because we need merged values
+                FormattedText text = chapter.getText();
+                if (text != null && this.readChapters.contains(text)) {
+                    read.add(text);
                 }
-                readChapters = read;
             }
-            save();
+            readChapters = read;
         }
+        log.trace("saving");
+        save();
     }
 
     public synchronized void setChapterRead(Chapter chapter, boolean read) {

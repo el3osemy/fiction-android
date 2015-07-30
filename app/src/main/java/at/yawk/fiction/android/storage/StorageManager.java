@@ -39,7 +39,7 @@ public class StorageManager {
             wrapper.manager = StorageManager.this;
             return wrapper;
         }));
-        this.pojoMerger = new PojoMerger(objectMapper);
+        this.pojoMerger = new PojoMerger();
         this.textStorage = new TextStorage(objectStorage);
         this.queryManager = QueryManager.load(objectStorage);
         this.epubBuilder = new EpubBuilder(this, root);

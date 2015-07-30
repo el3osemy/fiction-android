@@ -2,6 +2,7 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,10 +90,6 @@ public class QueryFragment extends ListFragment implements ContextProvider {
         });
     }
 
-    private void updateEntries() {
-        getActivity().runOnUiThread(((ArrayAdapter<?>) getListAdapter())::notifyDataSetChanged);
-    }
-
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
@@ -172,19 +169,22 @@ public class QueryFragment extends ListFragment implements ContextProvider {
     private boolean fetchOne() {
         boolean ok = false;
         try {
+            log.trace("Fetching page {}", this.page);
             Pageable.Page<? extends Story> page = pageable.getPage(this.page);
+            log.trace("Fetched, merging with database");
+            //Debug.startMethodTracingSampling("fetch", 8 * 1024 * 1024, 1000);
             pageCount = page.getPageCount();
-
-            log.trace("Entries {}", page.getEntries());
 
             List<StoryWrapper> additions = new ArrayList<>(page.getEntries().size());
             for (Story story : page.getEntries()) {
                 StoryWrapper wrapper = getContext().getStorageManager().mergeStory(story);
                 additions.add(wrapper);
             }
+            //Debug.stopMethodTracing();
+            log.trace("Done, passing on to UI");
             stories.addAll(additions);
             hasMore = !page.isLast();
-            updateEntries();
+            getActivity().runOnUiThread(((ArrayAdapter<?>) getListAdapter())::notifyDataSetChanged);
             ok = true;
         } catch (Exception e) {
             log.error("Failed to fetch page {}", page, e);

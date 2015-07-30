@@ -8,10 +8,12 @@ import com.google.common.hash.Hashing;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 public class TextStorage {
     private static final int SIZE_LIMIT = 256;
 
@@ -65,6 +67,9 @@ public class TextStorage {
                     objectStorage.save(text, encoded);
                 }
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Externalized {} characters to hash {}", strategy.length(text), encoded);
+            }
             return new ExternalizedText(hash);
         } else {
             return text;
@@ -92,6 +97,8 @@ public class TextStorage {
         byte[] hash(T text);
 
         boolean isExternalizable(T text);
+
+        int length(T text);
     }
 
     private static final ExternalizationStrategy<HtmlText> HTML_TEXT_EXTERNALIZATION_STRATEGY =
@@ -107,6 +114,11 @@ public class TextStorage {
                 @Override
                 public boolean isExternalizable(HtmlText text) {
                     return text.getHtml().length() > SIZE_LIMIT;
+                }
+
+                @Override
+                public int length(HtmlText text) {
+                    return text.getHtml().length();
                 }
             };
 
@@ -124,6 +136,11 @@ public class TextStorage {
                 public boolean isExternalizable(RawText text) {
                     return text.getText().length() > SIZE_LIMIT;
                 }
+
+                @Override
+                public int length(RawText text) {
+                    return text.getText().length();
+                }
             };
 
     private static final ExternalizationStrategy<ExternalizedText> EXTERNALIZED_TEXT_EXTERNALIZATION_STRATEGY =
@@ -136,6 +153,11 @@ public class TextStorage {
                 @Override
                 public boolean isExternalizable(ExternalizedText text) {
                     return false;
+                }
+
+                @Override
+                public int length(ExternalizedText text) {
+                    throw new UnsupportedOperationException();
                 }
             };
 
