@@ -23,6 +23,8 @@ public class LocalSearchQuery extends SearchQuery {
     boolean downloadedSome = true;
     boolean downloadedAll = true;
 
+    StoryOrder order = StoryOrder.ALPHABETICAL;
+
     boolean accept(StoryWrapper wrapper) {
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
         int downloadedCount = 0;

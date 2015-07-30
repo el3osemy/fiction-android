@@ -9,6 +9,7 @@ import at.yawk.fiction.android.provider.ProviderContext;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,13 +58,14 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
                 return page;
             }
 
-            List<Story> stories = new ArrayList<>();
+            List<StoryWrapper> stories = new ArrayList<>();
             for (StoryWrapper wrapper : storageManager.listStories()) {
                 if (localSearchQuery.accept(wrapper)) {
-                    stories.add(wrapper.getStory());
+                    stories.add(wrapper);
                 }
             }
-            page.setEntries(stories);
+            Collections.sort(stories, localSearchQuery.getOrder());
+            page.setEntries(Lists.transform(stories, StoryWrapper::getStory));
             return page;
         };
     }

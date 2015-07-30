@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Spinner;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 
@@ -15,6 +16,11 @@ public class LocalQueryEditorFragment extends QueryEditorFragment<LocalSearchQue
     protected View createView(LayoutInflater inflater, ViewGroup container) {
         View root = inflater.inflate(R.layout.query_editor_local, container, false);
 
+        bindChoice((Spinner) root.findViewById(R.id.order),
+                   LocalSearchQuery::getOrder,
+                   LocalSearchQuery::setOrder,
+                   StoryOrder::getName,
+                   StoryOrder.values());
         bindBoolean((CheckBox) root.findViewById(R.id.readNone),
                     LocalSearchQuery::isReadNone,
                     LocalSearchQuery::setReadNone);
