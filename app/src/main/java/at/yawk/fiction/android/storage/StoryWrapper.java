@@ -88,6 +88,7 @@ public class StoryWrapper {
         String newHash = read ? holder.textHash : null;
         if (!Objects.equal(holder.readHash, newHash)) {
             holder.readHash = newHash;
+            bakeReadChapterCount();
             save();
         }
     }
