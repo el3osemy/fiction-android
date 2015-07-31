@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.android.FictionApplication;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import dalvik.system.DexFile;
 import java.lang.reflect.Modifier;
@@ -20,7 +21,7 @@ public class ProviderLoader {
     private final List<AndroidFictionProvider> providers = new ArrayList<>();
 
     @Inject
-    public ProviderLoader(Injector injector) {
+    public ProviderLoader(ObjectMapper objectMapper, Injector injector) {
         try {
             DexFile dexFile = new DexFile(FictionApplication.applicationInfo.sourceDir);
             Enumeration<String> entries = dexFile.entries();
@@ -42,6 +43,11 @@ public class ProviderLoader {
                 log.info("Adding provider {}", providerClass.getName());
                 AndroidFictionProvider provider = (AndroidFictionProvider) providerClass.newInstance();
                 injector.injectMembers(provider);
+
+                //noinspection Convert2streamapi
+                for (Class<?> provided : provider.getProvidingClasses()) {
+                    objectMapper.registerSubtypes(provided);
+                }
 
                 providers.add(provider);
             }

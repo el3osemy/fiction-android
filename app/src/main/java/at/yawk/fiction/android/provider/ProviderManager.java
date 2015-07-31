@@ -53,11 +53,4 @@ public class ProviderManager {
         }
         return provider;
     }
-
-    @SuppressWarnings("unchecked")
-    public  <T extends AndroidFictionProvider> T findProvider(Class<T> type) {
-        AndroidFictionProvider provider = providers.get(type);
-        assert provider != null;
-        return (T) provider;
-    }
 }
