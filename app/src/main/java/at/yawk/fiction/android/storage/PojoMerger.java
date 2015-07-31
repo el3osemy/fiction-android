@@ -124,7 +124,8 @@ public class PojoMerger {
         public T clone(PojoMerger merger, T obj) {
             T clone = constructor.newInstance();
             for (Field field : fields) {
-                field.set(clone, merger.clone((Class) field.getType(), field.get(obj)));
+                Object value = field.get(obj);
+                field.set(clone, value == null ? null : merger.clone((Class) field.getType(), value));
             }
             return clone;
         }
