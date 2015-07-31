@@ -5,7 +5,6 @@ import at.yawk.fiction.Pageable;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
-import at.yawk.fiction.android.provider.ProviderContext;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
@@ -13,27 +12,19 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * @author yawkat
  */
+@Singleton
 public class LocalAndroidFictionProvider extends AndroidFictionProvider {
-    private StorageManager storageManager;
+    @Inject StorageManager storageManager;
 
-    @Override
-    public String getName() {
-        return "Local";
-    }
-
-    @Override
-    public String getId() {
-        return "local";
-    }
-
-    @Override
-    public void init(ProviderContext context) {
-        super.init(context);
-        storageManager = context.getStorageManager();
+    public LocalAndroidFictionProvider() {
+        super("local", "Local",
+              LocalSearchQuery.class);
     }
 
     @Override

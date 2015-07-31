@@ -7,9 +7,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
@@ -31,6 +31,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     @Inject TaskManager taskManager;
     @Inject ProviderManager providerManager;
     @Inject Toasts toasts;
+    @Inject FfnAndroidFictionProvider provider;
 
     private TaskContext taskContext = new TaskContext();
 
@@ -70,8 +71,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                             FfnCategory category = (FfnCategory) parent.getSelectedItem();
                             try {
                                 List<FfnSubCategory> subCategories =
-                                        providerManager.findProvider(FfnAndroidFictionProvider.class)
-                                                .getFictionProvider().fetchSubCategories(category);
+                                        provider.getFictionProvider().fetchSubCategories(category);
                                 Collections.sort(subCategories, subCategoryOrder);
                                 getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
                             } catch (Exception e) {

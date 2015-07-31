@@ -2,40 +2,36 @@ package at.yawk.fiction.android.provider.ffn;
 
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
-import at.yawk.fiction.android.provider.ProviderContext;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
-import at.yawk.fiction.impl.fanfiction.FfnFictionProvider;
-import at.yawk.fiction.impl.fanfiction.FfnGenre;
-import at.yawk.fiction.impl.fanfiction.FfnStory;
+import at.yawk.fiction.impl.PageParserProvider;
+import at.yawk.fiction.impl.fanfiction.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
+@Singleton
 public class FfnAndroidFictionProvider extends AndroidFictionProvider {
     private FfnFictionProvider fictionProvider;
 
-    @Override
-    public String getName() {
-        return "FanFiction.net";
-    }
+    @Inject PageParserProvider pageParserProvider;
 
-    @Override
-    public String getId() {
-        return "ffn";
+    public FfnAndroidFictionProvider() {
+        super("ffn", "FanFiction.net",
+              FfnSearchQuery.class, FfnStory.class, FfnChapter.class, FfnAuthor.class);
     }
 
     @Override
     public FfnFictionProvider getFictionProvider() {
+        if (fictionProvider == null) {
+            fictionProvider = new FfnFictionProvider(pageParserProvider, getHttpClient());
+        }
         return fictionProvider;
-    }
-
-    @Override
-    public void init(ProviderContext context) {
-        super.init(context);
-
-        fictionProvider = new FfnFictionProvider(context.getPageParserProvider(), getHttpClient());
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.slf4j.helpers.MessageFormatter;
 @RequiredArgsConstructor
 final class AndroidLogger implements Logger {
     private final String name;
-    private final int level;
+    private final AndroidLoggingProvider provider;
 
     @Override
     public String getName() {
@@ -27,7 +27,7 @@ final class AndroidLogger implements Logger {
 
     @SuppressWarnings("UnusedParameters")
     private boolean isEnabled(Marker marker, int level) {
-        return this.level <= level;
+        return provider.getLevel() <= level;
     }
 
     private void doLog(Marker marker, int level, String msg, Throwable throwable) {
@@ -35,7 +35,7 @@ final class AndroidLogger implements Logger {
             msg = msg + '\n' + Log.getStackTraceString(throwable);
         }
 
-        Log.println(level, getTag(marker), msg);
+        provider.log(getTag(marker), level, msg);
     }
 
     private void log(Marker marker, int level, String msg) {

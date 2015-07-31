@@ -3,8 +3,8 @@ package at.yawk.fiction.android;
 import android.os.Environment;
 import at.yawk.fiction.Chapter;
 import at.yawk.fiction.NotFoundException;
-import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
+import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.impl.fanfiction.FfnStory;
@@ -26,10 +26,10 @@ public class Importer implements Runnable {
     @Inject ObjectMapper objectMapper;
     @Inject ProviderManager providerManager;
     @Inject StorageManager storageManager;
+    @Inject FfnAndroidFictionProvider provider;
 
     @Override
     public void run() {
-        AndroidFictionProvider provider = providerManager.getProvider(new FfnStory());
         try {
             File[] files = new File(Environment.getExternalStorageDirectory(), "Fanfiction/db/story")
                     .listFiles((dir, filename) -> {

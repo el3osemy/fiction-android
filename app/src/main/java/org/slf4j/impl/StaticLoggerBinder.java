@@ -1,6 +1,5 @@
 package org.slf4j.impl;
 
-import android.util.Log;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.spi.LoggerFactoryBinder;
 
@@ -17,7 +16,7 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
         return singleton;
     }
 
-    private final AndroidLoggerFactory factory = new AndroidLoggerFactory(Log.VERBOSE); // todo: config
+    private final AndroidLoggerFactory factory = new AndroidLoggerFactory();
 
     @Override
     public ILoggerFactory getLoggerFactory() {
