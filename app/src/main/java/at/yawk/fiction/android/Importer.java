@@ -64,15 +64,13 @@ public class Importer implements ContextProvider, Runnable {
                         }
 
                         Chapter chapter = story.getStory().getChapters().get(i);
-                        if (chapter.getText() == null) {
+                        if (!story.hasChapterText(i)) {
                             log.info("Fetching chapter {}/{}", keyStory.getId(), i);
                             provider.fetchChapter(keyStory, chapter);
-                            context.getStorageManager().getTextStorage().externalize(chapter);
-                            context.getStorageManager().getTextStorage().externalize(keyStory);
                             story.updateStory(keyStory);
                         }
 
-                        story.setChapterRead(chapter, true);
+                        story.setChapterRead(i, true);
                     }
                 }
             }

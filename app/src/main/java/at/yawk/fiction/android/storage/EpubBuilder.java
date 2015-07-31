@@ -33,7 +33,7 @@ public class EpubBuilder {
     private final StorageManager storageManager;
     private final File root;
 
-    public void openEpub(Activity activity, Story story) throws IOException {
+    public void openEpub(Activity activity, StoryWrapper story) throws IOException {
         File file = buildEpub(story);
 
         Intent intent = new Intent();
@@ -42,7 +42,8 @@ public class EpubBuilder {
         activity.startActivity(intent);
     }
 
-    public File buildEpub(Story story) throws IOException {
+    public File buildEpub(StoryWrapper wrapper) throws IOException {
+        Story story = wrapper.getStory();
         AndroidFictionProvider provider = storageManager.providerManager.getProvider(story);
         String id = provider.getStoryId(story, "/");
         File file = new File(root, "epub/" + provider.getId() + "/" + id + ".epub");
@@ -64,7 +65,7 @@ public class EpubBuilder {
                 name = "Chapter " + (i + 1);
             }
 
-            FormattedText text = storageManager.getTextStorage().load(chapter.getText());
+            FormattedText text = wrapper.loadChapterText(i);
             Resource resource;
             if (text instanceof HtmlText) {
                 resource = createHtmlResource(Jsoup.clean(((HtmlText) text).getHtml(), Whitelist.basicWithImages()));

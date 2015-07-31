@@ -1,12 +1,13 @@
 package at.yawk.fiction.android.storage;
 
 import android.util.Base64;
-import at.yawk.fiction.*;
+import at.yawk.fiction.FormattedText;
+import at.yawk.fiction.HtmlText;
+import at.yawk.fiction.RawText;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import java.util.Arrays;
-import java.util.List;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class TextStorage {
+    private static final char[] HEX = "0123456789abcdef".toCharArray();
     private static final int SIZE_LIMIT = 256;
 
     private final ObjectStorageManager objectStorage;
@@ -24,60 +26,42 @@ public class TextStorage {
     }
 
     @Nullable
-    public FormattedText load(@Nullable FormattedText text) {
+    public FormattedText getText(String hash) {
+        try {
+            return objectStorage.load(FormattedText.class, getStorageId(hash));
+        } catch (NotFoundException e) {
+            return null;
+        }
+    }
+
+    public String externalizeText(FormattedText text) {
+        String hash;
         if (text instanceof ExternalizedText) {
-            try {
-                return objectStorage.load(FormattedText.class, getStorageId(((ExternalizedText) text).hash));
-            } catch (NotFoundException e) {
-                return null;
-            }
+            hash = Base64.encodeToString(((ExternalizedText) text).hash,
+                                         Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
         } else {
-            return text;
-        }
-    }
-
-    public void externalize(Story story) {
-        FormattedText description = story.getDescription();
-        if (description != null) {
-            story.setDescription(externalize(description));
-        }
-
-        List<? extends Chapter> chapters = story.getChapters();
-        if (chapters != null) {
-            for (Chapter chapter : chapters) {
-                externalize(chapter);
+            ExternalizationStrategy<? super FormattedText> strategy = getStrategy(text);
+            hash = hashToString(strategy.hash(text));
+            String storageId = getStorageId(hash);
+            if (!objectStorage.exists(storageId)) {
+                objectStorage.save(FormattedText.class, storageId);
+                log.debug("Externalized {} characters to {}", strategy.length(text), hash);
             }
         }
+        return hash;
     }
 
-    public void externalize(Chapter chapter) {
-        FormattedText text = chapter.getText();
-        if (text != null) {
-            chapter.setText(externalize(text));
+    private static String hashToString(byte[] hash) {
+        StringBuilder builder = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            builder.append(HEX[(b >>> 4) & 0xf]);
+            builder.append(HEX[b & 0xf]);
         }
+        return builder.toString();
     }
 
-    public <T extends FormattedText> FormattedText externalize(T text) {
-        ExternalizationStrategy<? super T> strategy = getStrategy(text);
-        if (strategy.isExternalizable(text)) {
-            byte[] hash = strategy.hash(text);
-            String encoded = getStorageId(hash);
-            if (!objectStorage.exists(encoded)) {
-                synchronized (this) {
-                    objectStorage.save(text, encoded);
-                }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Externalized {} characters to hash {}", strategy.length(text), encoded);
-            }
-            return new ExternalizedText(hash);
-        } else {
-            return text;
-        }
-    }
-
-    private static String getStorageId(byte[] hash) {
-        return "text/" + Base64.encodeToString(hash, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+    private static String getStorageId(String hash) {
+        return "text/" + hash;
     }
 
     @SuppressWarnings("unchecked")

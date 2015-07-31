@@ -66,7 +66,7 @@ public class StoryFragment extends Fragment implements ContextProvider {
         chapterGroup = (ViewGroup) root.findViewById(R.id.chapters);
         root.findViewById(R.id.title).setOnClickListener(v -> getContext().getTaskManager().execute(taskContext, () -> {
             try {
-                getContext().getStorageManager().getEpubBuilder().openEpub(getActivity(), wrapper.getStory());
+                getContext().getStorageManager().getEpubBuilder().openEpub(getActivity(), wrapper);
             } catch (Exception e) {
                 log.error("Failed to open epub", e);
                 getContext().toast(getActivity(), "Failed to open epub", e);
@@ -188,7 +188,7 @@ public class StoryFragment extends Fragment implements ContextProvider {
                     for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
                         ChapterHolder holder = chapterHolders.get(i);
                         // don't redownload
-                        if (holder.chapter.getText() == null) {
+                        if (!holder.hasText()) {
                             holder.fetchChapter(true);
                         }
                     }
@@ -209,7 +209,7 @@ public class StoryFragment extends Fragment implements ContextProvider {
         }
 
         void setRead(boolean read) {
-            wrapper.setChapterRead(chapter, read);
+            wrapper.setChapterRead(index, read);
         }
 
         void setChapter(Chapter chapter) {
@@ -221,12 +221,16 @@ public class StoryFragment extends Fragment implements ContextProvider {
             }
             ((TextView) view.findViewById(R.id.chapterName)).setText(name);
 
-            boolean hasText = chapter.getText() != null;
+            boolean hasText = hasText();
 
             setChapterViewStatus(hasText ? R.id.chapterRefresh : R.id.chapterDownload);
 
             readBox.setVisibility(hasText ? View.VISIBLE : View.INVISIBLE);
-            readBox.setChecked(wrapper.isChapterRead(chapter));
+            readBox.setChecked(wrapper.isChapterRead(index));
+        }
+
+        boolean hasText() {
+            return wrapper.hasChapterText(index);
         }
 
         void fetchChapter(boolean sync) {
@@ -239,8 +243,6 @@ public class StoryFragment extends Fragment implements ContextProvider {
             Runnable task = () -> {
                 try {
                     provider.fetchChapter(storyClone, chapter);
-                    getContext().getStorageManager().getTextStorage().externalize(chapter);
-
                     getContext().getStorageManager().mergeStory(storyClone);
                     refreshAsync();
                 } catch (Exception e) {
