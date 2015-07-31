@@ -2,7 +2,6 @@ package at.yawk.fiction.android.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,19 +9,18 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import at.yawk.fiction.SearchQuery;
-import at.yawk.fiction.android.context.ContextProvider;
-import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.context.WrapperParcelable;
 import com.google.common.base.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import roboguice.fragment.RoboFragment;
 
 /**
  * @author yawkat
  */
-public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragment implements ContextProvider {
+public abstract class QueryEditorFragment<S extends SearchQuery> extends RoboFragment {
     private S query;
-    private FictionContext context;
 
     private List<Runnable> saveTasks = new ArrayList<>();
 
@@ -30,26 +28,18 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Fragmen
         return query;
     }
 
-    public void setQuery(FictionContext context, S query) {
+    public void setQuery(S query) {
         this.query = query;
         Bundle bundle = new Bundle();
-        bundle.putParcelable("query", context.objectToParcelable(query));
+        bundle.putParcelable("query", WrapperParcelable.objectToParcelable(query));
         setArguments(bundle);
-    }
-
-    @Override
-    public FictionContext getContext() {
-        if (context == null) {
-            context = FictionContext.get(getActivity());
-        }
-        return context;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        query = getContext().parcelableToObject(getArguments().getParcelable("query"));
+        query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
     }
 
     @Nullable

@@ -8,15 +8,14 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import javax.inject.Singleton;
 import lombok.SneakyThrows;
 import org.joda.time.Instant;
 
 /**
  * @author yawkat
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@Singleton
 public class PojoMerger {
     private final ConcurrentMap<Class<?>, Merger<?>> mergers = new ConcurrentHashMap<>();
 

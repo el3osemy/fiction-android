@@ -9,18 +9,22 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import java.util.Arrays;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
 @Slf4j
+@Singleton
 public class TextStorage {
     private static final char[] HEX = "0123456789abcdef".toCharArray();
     private static final int SIZE_LIMIT = 256;
 
     private final ObjectStorageManager objectStorage;
 
+    @Inject
     TextStorage(ObjectStorageManager objectStorage) {
         this.objectStorage = objectStorage;
     }
@@ -44,7 +48,7 @@ public class TextStorage {
             hash = hashToString(strategy.hash(text));
             String storageId = getStorageId(hash);
             if (!objectStorage.exists(storageId)) {
-                objectStorage.save(FormattedText.class, storageId);
+                objectStorage.save(text, storageId);
                 log.debug("Externalized {} characters to {}", strategy.length(text), hash);
             }
         }

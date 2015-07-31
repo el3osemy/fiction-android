@@ -7,7 +7,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.TaskContext;
+import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
@@ -16,6 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +28,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> {
+    @Inject TaskManager taskManager;
+    @Inject ProviderManager providerManager;
+    @Inject Toasts toasts;
+
     private TaskContext taskContext = new TaskContext();
 
     private SubCategoryOrder subCategoryOrder = SubCategoryOrder.SIZE;
@@ -58,17 +66,17 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         subCategoryArrayAdapter.clear();
-                        getContext().getTaskManager().execute(taskContext, () -> {
+                        taskManager.execute(taskContext, () -> {
                             FfnCategory category = (FfnCategory) parent.getSelectedItem();
                             try {
                                 List<FfnSubCategory> subCategories =
-                                        getContext().getProviderManager().findProvider(FfnAndroidFictionProvider.class)
+                                        providerManager.findProvider(FfnAndroidFictionProvider.class)
                                                 .getFictionProvider().fetchSubCategories(category);
                                 Collections.sort(subCategories, subCategoryOrder);
                                 getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
                             } catch (Exception e) {
                                 log.error("Failed to fetch subcategories for {}", category, e);
-                                getContext().toast(getActivity(), "Failed to fetch subcategories", e);
+                                toasts.toast(getActivity(), "Failed to fetch subcategories", e);
                             }
                         });
                     }

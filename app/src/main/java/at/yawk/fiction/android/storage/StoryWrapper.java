@@ -11,18 +11,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import lombok.Data;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
 @Slf4j
-@ToString(exclude = "manager", doNotUseGetters = true)
 public class StoryWrapper {
     transient String objectId;
-    transient StorageManager manager;
+
+    @Inject transient StorageManager storageManager;
+    @Inject transient ObjectStorageManager objectStorageManager;
+    @Inject transient TextStorage textStorage;
+    @Inject transient PojoMerger pojoMerger;
 
     @JsonProperty private Story story;
 
@@ -40,15 +43,20 @@ public class StoryWrapper {
     @JsonIgnore
     String getObjectId() {
         if (objectId == null) {
-            objectId = manager.getObjectId(story);
+            objectId = storageManager.getObjectId(story);
         }
         return objectId;
     }
 
     public synchronized void updateStory(Story changes) {
-        log.trace("merging");
-        Story merged = this.story == null ? changes : manager.pojoMerger.merge(changes, this.story);
-        if (merged.equals(story)) { return; }
+        Story merged = this.story == null ? changes : pojoMerger.merge(changes, this.story);
+        if (log.isTraceEnabled()) {
+            log.trace("Merging {} -> {} = {}", changes.hashCode(), story.hashCode(), merged.hashCode());
+            log.trace("{} -> {} = {}",
+                      System.identityHashCode(changes),
+                      System.identityHashCode(story),
+                      System.identityHashCode(merged));
+        }
         if (merged.getChapters() != null) {
             List<? extends Chapter> chapters = merged.getChapters();
             for (int i = 0; i < chapters.size(); i++) {
@@ -56,7 +64,7 @@ public class StoryWrapper {
                 FormattedText text = chapter.getText();
                 if (text != null) {
                     ChapterHolder holder = getChapterHolder(i);
-                    String hash = manager.getTextStorage().externalizeText(text);
+                    String hash = textStorage.externalizeText(text);
                     holder.setTextHash(hash);
                     if (readChapters.contains(text)) {
                         holder.setReadHash(hash);
@@ -65,6 +73,7 @@ public class StoryWrapper {
                 }
             }
         }
+        if (merged.equals(story)) { return; }
         story = merged;
         log.trace("saving");
         save();
@@ -81,7 +90,7 @@ public class StoryWrapper {
     }
 
     private synchronized void save() {
-        manager.objectStorage.save(this, getObjectId());
+        objectStorageManager.save(this, getObjectId());
     }
 
     @JsonIgnore
@@ -117,8 +126,10 @@ public class StoryWrapper {
         return getChapterHolder(index).textHash != null;
     }
 
+    @Nullable
     public synchronized FormattedText loadChapterText(int index) {
-        return manager.getTextStorage().getText(getChapterHolder(index).textHash);
+        String hash = getChapterHolder(index).textHash;
+        return hash == null ? null : textStorage.getText(hash);
     }
 
     @Data

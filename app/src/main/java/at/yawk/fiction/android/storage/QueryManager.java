@@ -1,35 +1,51 @@
 package at.yawk.fiction.android.storage;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import lombok.Data;
 
 /**
  * @author yawkat
  */
+@Singleton
 public class QueryManager {
-    private transient ObjectStorageManager objectStorageManager;
-    @JsonProperty private List<QueryWrapper> queries;
-    @JsonProperty private UUID selectedQueryId;
+    @Inject ObjectStorageManager objectStorageManager;
+    private Holder holder;
+
+    @Inject
+    void load() {
+        try {
+            holder = objectStorageManager.load(Holder.class, "queryManager");
+        } catch (NotFoundException e) {
+            holder = new Holder();
+            holder.setQueries(new ArrayList<>());
+            holder.setSelectedQueryId(null);
+        }
+    }
+
+    private void save() {
+        objectStorageManager.save(holder, "queryManager");
+    }
 
     public void saveQuery(QueryWrapper wrapper) {
         boolean found = false;
-        for (int i = 0; i < queries.size(); i++) {
-            if (queries.get(i).getId().equals(wrapper.getId())) {
-                queries.set(i, wrapper);
+        for (int i = 0; i < holder.queries.size(); i++) {
+            if (holder.queries.get(i).getId().equals(wrapper.getId())) {
+                holder.queries.set(i, wrapper);
                 found = true;
                 break;
             }
         }
-        if (!found) { queries.add(wrapper); }
+        if (!found) { holder.queries.add(wrapper); }
         save();
     }
 
     public void removeQuery(QueryWrapper wrapper) {
-        for (Iterator<QueryWrapper> iterator = queries.iterator(); iterator.hasNext(); ) {
+        for (Iterator<QueryWrapper> iterator = holder.queries.iterator(); iterator.hasNext(); ) {
             if (iterator.next().getId().equals(wrapper.getId())) {
                 iterator.remove();
             }
@@ -38,32 +54,21 @@ public class QueryManager {
     }
 
     public UUID getSelectedQueryId() {
-        return selectedQueryId;
+        return holder.selectedQueryId;
     }
 
-    @JsonIgnore
     public void setSelectedQueryId(UUID selectedQueryId) {
-        this.selectedQueryId = selectedQueryId;
+        holder.selectedQueryId = selectedQueryId;
         save();
     }
 
     public List<QueryWrapper> getQueries() {
-        return queries;
+        return holder.queries;
     }
 
-    private void save() {
-        objectStorageManager.save(this, "queryManager");
-    }
-
-    static QueryManager load(ObjectStorageManager objectStorageManager) {
-        QueryManager manager;
-        try {
-            manager = objectStorageManager.load(QueryManager.class, "queryManager");
-        } catch (NotFoundException e) {
-            manager = new QueryManager();
-            manager.queries = new ArrayList<>();
-        }
-        manager.objectStorageManager = objectStorageManager;
-        return manager;
+    @Data
+    private static class Holder {
+        List<QueryWrapper> queries;
+        UUID selectedQueryId;
     }
 }

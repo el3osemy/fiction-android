@@ -3,47 +3,39 @@ package at.yawk.fiction.android.storage;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
-import java.io.File;
-import lombok.Getter;
+import com.google.inject.MembersInjector;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
 @Slf4j
+@Singleton
 public class StorageManager {
-    final ProviderManager providerManager;
-    final ObjectMapper objectMapper;
-    final ObjectStorageManager objectStorage;
-    final LoadingCache<String, StoryWrapper> storyCache;
-    @Getter final PojoMerger pojoMerger;
-    final TextStorage textStorage;
-    final QueryManager queryManager;
-    @Getter final EpubBuilder epubBuilder;
+    @Inject ObjectStorageManager objectStorageManager;
+    @Inject ProviderManager providerManager;
 
-    public StorageManager(ProviderManager providerManager, ObjectMapper objectMapper, File root) {
-        this.providerManager = providerManager;
-        this.objectMapper = objectMapper;
-        this.objectStorage = new ObjectStorageManager(root, objectMapper);
-        this.storyCache = CacheBuilder.newBuilder().softValues().build(CacheLoader.from(input -> {
-            StoryWrapper wrapper;
-            try {
-                wrapper = objectStorage.load(StoryWrapper.class, input);
-            } catch (NotFoundException e) {
-                wrapper = new StoryWrapper();
-            }
-            wrapper.manager = StorageManager.this;
-            return wrapper;
-        }));
-        this.pojoMerger = new PojoMerger();
-        this.textStorage = new TextStorage(objectStorage);
-        this.queryManager = QueryManager.load(objectStorage);
-        this.epubBuilder = new EpubBuilder(this, root);
+    final LoadingCache<String, StoryWrapper> storyCache;
+
+    @Inject
+    StorageManager(MembersInjector<StoryWrapper> queryWrapperInjector) {
+        storyCache = CacheBuilder.newBuilder()
+                .softValues().build(CacheLoader.from(input -> {
+                    StoryWrapper wrapper;
+                    try {
+                        wrapper = objectStorageManager.load(StoryWrapper.class, input);
+                    } catch (NotFoundException e) {
+                        wrapper = new StoryWrapper();
+                    }
+                    queryWrapperInjector.injectMembers(wrapper);
+                    return wrapper;
+                }));
     }
 
     String getObjectId(Story story) {
@@ -74,14 +66,6 @@ public class StorageManager {
     }
 
     public Iterable<StoryWrapper> listStories() {
-        return Iterables.transform(objectStorage.list("story"), this::getStory0);
-    }
-
-    public TextStorage getTextStorage() {
-        return textStorage;
-    }
-
-    public QueryManager getQueryManager() {
-        return queryManager;
+        return Iterables.transform(objectStorageManager.list("story"), this::getStory0);
     }
 }

@@ -2,7 +2,6 @@ package at.yawk.fiction.android.ui;
 
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -10,17 +9,23 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.ContextProvider;
-import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ProviderManager;
+import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import java.util.*;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import roboguice.activity.RoboFragmentActivity;
 
 /**
  * @author yawkat
  */
-public class QueryWrapperActivity extends FragmentActivity implements ContextProvider {
+public class QueryWrapperActivity extends RoboFragmentActivity {
+    @Inject ProviderManager providerManager;
+    @Inject QueryManager queryManager;
+
     private QueryWrapper query;
 
     private Map<AndroidFictionProvider, SearchQuery> queriesByProvider = new HashMap<>();
@@ -34,8 +39,8 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
 
         Parcelable queryParcel = getIntent().getParcelableExtra("query");
         if (queryParcel != null) {
-            query = getContext().parcelableToObject(queryParcel);
-            AndroidFictionProvider provider = getContext().getProviderManager().getProvider(query.getQuery());
+            query = WrapperParcelable.parcelableToObject(queryParcel);
+            AndroidFictionProvider provider = providerManager.getProvider(query.getQuery());
             queriesByProvider.put(provider, query.getQuery());
             selectProvider(provider);
             ((Button) findViewById(R.id.accept)).setText(R.string.update_query);
@@ -49,7 +54,7 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
 
         ((EditText) findViewById(R.id.queryName)).setText(query.getName());
 
-        List<AndroidFictionProvider> providers = new ArrayList<>(getContext().getProviderManager().getProviders());
+        List<AndroidFictionProvider> providers = new ArrayList<>(providerManager.getProviders());
         Spinner providerSpinner = (Spinner) findViewById(R.id.provider);
         providerSpinner.setAdapter(new StringArrayAdapter<>(this, providers, AndroidFictionProvider::getName));
         providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -75,7 +80,7 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
         });
         findViewById(R.id.cancel).setOnClickListener(v -> finish());
         findViewById(R.id.remove).setOnClickListener(v -> {
-            getContext().getStorageManager().getQueryManager().removeQuery(query);
+            queryManager.removeQuery(query);
             finish();
         });
     }
@@ -89,7 +94,7 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
             query.setQuery(queryEditorFragment.getQuery());
         }
 
-        getContext().getStorageManager().getQueryManager().saveQuery(query);
+        queryManager.saveQuery(query);
     }
 
     private void selectProvider(@Nullable AndroidFictionProvider provider) {
@@ -101,7 +106,7 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
 
             queryEditorFragment = provider.createQueryEditorFragment();
             //noinspection unchecked
-            queryEditorFragment.setQuery(getContext(), query);
+            queryEditorFragment.setQuery(query);
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.providerQueryEditor, queryEditorFragment)
@@ -125,10 +130,5 @@ public class QueryWrapperActivity extends FragmentActivity implements ContextPro
 
     private boolean isSavable() {
         return queryEditorFragment != null && queryEditorFragment.isSavable();
-    }
-
-    @Override
-    public FictionContext getContext() {
-        return FictionContext.get(this);
     }
 }

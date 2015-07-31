@@ -3,17 +3,17 @@ package at.yawk.fiction.android;
 import android.os.Environment;
 import at.yawk.fiction.Chapter;
 import at.yawk.fiction.NotFoundException;
-import at.yawk.fiction.android.context.ContextProvider;
-import at.yawk.fiction.android.context.FictionContext;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ProviderManager;
+import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.impl.fanfiction.FfnStory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 import java.io.File;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,14 +21,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @SuppressWarnings("unused")
 @Slf4j
-@RequiredArgsConstructor
-public class Importer implements ContextProvider, Runnable {
-    @Getter private final FictionContext context;
+@Singleton
+public class Importer implements Runnable {
+    @Inject ObjectMapper objectMapper;
+    @Inject ProviderManager providerManager;
+    @Inject StorageManager storageManager;
 
     @Override
     public void run() {
-        ObjectMapper objectMapper = getContext().getObjectMapper();
-        AndroidFictionProvider provider = context.getProviderManager().getProvider(new FfnStory());
+        AndroidFictionProvider provider = providerManager.getProvider(new FfnStory());
         try {
             File[] files = new File(Environment.getExternalStorageDirectory(), "Fanfiction/db/story")
                     .listFiles((dir, filename) -> {
@@ -46,7 +47,7 @@ public class Importer implements ContextProvider, Runnable {
                     if (Objects.equal(chapterNode.get("readHash"), chapterNode.get("textHash"))) {
                         FfnStory keyStory = new FfnStory();
                         keyStory.setId(tree.get("story").get("id").asInt());
-                        StoryWrapper story = getContext().getStorageManager().getStory(keyStory);
+                        StoryWrapper story = storageManager.getStory(keyStory);
                         if (story.getStory() == null) {
                             log.info("Fetching story {}", keyStory.getId());
                             try {

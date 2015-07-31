@@ -6,22 +6,23 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import lombok.RequiredArgsConstructor;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
 @Slf4j
-@RequiredArgsConstructor
+@Singleton
 class ObjectStorageManager {
     static final Joiner SLASH_JOINER = Joiner.on('/');
 
-    private final File root;
-    private final ObjectMapper objectMapper;
+    @Inject RootFile root;
+    @Inject ObjectMapper objectMapper;
 
     public <T> T load(Class<T> type, String key) throws NotFoundException {
-        File file = new File(root, key);
+        File file = new File(root.getRoot(), key);
         if (file.exists()) {
             try {
                 return objectMapper.readValue(file, type);
@@ -34,8 +35,8 @@ class ObjectStorageManager {
     }
 
     public void save(Object o, String key) {
-        File file = new File(root, key);
-        File tmp = new File(root, key + ".tmp");
+        File file = new File(root.getRoot(), key);
+        File tmp = new File(root.getRoot(), key + ".tmp");
         //noinspection ResultOfMethodCallIgnored
         file.getParentFile().mkdirs();
         try {
@@ -52,69 +53,74 @@ class ObjectStorageManager {
     }
 
     public boolean exists(String key) {
-        return new File(root, key).exists();
+        return new File(root.getRoot(), key).exists();
     }
 
     public Iterable<String> list(String key) {
-        return () -> new Iterator<String>() {
-            private DirectoryNode node = new DirectoryNode(null, key + '/', new File(root, key));
-            private String next;
-
+        return new Iterable<String>() {
             @Override
-            public boolean hasNext() {
-                findNext();
-                return next != null;
-            }
+            public Iterator<String> iterator() {
+                return new Iterator<String>() {
+                    private DirectoryNode node = new DirectoryNode(null, key + '/', new File(root.getRoot(), key));
+                    private String next;
 
-            @Override
-            public String next() {
-                findNext();
-                if (next == null) { throw new NoSuchElementException(); }
-                String e = this.next;
-                next = null;
-                return e;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-
-            void findNext() {
-                while (node != null && next == null) {
-                    node.findNextHere();
-                }
-            }
-
-            class DirectoryNode {
-                final DirectoryNode parent;
-                final String path;
-                final String[] entries;
-                int index = 0;
-
-                DirectoryNode(DirectoryNode parent, String path, File dir) {
-                    this.parent = parent;
-                    this.path = path;
-                    this.entries = dir.list();
-                }
-
-                void findNextHere() {
-                    if (index >= entries.length) {
-                        node = parent;
-                        return;
+                    @Override
+                    public boolean hasNext() {
+                        findNext();
+                        return next != null;
                     }
 
-                    String entry = entries[index++];
-                    if (entry.endsWith(".tmp")) { return; }
-
-                    String entryPath = path + entry;
-                    File file = new File(root, entryPath);
-                    if (file.isDirectory()) {
-                        node = new DirectoryNode(this, entryPath + '/', file);
-                    } else {
-                        next = entryPath;
+                    @Override
+                    public String next() {
+                        findNext();
+                        if (next == null) { throw new NoSuchElementException(); }
+                        String e = this.next;
+                        next = null;
+                        return e;
                     }
-                }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    void findNext() {
+                        while (node != null && next == null) {
+                            node.findNextHere();
+                        }
+                    }
+
+                    class DirectoryNode {
+                        final DirectoryNode parent;
+                        final String path;
+                        final String[] entries;
+                        int index = 0;
+
+                        DirectoryNode(DirectoryNode parent, String path, File dir) {
+                            this.parent = parent;
+                            this.path = path;
+                            this.entries = dir.list();
+                        }
+
+                        void findNextHere() {
+                            if (index >= entries.length) {
+                                node = parent;
+                                return;
+                            }
+
+                            String entry = entries[index++];
+                            if (entry.endsWith(".tmp")) { return; }
+
+                            String entryPath = path + entry;
+                            File file = new File(root.getRoot(), entryPath);
+                            if (file.isDirectory()) {
+                                node = new DirectoryNode(this, entryPath + '/', file);
+                            } else {
+                                next = entryPath;
+                            }
+                        }
+                    }
+                };
             }
         };
     }

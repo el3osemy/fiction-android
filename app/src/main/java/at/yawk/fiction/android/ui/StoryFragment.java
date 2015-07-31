@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,49 +13,54 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.ContextProvider;
-import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.TaskContext;
+import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ProviderManager;
+import at.yawk.fiction.android.storage.EpubBuilder;
+import at.yawk.fiction.android.storage.PojoMerger;
+import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import roboguice.fragment.RoboFragment;
 
 /**
  * @author yawkat
  */
 @Slf4j
-public class StoryFragment extends Fragment implements ContextProvider {
+public class StoryFragment extends RoboFragment {
+    @Inject Toasts toasts;
+    @Inject StorageManager storageManager;
+    @Inject TaskManager taskManager;
+    @Inject EpubBuilder epubBuilder;
+    @Inject ProviderManager providerManager;
+    @Inject PojoMerger pojoMerger;
+
     private TaskContext taskContext = new TaskContext();
 
     private StoryWrapper wrapper;
-    private FictionContext fictionContext;
     private View root;
     private ViewGroup chapterGroup;
 
-    @Override
-    public FictionContext getContext() {
-        if (fictionContext == null) { fictionContext = FictionContext.get(getActivity()); }
-        return fictionContext;
-    }
-
-    public static StoryFragment create(FictionContext context, StoryWrapper story) {
-        StoryFragment fragment = new StoryFragment();
+    public void setStory(StoryWrapper wrapper) {
         Bundle args = new Bundle();
-        args.putParcelable("story", context.objectToParcelable(story.getStory()));
-        fragment.setArguments(args);
-        return fragment;
+        args.putParcelable("story", WrapperParcelable.objectToParcelable(wrapper.getStory()));
+        setArguments(args);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        wrapper = getContext().getStorageManager()
-                .getStory(getContext().<Story>parcelableToObject(getArguments().getParcelable("story")));
+        wrapper = storageManager.getStory(WrapperParcelable.<Story>parcelableToObject(getArguments().getParcelable(
+                "story")));
     }
 
     @Nullable
@@ -64,12 +68,12 @@ public class StoryFragment extends Fragment implements ContextProvider {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.story, container, false);
         chapterGroup = (ViewGroup) root.findViewById(R.id.chapters);
-        root.findViewById(R.id.title).setOnClickListener(v -> getContext().getTaskManager().execute(taskContext, () -> {
+        root.findViewById(R.id.title).setOnClickListener(v -> taskManager.execute(taskContext, () -> {
             try {
-                getContext().getStorageManager().getEpubBuilder().openEpub(getActivity(), wrapper);
+                epubBuilder.openEpub(getActivity(), wrapper);
             } catch (Exception e) {
                 log.error("Failed to open epub", e);
-                getContext().toast(getActivity(), "Failed to open epub", e);
+                toasts.toast(getActivity(), "Failed to open epub", e);
             }
         }));
         root.findViewById(R.id.title).setOnLongClickListener(v -> {
@@ -98,7 +102,7 @@ public class StoryFragment extends Fragment implements ContextProvider {
             authorView.setText(author.getName());
         }
 
-        AndroidFictionProvider provider = getContext().getProviderManager().getProvider(wrapper.getStory());
+        AndroidFictionProvider provider = providerManager.getProvider(wrapper.getStory());
         ((TextView) root.findViewById(R.id.tags)).setText(
                 StringUtils.join(provider.getTags(wrapper.getStory()), " • "));
 
@@ -153,7 +157,7 @@ public class StoryFragment extends Fragment implements ContextProvider {
             actionNames[i] = getResources().getString(actions[i].description);
         }
         builder.setItems(actionNames, (dialog, which) -> {
-            getContext().getTaskManager().execute(taskContext, actions[which].task);
+            taskManager.execute(taskContext, actions[which].task);
         });
         builder.show();
     }
@@ -236,24 +240,24 @@ public class StoryFragment extends Fragment implements ContextProvider {
         void fetchChapter(boolean sync) {
             getActivity().runOnUiThread(() -> setChapterViewStatus(R.id.chapterDownloading));
 
-            Story storyClone = getContext().getStorageManager().getPojoMerger().clone(wrapper.getStory());
+            Story storyClone = pojoMerger.clone(wrapper.getStory());
             Chapter chapter = storyClone.getChapters().get(index);
-            AndroidFictionProvider provider = getContext().getProviderManager().getProvider(storyClone);
+            AndroidFictionProvider provider = providerManager.getProvider(storyClone);
 
             Runnable task = () -> {
                 try {
                     provider.fetchChapter(storyClone, chapter);
-                    getContext().getStorageManager().mergeStory(storyClone);
+                    storageManager.mergeStory(storyClone);
                     refreshAsync();
                 } catch (Exception e) {
                     log.error("Failed to fetch chapter", e);
-                    getContext().toast(getActivity(), "Failed to fetch chapter", e);
+                    toasts.toast(getActivity(), "Failed to fetch chapter", e);
                 }
             };
             if (sync) {
                 task.run();
             } else {
-                getContext().getTaskManager().execute(taskContext, task);
+                taskManager.execute(taskContext, task);
             }
         }
 

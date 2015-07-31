@@ -2,8 +2,6 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Debug;
-import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -13,40 +11,47 @@ import android.widget.TextView;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.ContextProvider;
-import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.TaskContext;
+import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
+import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import roboguice.fragment.RoboListFragment;
 
 @Slf4j
-public class QueryFragment extends ListFragment implements ContextProvider {
+public class QueryFragment extends RoboListFragment {
+    @Inject ProviderManager providerManager;
+    @Inject Toasts toasts;
+    @Inject TaskManager taskManager;
+    @Inject StorageManager storageManager;
+
     private final TaskContext taskContext = new TaskContext();
     private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
 
     private View footerView;
     private QueryWrapper query;
-    private FictionContext context;
 
-    public static QueryFragment create(FictionContext context, QueryWrapper query) {
-        QueryFragment fragment = new QueryFragment();
+    public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
-        args.putParcelable("query", context.objectToParcelable(query));
-        fragment.setArguments(args);
-        return fragment;
+        args.putParcelable("query", WrapperParcelable.objectToParcelable(query));
+        setArguments(args);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        query = getContext().parcelableToObject(getArguments().getParcelable("query"));
+        query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
 
         setListAdapter(new ArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
             @Override
@@ -59,7 +64,7 @@ public class QueryFragment extends ListFragment implements ContextProvider {
             }
         });
 
-        pageable = getContext().getProviderManager().getProvider(query.getQuery()).search(query.getQuery());
+        pageable = providerManager.getProvider(query.getQuery()).search(query.getQuery());
     }
 
     @Override
@@ -96,7 +101,7 @@ public class QueryFragment extends ListFragment implements ContextProvider {
 
         StoryWrapper wrapper = (StoryWrapper) l.getItemAtPosition(position);
         Intent intent = new Intent(getActivity(), StoryActivity.class);
-        intent.putExtra("story", getContext().objectToParcelable(wrapper.getStory()));
+        intent.putExtra("story", WrapperParcelable.objectToParcelable(wrapper.getStory()));
         startActivity(intent);
     }
 
@@ -116,12 +121,6 @@ public class QueryFragment extends ListFragment implements ContextProvider {
         }
     }
 
-    @Override
-    public FictionContext getContext() {
-        if (context == null) { context = FictionContext.get(this); }
-        return context;
-    }
-
     ///////////////////////////////
 
     private Pageable<? extends Story> pageable;
@@ -137,7 +136,7 @@ public class QueryFragment extends ListFragment implements ContextProvider {
             ListView listView = getListView();
             if (listView.getLastVisiblePosition() >= stories.size() - 1) {
                 fetching = true;
-                getContext().getTaskManager().execute(taskContext, () -> {
+                taskManager.execute(taskContext, () -> {
                     if (!fetchOne()) {
                         Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
                     }
@@ -177,7 +176,7 @@ public class QueryFragment extends ListFragment implements ContextProvider {
 
             List<StoryWrapper> additions = new ArrayList<>(page.getEntries().size());
             for (Story story : page.getEntries()) {
-                StoryWrapper wrapper = getContext().getStorageManager().mergeStory(story);
+                StoryWrapper wrapper = storageManager.mergeStory(story);
                 additions.add(wrapper);
             }
             //Debug.stopMethodTracing();
@@ -188,7 +187,7 @@ public class QueryFragment extends ListFragment implements ContextProvider {
             ok = true;
         } catch (Exception e) {
             log.error("Failed to fetch page {}", page, e);
-            getContext().toast(getActivity(), "Failed to fetch page {}", page, e);
+            toasts.toast(getActivity(), "Failed to fetch page {}", page, e);
         }
         if (ok) {
             page++;

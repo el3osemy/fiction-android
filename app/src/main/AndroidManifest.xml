@@ -11,6 +11,11 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="roboguice.modules"
+            android:value="at.yawk.fiction.android.context.ObjectMapperProvider" />
+
         <activity
             android:name=".ui.QueryOverviewActivity"
             android:label="@string/app_name"

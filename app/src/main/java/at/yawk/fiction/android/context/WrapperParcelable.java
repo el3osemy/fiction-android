@@ -3,13 +3,16 @@ package at.yawk.fiction.android.context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import java.io.IOException;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 /**
  * @author yawkat
  */
 @Value
-class WrapperParcelable implements Parcelable {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class WrapperParcelable implements Parcelable {
     private final Object value;
 
     public static final Creator<WrapperParcelable> CREATOR = new Creator<WrapperParcelable>() {
@@ -25,7 +28,7 @@ class WrapperParcelable implements Parcelable {
             byte[] array = source.createByteArray();
             Object value;
             try {
-                value = ObjectMapperHolder.getObjectMapper().readValue(array, clazz);
+                value = ObjectMapperProvider.getObjectMapper().readValue(array, clazz);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -38,6 +41,15 @@ class WrapperParcelable implements Parcelable {
         }
     };
 
+    public static Parcelable objectToParcelable(Object o) {
+        return new WrapperParcelable(o);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T parcelableToObject(Parcelable parcelable) {
+        return (T) ((WrapperParcelable) parcelable).getValue();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -47,7 +59,7 @@ class WrapperParcelable implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         PublicByteArrayOutputStream bos = new PublicByteArrayOutputStream();
         try {
-            ObjectMapperHolder.getObjectMapper().writeValue(bos, value);
+            ObjectMapperProvider.getObjectMapper().writeValue(bos, value);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

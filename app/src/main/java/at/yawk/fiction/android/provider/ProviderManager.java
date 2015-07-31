@@ -15,10 +15,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * @author yawkat
  */
+@Singleton
 public class ProviderManager {
     private static final Map<Class<?>, Class<? extends AndroidFictionProvider>> PROVIDERS_BY_PROVIDING_CLASS =
             ImmutableMap.of(
@@ -40,7 +43,8 @@ public class ProviderManager {
         provider.init(context);
     }
 
-    public void init(StorageManager storageManager) {
+    @Inject
+    ProviderManager(StorageManager storageManager) {
         context = new ProviderContext(storageManager);
         addProvider(new FfnAndroidFictionProvider());
         addProvider(new LocalAndroidFictionProvider());

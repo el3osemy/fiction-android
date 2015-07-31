@@ -3,7 +3,6 @@ package at.yawk.fiction.android.ui;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
@@ -12,28 +11,28 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.ContextProvider;
-import at.yawk.fiction.android.context.FictionContext;
+import at.yawk.fiction.android.context.Toasts;
+import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import roboguice.activity.RoboFragmentActivity;
 
 /**
  * @author yawkat
  */
 @Slf4j
-public class QueryOverviewActivity extends FragmentActivity implements ContextProvider {
+public class QueryOverviewActivity extends RoboFragmentActivity {
+    @Inject QueryManager queryManager;
+    @Inject Importer importer;
+
     private ArrayAdapter<QueryWrapper> queryArrayAdapter;
     private DrawerLayout drawerParent;
     private ListView drawer;
-
-    @Override
-    public FictionContext getContext() {
-        return FictionContext.get(this);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +62,12 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
     }
 
     private void updateQueries(boolean first) {
-        List<QueryWrapper> queries = getQueryManager().getQueries();
+        List<QueryWrapper> queries = queryManager.getQueries();
         queryArrayAdapter.clear();
         queryArrayAdapter.addAll(queries);
 
         for (QueryWrapper query : queries) {
-            if (query.getId().equals(getQueryManager().getSelectedQueryId())) {
+            if (query.getId().equals(queryManager.getSelectedQueryId())) {
                 showQuery(query, first);
                 break;
             }
@@ -76,14 +75,16 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
     }
 
     private void showQuery(QueryWrapper query, boolean forceRedraw) {
-        if (!forceRedraw && query.getId().equals(getQueryManager().getSelectedQueryId())) {
+        if (!forceRedraw && query.getId().equals(queryManager.getSelectedQueryId())) {
             return;
         }
 
         log.info("ShowQuery {}", query);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.content_frame, QueryFragment.create(getContext(), query));
+        QueryFragment fragment = new QueryFragment();
+        fragment.setQuery(query);
+        ft.replace(R.id.content_frame, fragment);
         ft.commit();
 
         ActionBar actionBar = getActionBar();
@@ -91,16 +92,12 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
             actionBar.setTitle(getName(query));
         }
 
-        getQueryManager().setSelectedQueryId(query.getId());
+        queryManager.setSelectedQueryId(query.getId());
     }
 
     private static String getName(QueryWrapper query) {
         String name = query.getName();
         return name == null || name.isEmpty() ? "Unnamed Query" : name;
-    }
-
-    private QueryManager getQueryManager() {
-        return getContext().getStorageManager().getQueryManager();
     }
 
     @Override
@@ -118,6 +115,8 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Inject Toasts toasts;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -125,7 +124,7 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
             editQuery(null);
             return true;
         case R.id.import_ffn:
-            new Thread(new Importer(getContext())).start();
+            new Thread(importer).start();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -134,7 +133,7 @@ public class QueryOverviewActivity extends FragmentActivity implements ContextPr
     private void editQuery(@Nullable QueryWrapper query) {
         Intent intent = new Intent(this, QueryWrapperActivity.class);
         if (query != null) {
-            intent.putExtra("query", getContext().objectToParcelable(query));
+            intent.putExtra("query", WrapperParcelable.objectToParcelable(query));
         }
         startActivity(intent);
     }

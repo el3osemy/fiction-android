@@ -13,8 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
@@ -28,10 +28,10 @@ import org.jsoup.safety.Whitelist;
 /**
  * @author yawkat
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@Singleton
 public class EpubBuilder {
-    private final StorageManager storageManager;
-    private final File root;
+    @Inject StorageManager storageManager;
+    @Inject RootFile root;
 
     public void openEpub(Activity activity, StoryWrapper story) throws IOException {
         File file = buildEpub(story);
@@ -46,7 +46,7 @@ public class EpubBuilder {
         Story story = wrapper.getStory();
         AndroidFictionProvider provider = storageManager.providerManager.getProvider(story);
         String id = provider.getStoryId(story, "/");
-        File file = new File(root, "epub/" + provider.getId() + "/" + id + ".epub");
+        File file = new File(root.getRoot(), "epub/" + provider.getId() + "/" + id + ".epub");
         //noinspection ResultOfMethodCallIgnored
         file.getParentFile().mkdirs();
 

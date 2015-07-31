@@ -5,12 +5,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
 @Slf4j
+@Singleton
 public class TaskManager {
     private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactory() {
         private AtomicInteger index = new AtomicInteger(0);
