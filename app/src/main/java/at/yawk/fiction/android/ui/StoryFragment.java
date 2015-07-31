@@ -73,7 +73,7 @@ public class StoryFragment extends RoboFragment {
                 epubBuilder.openEpub(getActivity(), wrapper);
             } catch (Exception e) {
                 log.error("Failed to open epub", e);
-                toasts.toast(getActivity(), "Failed to open epub", e);
+                toasts.toast("Failed to open epub", e);
             }
         }));
         root.findViewById(R.id.title).setOnLongClickListener(v -> {
@@ -251,7 +251,7 @@ public class StoryFragment extends RoboFragment {
                     refreshAsync();
                 } catch (Exception e) {
                     log.error("Failed to fetch chapter", e);
-                    toasts.toast(getActivity(), "Failed to fetch chapter", e);
+                    toasts.toast("Failed to fetch chapter", e);
                 }
             };
             if (sync) {

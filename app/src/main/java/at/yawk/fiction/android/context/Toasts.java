@@ -15,7 +15,7 @@ import roboguice.inject.ContextSingleton;
 public class Toasts {
     @Inject Activity activity;
 
-    public void toast(Activity activity, String msg, Object... args) {
+    public void toast(String msg, Object... args) {
         FormattingTuple tuple = MessageFormatter.arrayFormat(msg, args);
         String message = tuple.getMessage();
 

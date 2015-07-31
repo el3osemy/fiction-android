@@ -76,7 +76,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                                 getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
                             } catch (Exception e) {
                                 log.error("Failed to fetch subcategories for {}", category, e);
-                                toasts.toast(getActivity(), "Failed to fetch subcategories", e);
+                                toasts.toast("Failed to fetch subcategories", e);
                             }
                         });
                     }

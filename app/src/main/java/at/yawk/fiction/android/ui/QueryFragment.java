@@ -187,7 +187,7 @@ public class QueryFragment extends RoboListFragment {
             ok = true;
         } catch (Exception e) {
             log.error("Failed to fetch page {}", page, e);
-            toasts.toast(getActivity(), "Failed to fetch page {}", page, e);
+            toasts.toast("Failed to fetch page {}", page, e);
         }
         if (ok) {
             page++;
