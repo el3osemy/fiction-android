@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -13,6 +14,7 @@ import at.yawk.fiction.android.context.WrapperParcelable;
 import com.google.common.base.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import roboguice.fragment.RoboFragment;
 
@@ -69,10 +71,20 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends RoboFra
                                   Setter<S, C> setter,
                                   Function<C, String> toString,
                                   List<C> choices) {
-        spinner.setAdapter(new StringArrayAdapter(getActivity(), choices, toString));
-        int position = choices.indexOf(getter.get(getQuery()));
-        if (position != -1) { spinner.setSelection(position); }
+        setChoice(spinner, toString, choices, choices.indexOf(getter.get(getQuery())));
         saveTasks.add(() -> setter.set(getQuery(), (C) spinner.getSelectedItem()));
+    }
+
+    protected <C> void setChoice(Spinner spinner,
+                                 Function<C, String> toString,
+                                 List<C> choices,
+                                 int currentChoiceIndex) {
+        spinner.setAdapter(new StringArrayAdapter<>(getActivity(), choices, toString));
+        spinner.setSelection(currentChoiceIndex);
+    }
+
+    protected void clearChoice(Spinner spinner) {
+        spinner.setAdapter(new ArrayAdapter<>(getActivity(), 0, Collections.emptyList()));
     }
 
     protected void bindBoolean(CheckBox editor, Getter<S, Boolean> getter, Setter<S, Boolean> setter) {
