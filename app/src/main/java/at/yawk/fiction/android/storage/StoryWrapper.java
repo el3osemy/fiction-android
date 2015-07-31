@@ -51,7 +51,10 @@ public class StoryWrapper {
     public synchronized void updateStory(Story changes) {
         Story merged = this.story == null ? changes : pojoMerger.merge(changes, this.story);
         if (log.isTraceEnabled()) {
-            log.trace("Merging {} -> {} = {}", changes.hashCode(), story.hashCode(), merged.hashCode());
+            log.trace("Merging {} -> {} = {}",
+                      changes.hashCode(),
+                      story == null ? 0 : story.hashCode(),
+                      merged.hashCode());
             log.trace("{} -> {} = {}",
                       System.identityHashCode(changes),
                       System.identityHashCode(story),
