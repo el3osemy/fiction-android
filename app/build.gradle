@@ -39,6 +39,8 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
+
+    testCompile 'org.testng:testng:6.9.6'
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {
