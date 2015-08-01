@@ -125,6 +125,9 @@ public class QueryFragment extends RoboListFragment {
             readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadNone));
         }
 
+        TextView downloadedChapterDisplay = (TextView) view.findViewById(R.id.downloadedChapterDisplay);
+        downloadedChapterDisplay.setText(wrapper.getDownloadedCount() + "/");
+
         storyViewMap.put(wrapper, view);
     }
 

@@ -26,8 +26,19 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="false"
         android:layout_centerVertical="true"
-        android:padding="2dp"
         android:text="5/10"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/chaptersReadSome" />
+
+    <TextView
+        android:id="@+id/downloadedChapterDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="7/"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#40ffffff"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/readChapterDisplay"
+        android:layout_toStartOf="@+id/readChapterDisplay"
+        android:paddingLeft="2dp" />
 </RelativeLayout>

@@ -39,6 +39,8 @@ public class StoryWrapper {
     private Set<FormattedText> readChapters = new HashSet<>();
 
     @JsonProperty private List<ChapterHolder> chapterHolders = new ArrayList<>();
+
+    private transient int downloadedChapterCount = -1;
     private transient int readChapterCount = -1;
 
     public Story getStory() {
@@ -65,6 +67,7 @@ public class StoryWrapper {
                       System.identityHashCode(story),
                       System.identityHashCode(merged));
         }
+        boolean updated = !merged.equals(story);
         if (merged.getChapters() != null) {
             List<? extends Chapter> chapters = merged.getChapters();
             for (int i = 0; i < chapters.size(); i++) {
@@ -78,12 +81,14 @@ public class StoryWrapper {
                         holder.setReadHash(hash);
                     }
                     chapter.setText(null);
+                    updated = true;
                 }
             }
         }
-        if (merged.equals(story)) { return; }
+        if (!updated) { return; }
         story = merged;
         log.trace("saving");
+        bakeDownloadedChapterCount();
         save();
     }
 
@@ -111,6 +116,14 @@ public class StoryWrapper {
         return readChapterCount;
     }
 
+    @JsonIgnore
+    public synchronized int getDownloadedCount() {
+        if (downloadedChapterCount == -1) {
+            bakeDownloadedChapterCount();
+        }
+        return downloadedChapterCount;
+    }
+
     private synchronized ChapterHolder getChapterHolder(int index) {
         while (chapterHolders.size() <= index) {
             chapterHolders.add(new ChapterHolder());
@@ -123,6 +136,16 @@ public class StoryWrapper {
         for (int i = 0; i < story.getChapters().size(); i++) {
             if (isChapterRead(i)) {
                 readChapterCount++;
+            }
+        }
+    }
+
+    private synchronized void bakeDownloadedChapterCount() {
+        int chapterCount = getStory().getChapters().size();
+        downloadedChapterCount = 0;
+        for (int i = 0; i < chapterCount; i++) {
+            if (hasChapterText(i)) {
+                downloadedChapterCount++;
             }
         }
     }

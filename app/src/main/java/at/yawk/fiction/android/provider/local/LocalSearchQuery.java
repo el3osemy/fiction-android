@@ -1,9 +1,7 @@
 package at.yawk.fiction.android.provider.local;
 
-import at.yawk.fiction.Chapter;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.storage.StoryWrapper;
-import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,12 +25,7 @@ public class LocalSearchQuery extends SearchQuery {
 
     boolean accept(StoryWrapper wrapper) {
         int chapterCount = wrapper.getStory().getChapters().size();
-        int downloadedCount = 0;
-        for (int i = 0; i < chapterCount; i++) {
-            if (wrapper.hasChapterText(i)) {
-                downloadedCount++;
-            }
-        }
+        int downloadedCount = wrapper.getDownloadedCount();
         int readCount = wrapper.getReadChapterCount();
 
         if (readCount <= 0) {
@@ -53,4 +46,5 @@ public class LocalSearchQuery extends SearchQuery {
 
         return true;
     }
+
 }
