@@ -11,6 +11,7 @@ import com.google.inject.MembersInjector;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import roboguice.event.EventManager;
 
 /**
  * @author yawkat
@@ -20,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class StorageManager {
     @Inject ObjectStorageManager objectStorageManager;
     @Inject ProviderManager providerManager;
+
+    @SuppressWarnings("unused")
+    @Inject EventManager eventManager; // unused but needed by the story wrapper injector
 
     final LoadingCache<String, StoryWrapper> storyCache;
 
@@ -33,6 +37,7 @@ public class StorageManager {
                     } catch (NotFoundException e) {
                         wrapper = new StoryWrapper();
                     }
+                    wrapper.eventManager = eventManager;
                     queryWrapperInjector.injectMembers(wrapper);
                     return wrapper;
                 }));

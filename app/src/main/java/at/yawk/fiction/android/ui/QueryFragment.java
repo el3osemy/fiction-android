@@ -3,7 +3,6 @@ package at.yawk.fiction.android.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -14,6 +13,7 @@ import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import at.yawk.fiction.android.storage.StoryWrapper;
@@ -24,6 +24,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import roboguice.event.EventThread;
+import roboguice.event.Observes;
 import roboguice.fragment.RoboListFragment;
 
 @Slf4j
@@ -37,6 +39,8 @@ public class QueryFragment extends RoboListFragment {
 
     private View footerView;
 
+    private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
+
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
         args.putParcelable("query", WrapperParcelable.objectToParcelable(query));
@@ -49,18 +53,23 @@ public class QueryFragment extends RoboListFragment {
 
         QueryWrapper query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
 
-        setListAdapter(new ArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
+        setListAdapter(new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = getActivity().getLayoutInflater().inflate(R.layout.query_entry, parent, false);
-                }
-                decorateEntry(getItem(position), convertView);
-                return convertView;
+            protected void decorateView(View view, int position) {
+                decorateEntry(getItem(position), view);
             }
         });
 
         pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
+    }
+
+    public void onStoryUpdate(@Observes(EventThread.UI) StoryUpdateEvent event) {
+        getActivity().runOnUiThread(() -> {
+            View view = storyViewMap.getByKey(event.getStory());
+            if (view != null) {
+                decorateEntry(event.getStory(), view);
+            }
+        });
     }
 
     @Override
@@ -115,6 +124,8 @@ public class QueryFragment extends RoboListFragment {
         } else {
             readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadNone));
         }
+
+        storyViewMap.put(wrapper, view);
     }
 
     ///////////////////////////////
