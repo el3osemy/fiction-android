@@ -6,16 +6,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Html;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
@@ -29,13 +28,15 @@ import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import roboguice.fragment.RoboFragment;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
 @Slf4j
-public class StoryFragment extends RoboFragment {
+@ContentView(R.layout.story)
+public class StoryFragment extends ContentViewFragment {
     @Inject Toasts toasts;
     @Inject StorageManager storageManager;
     @Inject TaskManager taskManager;
@@ -46,8 +47,12 @@ public class StoryFragment extends RoboFragment {
     private TaskContext taskContext = new TaskContext();
 
     private StoryWrapper wrapper;
-    private View root;
-    private ViewGroup chapterGroup;
+
+    @InjectView(R.id.chapters) ViewGroup chapterGroup;
+    @InjectView(R.id.title) TextView titleView;
+    @InjectView(R.id.author) TextView authorView;
+    @InjectView(R.id.tags) TextView tagsView;
+    @InjectView(R.id.description) TextView descriptionView;
 
     public void setStory(StoryWrapper wrapper) {
         Bundle args = new Bundle();
@@ -63,12 +68,11 @@ public class StoryFragment extends RoboFragment {
                 "story")));
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        root = inflater.inflate(R.layout.story, container, false);
-        chapterGroup = (ViewGroup) root.findViewById(R.id.chapters);
-        root.findViewById(R.id.title).setOnClickListener(v -> taskManager.execute(taskContext, () -> {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        titleView.setOnClickListener(v -> taskManager.execute(taskContext, () -> {
             try {
                 epubBuilder.openEpub(getActivity(), wrapper);
             } catch (Exception e) {
@@ -76,7 +80,7 @@ public class StoryFragment extends RoboFragment {
                 toasts.toast("Failed to open epub", e);
             }
         }));
-        root.findViewById(R.id.title).setOnLongClickListener(v -> {
+        titleView.setOnLongClickListener(v -> {
             showDialog(new AsyncAction(R.string.open_in_browser, () -> {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(wrapper.getStory().getUri().toString()));
@@ -85,15 +89,13 @@ public class StoryFragment extends RoboFragment {
             return false;
         });
         refresh();
-        return root;
     }
 
     private List<ChapterHolder> chapterHolders = new ArrayList<>();
 
     private void refresh() {
-        ((TextView) root.findViewById(R.id.title)).setText(wrapper.getStory().getTitle());
+        titleView.setText(wrapper.getStory().getTitle());
 
-        TextView authorView = (TextView) root.findViewById(R.id.author);
         Author author = wrapper.getStory().getAuthor();
         if (author == null) {
             authorView.setVisibility(View.GONE);
@@ -103,10 +105,8 @@ public class StoryFragment extends RoboFragment {
         }
 
         AndroidFictionProvider provider = providerManager.getProvider(wrapper.getStory());
-        ((TextView) root.findViewById(R.id.tags)).setText(
-                StringUtils.join(provider.getTags(wrapper.getStory()), " • "));
+        tagsView.setText(StringUtils.join(provider.getTags(wrapper.getStory()), " • "));
 
-        TextView descriptionView = (TextView) root.findViewById(R.id.description);
         FormattedText description = wrapper.getStory().getDescription();
         if (description instanceof HtmlText) {
             descriptionView.setText(Html.fromHtml(((HtmlText) description).getHtml()));
@@ -165,7 +165,6 @@ public class StoryFragment extends RoboFragment {
     private class ChapterHolder {
         private final View view;
         private final int index;
-        private Chapter chapter;
 
         private final CheckBox readBox;
 
@@ -217,8 +216,6 @@ public class StoryFragment extends RoboFragment {
         }
 
         void setChapter(Chapter chapter) {
-            this.chapter = chapter;
-
             String name = chapter.getName();
             if (name == null) {
                 name = "Chapter " + (index + 1);

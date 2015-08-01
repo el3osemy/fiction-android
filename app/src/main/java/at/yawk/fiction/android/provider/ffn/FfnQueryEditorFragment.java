@@ -1,8 +1,6 @@
 package at.yawk.fiction.android.provider.ffn;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -10,7 +8,6 @@ import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
-import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
@@ -22,14 +19,16 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
 @Slf4j
+@ContentView(R.layout.query_editor_ffn)
 public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> {
     @Inject TaskManager taskManager;
-    @Inject ProviderManager providerManager;
     @Inject Toasts toasts;
     @Inject FfnAndroidFictionProvider provider;
 
@@ -37,99 +36,99 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
 
     private SubCategoryOrder subCategoryOrder = SubCategoryOrder.SIZE;
     private ArrayAdapter<FfnSubCategory> subCategoryArrayAdapter;
-    private View editor;
+
+    @InjectView(R.id.subCategory) Spinner subCategoryView;
+    @InjectView(R.id.category) Spinner categoryView;
+    @InjectView(R.id.subCategoryOrder) Spinner subCategoryOrderView;
+    @InjectView(R.id.searchOrder) Spinner searchOrderView;
+    @InjectView(R.id.ratingMin) Spinner ratingMinView;
+    @InjectView(R.id.ratingMax) Spinner ratingMaxView;
+    @InjectView(R.id.timeRange) Spinner timeRangeView;
+    @InjectView(R.id.status) Spinner statusView;
 
     @Override
-    protected View createView(LayoutInflater inflater, ViewGroup container) {
-        editor = inflater.inflate(R.layout.query_editor_ffn, container, false);
-
+    protected void bind() {
         subCategoryArrayAdapter = new StringArrayAdapter<>(
                 getActivity(), new ArrayList<>(), FfnSubCategory::getName);
 
-        ((Spinner) editor.findViewById(R.id.subCategory)).setAdapter(subCategoryArrayAdapter);
-        ((Spinner) editor.findViewById(R.id.subCategory)).setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        updateSavable();
-                    }
+        subCategoryView.setAdapter(subCategoryArrayAdapter);
+        subCategoryView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updateSavable();
+            }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        updateSavable();
-                    }
-                });
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                updateSavable();
+            }
+        });
 
-        ((Spinner) editor.findViewById(R.id.category)).setAdapter(
-                new StringArrayAdapter<>(getActivity(), FfnCategory.values(), FfnCategory::getName));
-        ((Spinner) editor.findViewById(R.id.category)).setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        subCategoryArrayAdapter.clear();
-                        taskManager.execute(taskContext, () -> {
-                            FfnCategory category = (FfnCategory) parent.getSelectedItem();
-                            try {
-                                List<FfnSubCategory> subCategories =
-                                        provider.getFictionProvider().fetchSubCategories(category);
-                                Collections.sort(subCategories, subCategoryOrder);
-                                getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
-                            } catch (Exception e) {
-                                log.error("Failed to fetch subcategories for {}", category, e);
-                                toasts.toast("Failed to fetch subcategories", e);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        subCategoryArrayAdapter.clear();
+        categoryView.setAdapter(new StringArrayAdapter<>(getActivity(), FfnCategory.values(), FfnCategory::getName));
+        categoryView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subCategoryArrayAdapter.clear();
+                taskManager.execute(taskContext, () -> {
+                    FfnCategory category = (FfnCategory) parent.getSelectedItem();
+                    try {
+                        List<FfnSubCategory> subCategories =
+                                provider.getFictionProvider().fetchSubCategories(category);
+                        Collections.sort(subCategories, subCategoryOrder);
+                        getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
+                    } catch (Exception e) {
+                        log.error("Failed to fetch subcategories for {}", category, e);
+                        toasts.toast("Failed to fetch subcategories", e);
                     }
                 });
+            }
 
-        ((Spinner) editor.findViewById(R.id.subCategoryOrder)).setAdapter(
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                subCategoryArrayAdapter.clear();
+            }
+        });
+
+        subCategoryOrderView.setAdapter(
                 new StringArrayAdapter<>(getActivity(), SubCategoryOrder.values(), SubCategoryOrder::getName));
-        ((Spinner) editor.findViewById(R.id.subCategoryOrder)).setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        subCategoryOrder = (SubCategoryOrder) parent.getSelectedItem();
-                        subCategoryArrayAdapter.sort(subCategoryOrder);
-                    }
+        subCategoryOrderView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subCategoryOrder = (SubCategoryOrder) parent.getSelectedItem();
+                subCategoryArrayAdapter.sort(subCategoryOrder);
+            }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {}
-                });
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
-        bindChoice((Spinner) editor.findViewById(R.id.searchOrder),
+        bindChoice(searchOrderView,
                    FfnSearchQuery::getOrder,
                    FfnSearchQuery::setOrder,
                    FfnSearchOrder::getName,
                    FfnSearchOrder.values());
-        this.<FfnRating>bindChoice((Spinner) editor.findViewById(R.id.ratingMin),
-                                   FfnSearchQuery::getMinRating,
-                                   FfnSearchQuery::setMinRating,
-                                   FfnRating::getName,
-                                   FfnRating.values());
-        this.<FfnRating>bindChoice((Spinner) editor.findViewById(R.id.ratingMax),
-                                   FfnSearchQuery::getMaxRating,
-                                   FfnSearchQuery::setMaxRating,
-                                   FfnRating::getName,
-                                   FfnRating.values());
+        bindChoice(ratingMinView,
+                   FfnSearchQuery::getMinRating,
+                   FfnSearchQuery::setMinRating,
+                   FfnRating::getName,
+                   FfnRating.values());
+        bindChoice(ratingMaxView,
+                   FfnSearchQuery::getMaxRating,
+                   FfnSearchQuery::setMaxRating,
+                   FfnRating::getName,
+                   FfnRating.values());
 
-        bindChoice((Spinner) editor.findViewById(R.id.timeRange),
+        bindChoice(timeRangeView,
                    FfnSearchQuery::getTimeRange,
                    FfnSearchQuery::setTimeRange,
                    timeRange -> timeRange == null ? "All" : timeRange.getLabel(),
                    andNull(TimeRange.values()));
 
-        bindChoice((Spinner) editor.findViewById(R.id.status),
+        bindChoice(statusView,
                    FfnSearchQuery::getStatus,
                    FfnSearchQuery::setStatus,
                    status -> status == null ? "All" : status.getName(),
                    andNull(FfnStatus.values()));
-
-        return editor;
     }
 
     @Override
@@ -140,9 +139,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
 
     @Nullable
     private FfnSubCategory getSelectedSubCategory() {
-        return editor == null ?
-                null :
-                (FfnSubCategory) ((Spinner) editor.findViewById(R.id.subCategory)).getSelectedItem();
+        return subCategoryView == null ? null : (FfnSubCategory) subCategoryView.getSelectedItem();
     }
 
     @Override

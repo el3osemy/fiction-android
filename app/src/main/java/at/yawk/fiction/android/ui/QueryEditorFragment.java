@@ -1,10 +1,7 @@
 package at.yawk.fiction.android.ui;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -21,7 +18,7 @@ import roboguice.fragment.RoboFragment;
 /**
  * @author yawkat
  */
-public abstract class QueryEditorFragment<S extends SearchQuery> extends RoboFragment {
+public abstract class QueryEditorFragment<S extends SearchQuery> extends ContentViewFragment {
     private S query;
 
     private List<Runnable> saveTasks = new ArrayList<>();
@@ -44,13 +41,13 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends RoboFra
         query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return createView(inflater, container);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        bind();
     }
 
-    protected abstract View createView(LayoutInflater inflater, ViewGroup container);
+    protected abstract void bind();
 
     protected void bindString(EditText editor, Getter<S, String> getter, Setter<S, String> setter) {
         editor.setText(getter.get(getQuery()));

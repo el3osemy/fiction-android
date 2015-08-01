@@ -1,45 +1,49 @@
 package at.yawk.fiction.android.provider.local;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
+@ContentView(R.layout.query_editor_local)
 public class LocalQueryEditorFragment extends QueryEditorFragment<LocalSearchQuery> {
-    @Override
-    protected View createView(LayoutInflater inflater, ViewGroup container) {
-        View root = inflater.inflate(R.layout.query_editor_local, container, false);
+    @InjectView(R.id.order) Spinner orderView;
+    @InjectView(R.id.readNone) CheckBox readNoneView;
+    @InjectView(R.id.readSome) CheckBox readSomeView;
+    @InjectView(R.id.readAll) CheckBox readAllView;
+    @InjectView(R.id.downloadedNone) CheckBox downloadedNoneView;
+    @InjectView(R.id.downloadedSome) CheckBox downloadedSomeView;
+    @InjectView(R.id.downloadedAll) CheckBox downloadedAllView;
 
-        bindChoice((Spinner) root.findViewById(R.id.order),
+    @Override
+    protected void bind() {
+        bindChoice(orderView,
                    LocalSearchQuery::getOrder,
                    LocalSearchQuery::setOrder,
                    StoryOrder::getName,
                    StoryOrder.values());
-        bindBoolean((CheckBox) root.findViewById(R.id.readNone),
+        bindBoolean(readNoneView,
                     LocalSearchQuery::isReadNone,
                     LocalSearchQuery::setReadNone);
-        bindBoolean((CheckBox) root.findViewById(R.id.readSome),
+        bindBoolean(readSomeView,
                     LocalSearchQuery::isReadSome,
                     LocalSearchQuery::setReadSome);
-        bindBoolean((CheckBox) root.findViewById(R.id.readAll),
+        bindBoolean(readAllView,
                     LocalSearchQuery::isReadAll,
                     LocalSearchQuery::setReadAll);
-        bindBoolean((CheckBox) root.findViewById(R.id.downloadedNone),
+        bindBoolean(downloadedNoneView,
                     LocalSearchQuery::isDownloadedNone,
                     LocalSearchQuery::setDownloadedNone);
-        bindBoolean((CheckBox) root.findViewById(R.id.downloadedSome),
+        bindBoolean(downloadedSomeView,
                     LocalSearchQuery::isDownloadedSome,
                     LocalSearchQuery::setDownloadedSome);
-        bindBoolean((CheckBox) root.findViewById(R.id.downloadedAll),
+        bindBoolean(downloadedAllView,
                     LocalSearchQuery::isDownloadedAll,
                     LocalSearchQuery::setDownloadedAll);
-
-        return root;
     }
 }

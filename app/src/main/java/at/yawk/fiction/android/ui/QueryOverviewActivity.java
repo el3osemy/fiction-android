@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
@@ -21,24 +20,26 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import roboguice.activity.RoboFragmentActivity;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
 @Slf4j
+@ContentView(R.layout.query_overview)
 public class QueryOverviewActivity extends RoboFragmentActivity {
     @Inject QueryManager queryManager;
     @Inject Importer importer;
 
     private ArrayAdapter<QueryWrapper> queryArrayAdapter;
-    private DrawerLayout drawerParent;
-    private ListView drawer;
+
+    @InjectView(R.id.left_drawer) ListView drawer;
+    @InjectView(R.id.drawer_layout) DrawerLayout drawerParent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.query_overview);
 
         log.info("Creating query overview");
 
@@ -47,9 +48,7 @@ public class QueryOverviewActivity extends RoboFragmentActivity {
 
         updateQueries(true);
 
-        drawer = (ListView) findViewById(R.id.left_drawer);
         drawer.setAdapter(queryArrayAdapter);
-        drawerParent = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         drawer.setOnItemClickListener((parent, view, position, id) -> {
             showQuery(queryArrayAdapter.getItem(position), true);
@@ -114,8 +113,6 @@ public class QueryOverviewActivity extends RoboFragmentActivity {
         getMenuInflater().inflate(R.menu.query_overview, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-    @Inject Toasts toasts;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

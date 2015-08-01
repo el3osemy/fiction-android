@@ -18,10 +18,13 @@ import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import roboguice.activity.RoboFragmentActivity;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
+@ContentView(R.layout.query_wrapper_editor)
 public class QueryWrapperActivity extends RoboFragmentActivity {
     @Inject ProviderManager providerManager;
     @Inject QueryManager queryManager;
@@ -31,11 +34,15 @@ public class QueryWrapperActivity extends RoboFragmentActivity {
     private Map<AndroidFictionProvider, SearchQuery> queriesByProvider = new HashMap<>();
     private QueryEditorFragment queryEditorFragment;
 
+    @InjectView(R.id.accept) Button acceptButton;
+    @InjectView(R.id.remove) Button removeButton;
+    @InjectView(R.id.cancel) Button cancelButton;
+    @InjectView(R.id.queryName) EditText queryName;
+    @InjectView(R.id.provider) Spinner providerSpinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.query_wrapper_editor);
 
         Parcelable queryParcel = getIntent().getParcelableExtra("query");
         if (queryParcel != null) {
@@ -43,19 +50,18 @@ public class QueryWrapperActivity extends RoboFragmentActivity {
             AndroidFictionProvider provider = providerManager.getProvider(query.getQuery());
             queriesByProvider.put(provider, query.getQuery());
             selectProvider(provider);
-            ((Button) findViewById(R.id.accept)).setText(R.string.update_query);
-            findViewById(R.id.remove).setVisibility(View.VISIBLE);
+            acceptButton.setText(R.string.update_query);
+            removeButton.setVisibility(View.VISIBLE);
         } else {
             query = new QueryWrapper();
             query.setId(UUID.randomUUID());
-            ((Button) findViewById(R.id.accept)).setText(R.string.create_query);
-            findViewById(R.id.remove).setVisibility(View.GONE);
+            acceptButton.setText(R.string.create_query);
+            removeButton.setVisibility(View.GONE);
         }
 
-        ((EditText) findViewById(R.id.queryName)).setText(query.getName());
+        queryName.setText(query.getName());
 
         List<AndroidFictionProvider> providers = new ArrayList<>(providerManager.getProviders());
-        Spinner providerSpinner = (Spinner) findViewById(R.id.provider);
         providerSpinner.setAdapter(new StringArrayAdapter<>(this, providers, AndroidFictionProvider::getName));
         providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -71,15 +77,15 @@ public class QueryWrapperActivity extends RoboFragmentActivity {
 
         updateSavable();
 
-        findViewById(R.id.accept).setOnClickListener(v -> {
+        acceptButton.setOnClickListener(v -> {
             updateSavable();
             if (isSavable()) {
                 save();
                 finish();
             }
         });
-        findViewById(R.id.cancel).setOnClickListener(v -> finish());
-        findViewById(R.id.remove).setOnClickListener(v -> {
+        cancelButton.setOnClickListener(v -> finish());
+        removeButton.setOnClickListener(v -> {
             queryManager.removeQuery(query);
             finish();
         });
@@ -88,7 +94,7 @@ public class QueryWrapperActivity extends RoboFragmentActivity {
     private void save() {
         assert isSavable();
 
-        query.setName(((EditText) findViewById(R.id.queryName)).getText().toString());
+        query.setName(queryName.getText().toString());
         if (queryEditorFragment != null) {
             queryEditorFragment.save();
             query.setQuery(queryEditorFragment.getQuery());
@@ -125,7 +131,7 @@ public class QueryWrapperActivity extends RoboFragmentActivity {
     }
 
     void updateSavable() {
-        findViewById(R.id.accept).setEnabled(isSavable());
+        acceptButton.setEnabled(isSavable());
     }
 
     private boolean isSavable() {
