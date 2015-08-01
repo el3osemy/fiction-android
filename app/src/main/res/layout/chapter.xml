@@ -33,7 +33,7 @@
             android:background="@android:color/transparent"
             android:contentDescription="Refresh Chapter"
             android:src="@drawable/ic_refresh_white_24dp"
-            android:visibility="invisible" />
+            android:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/chapterDownloading"
@@ -48,9 +48,9 @@
         android:id="@+id/chapterName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="2dp"
         android:text="Chapter Name"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:paddingLeft="4dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/downloadWrapper"
         android:layout_toLeftOf="@+id/chapterRead"

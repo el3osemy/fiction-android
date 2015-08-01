@@ -20,7 +20,7 @@
 
     <LinearLayout
         android:id="@+id/actions"
-        style="@style/Base.Widget.AppCompat.ButtonBar"
+        style="@style/Widget.AppCompat.ButtonBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -29,14 +29,14 @@
 
         <Button
             android:id="@+id/cancel"
-            style="?android:attr/buttonBarStyle"
+            style="?attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Cancel" />
 
         <Button
-            style="?android:attr/buttonBarStyle"
+            style="?attr/buttonBarStyle"
             android:id="@+id/remove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
 
         <Button
             android:id="@+id/accept"
-            style="?android:attr/buttonBarStyle"
+            style="?attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
