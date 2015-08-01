@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:text="7/"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#40ffffff"
+        android:textColor="#30ffffff"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/readChapterDisplay"
         android:layout_toStartOf="@+id/readChapterDisplay"
