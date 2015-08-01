@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'retrolambda'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'imagemagick'
+apply plugin: 'com.tmiyamon.mdicons'
 
 android {
     compileSdkVersion 22
@@ -39,8 +40,13 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
+    compile 'com.vandalsoftware.android:dslv:0.6.3'
 
     testCompile 'org.testng:testng:6.9.6'
+}
+
+mdicons {
+    pattern 'ic_reorder_white_24dp'
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {

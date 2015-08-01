@@ -27,11 +27,11 @@ public class QueryManager {
         }
     }
 
-    private void save() {
+    private synchronized void save() {
         objectStorageManager.save(holder, "queryManager");
     }
 
-    public void saveQuery(QueryWrapper wrapper) {
+    public synchronized void saveQuery(QueryWrapper wrapper) {
         boolean found = false;
         for (int i = 0; i < holder.queries.size(); i++) {
             if (holder.queries.get(i).getId().equals(wrapper.getId())) {
@@ -44,7 +44,7 @@ public class QueryManager {
         save();
     }
 
-    public void removeQuery(QueryWrapper wrapper) {
+    public synchronized void removeQuery(QueryWrapper wrapper) {
         for (Iterator<QueryWrapper> iterator = holder.queries.iterator(); iterator.hasNext(); ) {
             if (iterator.next().getId().equals(wrapper.getId())) {
                 iterator.remove();
@@ -57,13 +57,19 @@ public class QueryManager {
         return holder.selectedQueryId;
     }
 
-    public void setSelectedQueryId(UUID selectedQueryId) {
+    public synchronized void setSelectedQueryId(UUID selectedQueryId) {
         holder.selectedQueryId = selectedQueryId;
         save();
     }
 
     public List<QueryWrapper> getQueries() {
         return holder.queries;
+    }
+
+    public void moveQuery(int from, int to) {
+        QueryWrapper obj = holder.queries.remove(from);
+        holder.queries.add(to, obj);
+        save();
     }
 
     @Data

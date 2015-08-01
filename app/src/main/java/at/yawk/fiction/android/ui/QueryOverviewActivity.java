@@ -5,15 +5,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.TextView;
 import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
+import com.mobeta.android.dslv.DragSortListView;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -34,7 +37,7 @@ public class QueryOverviewActivity extends RoboFragmentActivity {
 
     private ArrayAdapter<QueryWrapper> queryArrayAdapter;
 
-    @InjectView(R.id.left_drawer) ListView drawer;
+    @InjectView(R.id.left_drawer) DragSortListView drawer;
     @InjectView(R.id.drawer_layout) DrawerLayout drawerParent;
 
     @Override
@@ -43,8 +46,13 @@ public class QueryOverviewActivity extends RoboFragmentActivity {
 
         log.info("Creating query overview");
 
-        queryArrayAdapter = new StringArrayAdapter<>(this, new ArrayList<>(),
-                                                     QueryOverviewActivity::getName);
+        queryArrayAdapter = new SimpleArrayAdapter<QueryWrapper>(
+                this, R.layout.query_overview_query_item, new ArrayList<>()) {
+            @Override
+            protected void decorateView(View view, int position) {
+                ((TextView) view.findViewById(R.id.queryName)).setText(getItem(position).getName());
+            }
+        };
 
         updateQueries(true);
 
@@ -55,19 +63,65 @@ public class QueryOverviewActivity extends RoboFragmentActivity {
             drawerParent.closeDrawers();
         });
         drawer.setOnItemLongClickListener((parent, view, position, id) -> {
-            editQuery(queryArrayAdapter.getItem(position));
+            longClickQuery(position);
             return true;
+        });
+        drawer.setDropListener((from, to) -> {
+            queryManager.moveQuery(from, to);
+            updateQueries(false);
+        });
+        drawer.setDragEnabled(false);
+    }
+
+    private void longClickQuery(int position) {
+        QueryWrapper contextQuery = queryArrayAdapter.getItem(position);
+        startActionMode(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.setTitle(contextQuery.getName());
+                mode.getMenuInflater().inflate(R.menu.query_context, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                case R.id.editQuery:
+                    editQuery(contextQuery);
+                    return true;
+                case R.id.reorder:
+                    drawer.setDragEnabled(true);
+                    item.setVisible(false);
+                    return true;
+                default:
+                    return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {}
         });
     }
 
-    private void updateQueries(boolean first) {
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+        super.onActionModeFinished(mode);
+        drawer.setDragEnabled(false);
+    }
+
+    private void updateQueries(boolean forceQueryReload) {
         List<QueryWrapper> queries = queryManager.getQueries();
         queryArrayAdapter.clear();
         queryArrayAdapter.addAll(queries);
 
         for (QueryWrapper query : queries) {
             if (query.getId().equals(queryManager.getSelectedQueryId())) {
-                showQuery(query, first);
+                showQuery(query, forceQueryReload);
                 break;
             }
         }

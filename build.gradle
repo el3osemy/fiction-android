@@ -11,6 +11,7 @@ buildscript {
         classpath 'me.tatarka:gradle-retrolambda:2.4.0'
         classpath 'de.undercouch:gradle-download-task:1.2'
         classpath 'com.eowise:gradle-imagemagick:0.4.0'
+        classpath 'com.tmiyamon:gradle-mdicons:0.2.7'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

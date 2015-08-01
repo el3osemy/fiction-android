@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/editQuery"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="@string/edit_query" />
+    <item
+        android:id="@+id/reorder"
+        android:icon="@drawable/ic_reorder_white_24dp"
+        android:title="Reorder" />
+</menu>
