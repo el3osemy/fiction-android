@@ -10,4 +10,5 @@
     <string name="open_in_browser">Open In Browser</string>
     <string name="separator">Separator</string>
     <string name="edit_query">Edit Query</string>
+    <string name="reorder">Reorder</string>
 </resources>
