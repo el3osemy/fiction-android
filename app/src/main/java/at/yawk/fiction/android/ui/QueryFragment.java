@@ -166,8 +166,16 @@ public class QueryFragment extends RoboListFragment {
     private void updateLoading() {
         getActivity().runOnUiThread(() -> {
             footerView.findViewById(R.id.loading_progress).setVisibility(fetching ? View.VISIBLE : View.GONE);
+
+            String pageString;
+            if (hasMore) {
+                pageString = (page + 1) + " / " + (pageCount == -1 ? "?" : pageCount);
+            } else {
+                pageString = Integer.toString(page);
+            }
             ((TextView) footerView.findViewById(R.id.loading_page))
-                    .setText((page + 1) + " / " + (pageCount == -1 ? "?" : pageCount));
+                    .setText(pageString);
+
             ((TextView) footerView.findViewById(R.id.loading_failure_count))
                     .setText(failedAttemptCount == 0 ? "" : "[" + failedAttemptCount + "]");
         });
@@ -190,7 +198,7 @@ public class QueryFragment extends RoboListFragment {
             hasMore = !page.isLast();
             getActivity().runOnUiThread(((ArrayAdapter<?>) getListAdapter())::notifyDataSetChanged);
             ok = true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Failed to fetch page {}", page, e);
             toasts.toast("Failed to fetch page {}", page, e);
         }
