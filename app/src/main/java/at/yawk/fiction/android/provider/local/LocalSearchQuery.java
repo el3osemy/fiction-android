@@ -29,7 +29,7 @@ public class LocalSearchQuery extends SearchQuery {
         int chapterCount = wrapper.getStory().getChapters().size();
         int downloadedCount = 0;
         for (int i = 0; i < chapterCount; i++) {
-            if (wrapper.isChapterRead(i)) {
+            if (wrapper.hasChapterText(i)) {
                 downloadedCount++;
             }
         }
