@@ -8,7 +8,6 @@ import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,10 +37,10 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     }
 
     @Override
-    public Pageable<? extends Story> search(SearchQuery searchQuery) {
+    public Pageable<StoryWrapper> searchWrappers(SearchQuery searchQuery) {
         LocalSearchQuery localSearchQuery = (LocalSearchQuery) searchQuery;
         return i -> {
-            Pageable.Page<Story> page = new Pageable.Page<>();
+            Pageable.Page<StoryWrapper> page = new Pageable.Page<>();
             page.setLast(true);
             page.setPageCount(1);
             if (i != 0) {
@@ -56,7 +55,7 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
                 }
             }
             Collections.sort(stories, localSearchQuery.getOrder());
-            page.setEntries(Lists.transform(stories, StoryWrapper::getStory));
+            page.setEntries(stories);
             return page;
         };
     }

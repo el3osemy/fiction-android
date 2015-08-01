@@ -9,15 +9,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import at.yawk.fiction.Pageable;
-import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
-import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
@@ -33,13 +31,11 @@ public class QueryFragment extends RoboListFragment {
     @Inject ProviderManager providerManager;
     @Inject Toasts toasts;
     @Inject TaskManager taskManager;
-    @Inject StorageManager storageManager;
 
     private final TaskContext taskContext = new TaskContext();
     private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
 
     private View footerView;
-    private QueryWrapper query;
 
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
@@ -51,7 +47,7 @@ public class QueryFragment extends RoboListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
+        QueryWrapper query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
 
         setListAdapter(new ArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
             @Override
@@ -64,7 +60,7 @@ public class QueryFragment extends RoboListFragment {
             }
         });
 
-        pageable = providerManager.getProvider(query.getQuery()).search(query.getQuery());
+        pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
     }
 
     @Override
@@ -123,7 +119,7 @@ public class QueryFragment extends RoboListFragment {
 
     ///////////////////////////////
 
-    private Pageable<? extends Story> pageable;
+    private Pageable<StoryWrapper> pageable;
     private int page;
     private int pageCount = -1;
     private int failedAttemptCount = 0;
@@ -169,17 +165,11 @@ public class QueryFragment extends RoboListFragment {
         boolean ok = false;
         try {
             log.trace("Fetching page {}", this.page);
-            Pageable.Page<? extends Story> page = pageable.getPage(this.page);
+            Pageable.Page<StoryWrapper> page = pageable.getPage(this.page);
             log.trace("Fetched, merging with database");
-            //Debug.startMethodTracingSampling("fetch", 8 * 1024 * 1024, 1000);
             pageCount = page.getPageCount();
 
-            List<StoryWrapper> additions = new ArrayList<>(page.getEntries().size());
-            for (Story story : page.getEntries()) {
-                StoryWrapper wrapper = storageManager.mergeStory(story);
-                additions.add(wrapper);
-            }
-            //Debug.stopMethodTracing();
+            List<StoryWrapper> additions = new ArrayList<>(page.getEntries()); // eager copy
             log.trace("Done, passing on to UI");
             stories.addAll(additions);
             hasMore = !page.isLast();

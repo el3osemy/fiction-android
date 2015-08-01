@@ -1,9 +1,12 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.*;
+import at.yawk.fiction.android.storage.StorageManager;
+import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
@@ -18,6 +21,8 @@ public abstract class AndroidFictionProvider {
     private final String id;
     private final String name;
     private final Set<Class<?>> providingClasses;
+
+    @Inject StorageManager storageManager;
 
     HttpClient httpClient;
 
@@ -43,6 +48,18 @@ public abstract class AndroidFictionProvider {
 
     public Pageable<? extends Story> search(SearchQuery searchQuery) {
         return getFictionProvider().search(searchQuery);
+    }
+
+    public Pageable<StoryWrapper> searchWrappers(SearchQuery query) {
+        Pageable<? extends Story> pageable = search(query);
+        return i -> {
+            Pageable.Page<? extends Story> storyPage = pageable.getPage(i);
+            Pageable.Page<StoryWrapper> wrapperPage = new Pageable.Page<>();
+            wrapperPage.setEntries(Lists.transform(storyPage.getEntries(), storageManager::mergeStory));
+            wrapperPage.setLast(storyPage.isLast());
+            wrapperPage.setPageCount(storyPage.getPageCount());
+            return wrapperPage;
+        };
     }
 
     public void fetchChapter(Story story, Chapter chapter) throws Exception {
