@@ -26,10 +26,10 @@ public class LocalSearchQuery extends SearchQuery {
     StoryOrder order = StoryOrder.ALPHABETICAL;
 
     boolean accept(StoryWrapper wrapper) {
-        List<? extends Chapter> chapters = wrapper.getStory().getChapters();
+        int chapterCount = wrapper.getStory().getChapters().size();
         int downloadedCount = 0;
-        for (Chapter chapter : chapters) {
-            if (chapter.getText() != null) {
+        for (int i = 0; i < chapterCount; i++) {
+            if (wrapper.isChapterRead(i)) {
                 downloadedCount++;
             }
         }
@@ -37,7 +37,7 @@ public class LocalSearchQuery extends SearchQuery {
 
         if (readCount <= 0) {
             if (!readNone) { return false; }
-        } else if (readCount >= chapters.size()) {
+        } else if (readCount >= chapterCount) {
             if (!readAll) { return false; }
         } else {
             if (!readSome) { return false; }
@@ -45,7 +45,7 @@ public class LocalSearchQuery extends SearchQuery {
 
         if (downloadedCount <= 0) {
             if (!downloadedNone) { return false; }
-        } else if (downloadedCount >= chapters.size()) {
+        } else if (downloadedCount >= chapterCount) {
             if (!downloadedAll) { return false; }
         } else {
             if (!downloadedSome) { return false; }
