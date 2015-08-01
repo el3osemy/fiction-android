@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import at.yawk.fiction.*;
@@ -72,14 +74,22 @@ public class StoryFragment extends ContentViewFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        titleView.setOnClickListener(v -> taskManager.execute(taskContext, () -> {
-            try {
-                epubBuilder.openEpub(getActivity(), wrapper);
-            } catch (Exception e) {
-                log.error("Failed to open epub", e);
-                toasts.toast("Failed to open epub", e);
-            }
-        }));
+        titleView.setOnClickListener(v -> {
+            Dialog dialog = new Dialog(getActivity());
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loading_dialog);
+            dialog.show();
+            taskManager.execute(taskContext, () -> {
+                try {
+                    epubBuilder.openEpub(getActivity(), wrapper);
+                } catch (Exception e) {
+                    log.error("Failed to open epub", e);
+                    toasts.toast("Failed to open epub", e);
+                } finally {
+                    getActivity().runOnUiThread(dialog::hide);
+                }
+            });
+        });
         titleView.setOnLongClickListener(v -> {
             showDialog(new AsyncAction(R.string.open_in_browser, () -> {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
