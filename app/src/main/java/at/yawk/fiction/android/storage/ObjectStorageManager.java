@@ -1,7 +1,6 @@
 package at.yawk.fiction.android.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -15,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Singleton
-class ObjectStorageManager {
-    static final Joiner SLASH_JOINER = Joiner.on('/');
-
+public class ObjectStorageManager {
     @Inject RootFile root;
     @Inject ObjectMapper objectMapper;
 
@@ -54,6 +51,12 @@ class ObjectStorageManager {
 
     public boolean exists(String key) {
         return new File(root.getRoot(), key).exists();
+    }
+
+    public void delete(String key) {
+        File file = new File(root.getRoot(), key);
+        //noinspection ResultOfMethodCallIgnored
+        file.delete();
     }
 
     public Iterable<String> list(String key) {

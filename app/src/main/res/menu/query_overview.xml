@@ -11,4 +11,9 @@
         android:id="@+id/import_ffn"
         android:title="Import FFN"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/cleanup_text"
+        android:title="Cleanup Text"
+        android:visible="false"
+        app:showAsAction="never" />
 </menu>

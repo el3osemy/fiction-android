@@ -64,6 +64,7 @@ public class QueryFragment extends RoboListFragment {
     }
 
     public void onStoryUpdate(@Observes(EventThread.UI) StoryUpdateEvent event) {
+        if (getActivity() == null) { return; }
         getActivity().runOnUiThread(() -> {
             View view = storyViewMap.getByKey(event.getStory());
             if (view != null) {

@@ -5,9 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.view.*;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import at.yawk.fiction.android.Cleanup;
 import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
@@ -31,6 +35,7 @@ import roboguice.inject.InjectView;
 public class QueryOverviewActivity extends RoboFragmentActivity {
     @Inject QueryManager queryManager;
     @Inject Importer importer;
+    @Inject Cleanup cleanup;
 
     private ArrayAdapter<QueryWrapper> queryArrayAdapter;
 
@@ -173,6 +178,9 @@ public class QueryOverviewActivity extends RoboFragmentActivity {
             return true;
         case R.id.import_ffn:
             new Thread(importer).start();
+            return true;
+        case R.id.cleanup_text:
+            new Thread(cleanup).start();
             return true;
         }
         return super.onOptionsItemSelected(item);

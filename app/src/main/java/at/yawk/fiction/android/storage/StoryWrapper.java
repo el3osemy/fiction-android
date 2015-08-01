@@ -165,6 +165,10 @@ public class StoryWrapper {
         return hash == null ? null : textStorage.getText(hash);
     }
 
+    public synchronized String getSavedTextHash(int index) {
+        return getChapterHolder(index).textHash;
+    }
+
     @Data
     private static final class ChapterHolder {
         @Nullable String textHash;
