@@ -2,6 +2,7 @@ package at.yawk.fiction.android.ui;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -10,22 +11,22 @@ import android.widget.Spinner;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.inject.ContentView;
+import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
+import butterknife.Bind;
 import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import roboguice.activity.RoboFragmentActivity;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
 @ContentView(R.layout.query_wrapper_editor)
-public class QueryWrapperActivity extends RoboFragmentActivity {
+public class QueryWrapperActivity extends FragmentActivity {
     @Inject ProviderManager providerManager;
     @Inject QueryManager queryManager;
 
@@ -34,15 +35,17 @@ public class QueryWrapperActivity extends RoboFragmentActivity {
     private Map<AndroidFictionProvider, SearchQuery> queriesByProvider = new HashMap<>();
     private QueryEditorFragment queryEditorFragment;
 
-    @InjectView(R.id.accept) Button acceptButton;
-    @InjectView(R.id.remove) Button removeButton;
-    @InjectView(R.id.cancel) Button cancelButton;
-    @InjectView(R.id.queryName) EditText queryName;
-    @InjectView(R.id.provider) Spinner providerSpinner;
+    @Bind(R.id.accept) Button acceptButton;
+    @Bind(R.id.remove) Button removeButton;
+    @Bind(R.id.cancel) Button cancelButton;
+    @Bind(R.id.queryName) EditText queryName;
+    @Bind(R.id.provider) Spinner providerSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Injector.initActivity(this);
 
         Parcelable queryParcel = getIntent().getParcelableExtra("query");
         if (queryParcel != null) {

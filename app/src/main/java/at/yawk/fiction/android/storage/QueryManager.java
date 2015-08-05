@@ -13,11 +13,12 @@ import lombok.Data;
  */
 @Singleton
 public class QueryManager {
-    @Inject ObjectStorageManager objectStorageManager;
+    private final ObjectStorageManager objectStorageManager;
     private Holder holder;
 
     @Inject
-    void load() {
+    public QueryManager(ObjectStorageManager objectStorageManager) {
+        this.objectStorageManager = objectStorageManager;
         try {
             holder = objectStorageManager.load(Holder.class, "queryManager");
         } catch (NotFoundException e) {

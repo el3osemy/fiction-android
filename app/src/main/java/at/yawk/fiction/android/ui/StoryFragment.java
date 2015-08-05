@@ -18,20 +18,20 @@ import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.EpubBuilder;
 import at.yawk.fiction.android.storage.PojoMerger;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
+import butterknife.Bind;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
@@ -50,11 +50,11 @@ public class StoryFragment extends ContentViewFragment {
 
     private StoryWrapper wrapper;
 
-    @InjectView(R.id.chapters) ViewGroup chapterGroup;
-    @InjectView(R.id.title) TextView titleView;
-    @InjectView(R.id.author) TextView authorView;
-    @InjectView(R.id.tags) TextView tagsView;
-    @InjectView(R.id.description) TextView descriptionView;
+    @Bind(R.id.chapters) ViewGroup chapterGroup;
+    @Bind(R.id.title) TextView titleView;
+    @Bind(R.id.author) TextView authorView;
+    @Bind(R.id.tags) TextView tagsView;
+    @Bind(R.id.description) TextView descriptionView;
 
     public void setStory(StoryWrapper wrapper) {
         Bundle args = new Bundle();

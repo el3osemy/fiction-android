@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,7 +21,8 @@ public class ProviderManager {
     private final Map<Class<? extends AndroidFictionProvider>, AndroidFictionProvider> providers = new HashMap<>();
 
     @Inject
-    ProviderManager(ProviderLoader loader) throws Exception {
+    @SneakyThrows
+    ProviderManager(ProviderLoader loader) {
         log.info("Loading providers...");
 
         for (AndroidFictionProvider provider : loader.getProviders()) {

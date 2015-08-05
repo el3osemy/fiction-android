@@ -1,10 +1,12 @@
 package at.yawk.fiction.android.provider.ffn;
 
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fanfiction.*;
+import dagger.Module;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -29,7 +31,7 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
     @Override
     public FfnFictionProvider getFictionProvider() {
         if (fictionProvider == null) {
-            fictionProvider = new FfnFictionProvider(pageParserProvider, getHttpClient());
+            fictionProvider = new FfnFictionProvider(pageParserProvider, createHttpClient());
         }
         return fictionProvider;
     }
@@ -57,4 +59,12 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
         }
         return list;
     }
+
+    @Override
+    public Object createModule() {
+        return new M();
+    }
+
+    @Module(addsTo = BaseModule.class, injects = FfnAndroidFictionProvider.class)
+    static class M {}
 }

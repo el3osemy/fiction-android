@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.SneakyThrows;
 import org.joda.time.Instant;
@@ -19,7 +20,8 @@ import org.joda.time.Instant;
 public class PojoMerger {
     private final ConcurrentMap<Class<?>, Merger<?>> mergers = new ConcurrentHashMap<>();
 
-    {
+    @Inject
+    PojoMerger() {
         mergers.put(String.class, IDENTITY);
         mergers.put(URI.class, IDENTITY);
         mergers.put(Instant.class, IDENTITY);

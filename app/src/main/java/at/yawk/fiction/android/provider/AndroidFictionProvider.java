@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider;
 
 import at.yawk.fiction.*;
+import at.yawk.fiction.android.inject.ExternalInjectable;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
@@ -17,12 +18,13 @@ import lombok.Getter;
  * @author yawkat
  */
 @Getter
-public abstract class AndroidFictionProvider {
+public abstract class AndroidFictionProvider implements ExternalInjectable {
     private final String id;
     private final String name;
     private final Set<Class<?>> providingClasses;
 
     @Inject StorageManager storageManager;
+    @Inject HttpClientFactory httpClientFactory;
 
     HttpClient httpClient;
 
@@ -32,14 +34,9 @@ public abstract class AndroidFictionProvider {
         this.providingClasses = ImmutableSet.copyOf(providingClasses);
     }
 
-    @Inject
-    public void initHttpClient(HttpClientFactory factory) {
-        httpClient = factory.createHttpClient();
-    }
-
     @JsonIgnore
-    protected HttpClient getHttpClient() {
-        return httpClient;
+    protected HttpClient createHttpClient() {
+        return httpClientFactory.createHttpClient();
     }
 
     public void fetchStory(Story story) throws Exception {

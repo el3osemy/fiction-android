@@ -8,17 +8,18 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.inject.ExternalInjectable;
 import com.google.common.base.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import roboguice.fragment.RoboFragment;
 
 /**
  * @author yawkat
  */
-public abstract class QueryEditorFragment<S extends SearchQuery> extends ContentViewFragment {
+public abstract class QueryEditorFragment<S extends SearchQuery> extends ContentViewFragment
+        implements ExternalInjectable {
     private S query;
 
     private List<Runnable> saveTasks = new ArrayList<>();

@@ -7,10 +7,13 @@ import android.widget.Spinner;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
-import at.yawk.fiction.android.context.Toasts;
+import at.yawk.fiction.android.inject.ContentView;
+import at.yawk.fiction.android.inject.FragmentModule;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
+import butterknife.Bind;
+import dagger.Module;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,8 +22,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
@@ -29,7 +30,7 @@ import roboguice.inject.InjectView;
 @ContentView(R.layout.query_editor_ffn)
 public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> {
     @Inject TaskManager taskManager;
-    @Inject Toasts toasts;
+    //@Inject Toasts toasts;
     @Inject FfnAndroidFictionProvider provider;
 
     private TaskContext taskContext = new TaskContext();
@@ -37,14 +38,14 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     private SubCategoryOrder subCategoryOrder = SubCategoryOrder.SIZE;
     private ArrayAdapter<FfnSubCategory> subCategoryArrayAdapter;
 
-    @InjectView(R.id.subCategory) Spinner subCategoryView;
-    @InjectView(R.id.category) Spinner categoryView;
-    @InjectView(R.id.subCategoryOrder) Spinner subCategoryOrderView;
-    @InjectView(R.id.searchOrder) Spinner searchOrderView;
-    @InjectView(R.id.ratingMin) Spinner ratingMinView;
-    @InjectView(R.id.ratingMax) Spinner ratingMaxView;
-    @InjectView(R.id.timeRange) Spinner timeRangeView;
-    @InjectView(R.id.status) Spinner statusView;
+    @Bind(R.id.subCategory) Spinner subCategoryView;
+    @Bind(R.id.category) Spinner categoryView;
+    @Bind(R.id.subCategoryOrder) Spinner subCategoryOrderView;
+    @Bind(R.id.searchOrder) Spinner searchOrderView;
+    @Bind(R.id.ratingMin) Spinner ratingMinView;
+    @Bind(R.id.ratingMax) Spinner ratingMaxView;
+    @Bind(R.id.timeRange) Spinner timeRangeView;
+    @Bind(R.id.status) Spinner statusView;
 
     @Override
     protected void bind() {
@@ -78,7 +79,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                         getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
                     } catch (Exception e) {
                         log.error("Failed to fetch subcategories for {}", category, e);
-                        toasts.toast("Failed to fetch subcategories", e);
+                        //toasts.toast("Failed to fetch subcategories", e);
                     }
                 });
             }
@@ -152,6 +153,14 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
         super.onDestroy();
         taskContext.destroy();
     }
+
+    @Override
+    public Object createModule() {
+        return new M();
+    }
+
+    @Module(addsTo = FragmentModule.class, injects = FfnQueryEditorFragment.class)
+    static class M {}
 
     @RequiredArgsConstructor
     private enum SubCategoryOrder implements Comparator<FfnSubCategory> {

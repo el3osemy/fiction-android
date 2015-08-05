@@ -1,24 +1,27 @@
 package at.yawk.fiction.android.ui;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.inject.ContentView;
+import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.storage.StorageManager;
 import javax.inject.Inject;
-import roboguice.activity.RoboFragmentActivity;
 
 /**
  * @author yawkat
  */
-public class StoryActivity extends RoboFragmentActivity {
+@ContentView(R.layout.story_activity)
+public class StoryActivity extends FragmentActivity {
     @Inject StorageManager storageManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.story_activity);
+        Injector.initActivity(this);
 
         Story story = WrapperParcelable.parcelableToObject(getIntent().getParcelableExtra("story"));
         StoryFragment fragment = new StoryFragment();

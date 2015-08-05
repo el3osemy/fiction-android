@@ -3,6 +3,7 @@ package at.yawk.fiction.android.ui;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
@@ -15,36 +16,38 @@ import at.yawk.fiction.android.Cleanup;
 import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.inject.ContentView;
+import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
+import butterknife.Bind;
 import com.mobeta.android.dslv.DragSortListView;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import roboguice.activity.RoboFragmentActivity;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
 
 /**
  * @author yawkat
  */
 @Slf4j
 @ContentView(R.layout.query_overview)
-public class QueryOverviewActivity extends RoboFragmentActivity {
+public class QueryOverviewActivity extends FragmentActivity {
     @Inject QueryManager queryManager;
     @Inject Importer importer;
     @Inject Cleanup cleanup;
 
     private ArrayAdapter<QueryWrapper> queryArrayAdapter;
 
-    @InjectView(R.id.left_drawer) DragSortListView drawer;
-    @InjectView(R.id.drawer_layout) DrawerLayout drawerParent;
+    @Bind(R.id.left_drawer) DragSortListView drawer;
+    @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Injector.initActivity(this);
 
         log.info("Creating query overview");
 

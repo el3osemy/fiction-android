@@ -4,10 +4,12 @@ import at.yawk.fiction.FictionProvider;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
+import dagger.Module;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,4 +76,12 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     public List<String> getTags(Story story) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Object createModule() {
+        return new M();
+    }
+
+    @Module(addsTo = BaseModule.class, injects = LocalAndroidFictionProvider.class)
+    static class M {}
 }

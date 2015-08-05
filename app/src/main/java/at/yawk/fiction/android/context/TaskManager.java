@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +25,9 @@ public class TaskManager {
             return thread;
         }
     });
+
+    @Inject
+    TaskManager() {}
 
     public void execute(TaskContext context, Runnable task) {
         TaskContext.FutureHolder holder = context.add();

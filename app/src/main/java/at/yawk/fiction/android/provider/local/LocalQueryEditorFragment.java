@@ -3,22 +3,24 @@ package at.yawk.fiction.android.provider.local;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
+import at.yawk.fiction.android.inject.ContentView;
+import at.yawk.fiction.android.inject.FragmentModule;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
+import butterknife.Bind;
+import dagger.Module;
 
 /**
  * @author yawkat
  */
 @ContentView(R.layout.query_editor_local)
 public class LocalQueryEditorFragment extends QueryEditorFragment<LocalSearchQuery> {
-    @InjectView(R.id.order) Spinner orderView;
-    @InjectView(R.id.readNone) CheckBox readNoneView;
-    @InjectView(R.id.readSome) CheckBox readSomeView;
-    @InjectView(R.id.readAll) CheckBox readAllView;
-    @InjectView(R.id.downloadedNone) CheckBox downloadedNoneView;
-    @InjectView(R.id.downloadedSome) CheckBox downloadedSomeView;
-    @InjectView(R.id.downloadedAll) CheckBox downloadedAllView;
+    @Bind(R.id.order) Spinner orderView;
+    @Bind(R.id.readNone) CheckBox readNoneView;
+    @Bind(R.id.readSome) CheckBox readSomeView;
+    @Bind(R.id.readAll) CheckBox readAllView;
+    @Bind(R.id.downloadedNone) CheckBox downloadedNoneView;
+    @Bind(R.id.downloadedSome) CheckBox downloadedSomeView;
+    @Bind(R.id.downloadedAll) CheckBox downloadedAllView;
 
     @Override
     protected void bind() {
@@ -46,4 +48,12 @@ public class LocalQueryEditorFragment extends QueryEditorFragment<LocalSearchQue
                     LocalSearchQuery::isDownloadedAll,
                     LocalSearchQuery::setDownloadedAll);
     }
+
+    @Override
+    public Object createModule() {
+        return new M();
+    }
+
+    @Module(addsTo = FragmentModule.class, injects = LocalQueryEditorFragment.class)
+    static class M {}
 }

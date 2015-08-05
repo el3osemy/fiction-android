@@ -4,6 +4,7 @@ import at.yawk.fiction.Chapter;
 import at.yawk.fiction.FormattedText;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
+import at.yawk.fiction.android.event.EventBus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
@@ -15,7 +16,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import roboguice.event.EventManager;
 
 /**
  * @author yawkat
@@ -30,7 +30,7 @@ public class StoryWrapper {
     @Inject transient ObjectStorageManager objectStorageManager;
     @Inject transient TextStorage textStorage;
     @Inject transient PojoMerger pojoMerger;
-    transient EventManager eventManager;
+    transient EventBus eventBus;
 
     @JsonProperty private Story story;
 
@@ -105,7 +105,7 @@ public class StoryWrapper {
 
     private synchronized void save() {
         objectStorageManager.save(this, getObjectId());
-        eventManager.fire(new StoryUpdateEvent(this));
+        eventBus.post(new StoryUpdateEvent(this));
     }
 
     @JsonIgnore

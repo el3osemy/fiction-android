@@ -4,16 +4,20 @@ import android.app.Activity;
 import android.widget.Toast;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.AllArgsConstructor;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
-import roboguice.inject.ContextSingleton;
 
 /**
  * @author yawkat
  */
-@ContextSingleton
+@Singleton
+@AllArgsConstructor
 public class Toasts {
     @Inject Activity activity;
+
+    @Inject
+    Toasts() {}
 
     public void toast(String msg, Object... args) {
         FormattingTuple tuple = MessageFormatter.arrayFormat(msg, args);

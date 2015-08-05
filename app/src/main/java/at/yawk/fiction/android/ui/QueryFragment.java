@@ -2,6 +2,7 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
@@ -14,6 +15,8 @@ import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
+import at.yawk.fiction.android.inject.Injector;
+import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import at.yawk.fiction.android.storage.StoryWrapper;
@@ -24,12 +27,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import roboguice.event.EventThread;
-import roboguice.event.Observes;
-import roboguice.fragment.RoboListFragment;
 
 @Slf4j
-public class QueryFragment extends RoboListFragment {
+public class QueryFragment extends ListFragment {
     @Inject ProviderManager providerManager;
     @Inject Toasts toasts;
     @Inject TaskManager taskManager;
@@ -51,6 +51,8 @@ public class QueryFragment extends RoboListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Injector.initFragment(this);
+
         QueryWrapper query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
 
         setListAdapter(new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
@@ -63,7 +65,8 @@ public class QueryFragment extends RoboListFragment {
         pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
     }
 
-    public void onStoryUpdate(@Observes(EventThread.UI) StoryUpdateEvent event) {
+    @Subscribe(Subscribe.EventQueue.UI)
+    public void onStoryUpdate(StoryUpdateEvent event) {
         if (getActivity() == null) { return; }
         getActivity().runOnUiThread(() -> {
             View view = storyViewMap.getByKey(event.getStory());

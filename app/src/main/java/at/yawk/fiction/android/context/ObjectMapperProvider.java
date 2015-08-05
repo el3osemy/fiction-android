@@ -4,14 +4,16 @@ import at.yawk.fiction.android.provider.local.LocalSearchQuery;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.google.inject.AbstractModule;
+import dagger.Module;
+import dagger.Provides;
 import javax.inject.Singleton;
 
 /**
  * @author yawkat
  */
 @Singleton
-public class ObjectMapperProvider extends AbstractModule {
+@Module(library = true)
+public class ObjectMapperProvider {
     private static final ObjectMapper objectMapper;
 
     static {
@@ -26,8 +28,8 @@ public class ObjectMapperProvider extends AbstractModule {
         return objectMapper;
     }
 
-    @Override
-    protected void configure() {
-        bind(ObjectMapper.class).toInstance(objectMapper);
+    @Provides
+    public ObjectMapper objectMapper() {
+        return getObjectMapper();
     }
 }

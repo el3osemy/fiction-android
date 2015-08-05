@@ -1,17 +1,17 @@
 package at.yawk.fiction.android.storage;
 
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.event.EventBus;
+import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
-import com.google.inject.MembersInjector;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import roboguice.event.EventManager;
 
 /**
  * @author yawkat
@@ -22,13 +22,12 @@ public class StorageManager {
     @Inject ObjectStorageManager objectStorageManager;
     @Inject ProviderManager providerManager;
 
-    @SuppressWarnings("unused")
-    @Inject EventManager eventManager; // unused but needed by the story wrapper injector
+    @Inject EventBus eventBus;
 
     final LoadingCache<String, StoryWrapper> storyCache;
 
     @Inject
-    StorageManager(MembersInjector<StoryWrapper> queryWrapperInjector) {
+    StorageManager() {
         storyCache = CacheBuilder.newBuilder()
                 .softValues().build(CacheLoader.from(input -> {
                     StoryWrapper wrapper;
@@ -37,8 +36,8 @@ public class StorageManager {
                     } catch (NotFoundException e) {
                         wrapper = new StoryWrapper();
                     }
-                    wrapper.eventManager = eventManager;
-                    queryWrapperInjector.injectMembers(wrapper);
+                    wrapper.eventBus = eventBus;
+                    Injector.inject(wrapper);
                     return wrapper;
                 }));
     }
