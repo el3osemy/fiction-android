@@ -89,7 +89,7 @@ public class QueryFragment extends ListFragment {
         super.onViewCreated(view, savedInstanceState);
 
         footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, getListView(), false);
-        getListView().addFooterView(footerView);
+        getListView().addFooterView(footerView, null, false);
 
         checkFetchMore();
 
