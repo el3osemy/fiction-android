@@ -5,6 +5,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
+import at.yawk.fiction.android.context.FragmentUiRunner;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.inject.ContentView;
@@ -32,6 +33,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     @Inject TaskManager taskManager;
     //@Inject Toasts toasts;
     @Inject FfnAndroidFictionProvider provider;
+    @Inject FragmentUiRunner uiRunner;
 
     private TaskContext taskContext = new TaskContext();
 
@@ -71,7 +73,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
                         List<FfnSubCategory> subCategories =
                                 provider.getFictionProvider().fetchSubCategories(category);
                         Collections.sort(subCategories, subCategoryOrder);
-                        getActivity().runOnUiThread(() -> {
+                        uiRunner.runOnUiThread(() -> {
                             subCategoryArrayAdapter = new StringArrayAdapter<>(
                                     getActivity(), subCategories, FfnSubCategory::getName);
                             subCategoryView.setAdapter(subCategoryArrayAdapter);

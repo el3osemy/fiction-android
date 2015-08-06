@@ -14,10 +14,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.TaskContext;
-import at.yawk.fiction.android.context.TaskManager;
-import at.yawk.fiction.android.context.Toasts;
-import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.context.*;
 import at.yawk.fiction.android.download.ChapterDownloadTask;
 import at.yawk.fiction.android.download.ChapterRangeDownloadTask;
 import at.yawk.fiction.android.download.DownloadManager;
@@ -47,8 +44,8 @@ public class StoryFragment extends ContentViewFragment {
     @Inject StorageManager storageManager;
     @Inject TaskManager taskManager;
     @Inject EpubBuilder epubBuilder;
-    @Inject ProviderManager providerManager;
     @Inject DownloadManager downloadManager;
+    @Inject FragmentUiRunner uiRunner;
 
     private TaskContext taskContext = new TaskContext();
 
@@ -97,7 +94,7 @@ public class StoryFragment extends ContentViewFragment {
                     log.error("Failed to open epub", e);
                     toasts.toast("Failed to open epub", e);
                 } finally {
-                    getActivity().runOnUiThread(dialog::hide);
+                    uiRunner.runOnUiThread(dialog::hide);
                 }
             });
         });
@@ -162,7 +159,7 @@ public class StoryFragment extends ContentViewFragment {
     }
 
     void refreshAsync() {
-        getActivity().runOnUiThread(StoryFragment.this::refresh);
+        uiRunner.runOnUiThread(StoryFragment.this::refresh);
     }
 
     @Override

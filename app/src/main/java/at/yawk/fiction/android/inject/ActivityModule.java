@@ -17,8 +17,6 @@ import javax.inject.Singleton;
                 StoryActivity.class,
                 QueryOverviewActivity.class,
                 QueryWrapperActivity.class,
-                QueryFragment.class,
-                StoryFragment.class,
         },
         library = true
 )

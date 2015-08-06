@@ -10,10 +10,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.TaskContext;
-import at.yawk.fiction.android.context.TaskManager;
-import at.yawk.fiction.android.context.Toasts;
-import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.context.*;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.Injector;
@@ -33,6 +30,7 @@ public class QueryFragment extends ListFragment {
     @Inject ProviderManager providerManager;
     @Inject Toasts toasts;
     @Inject TaskManager taskManager;
+    @Inject FragmentUiRunner uiRunner;
 
     private final TaskContext taskContext = new TaskContext();
     private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
@@ -68,7 +66,7 @@ public class QueryFragment extends ListFragment {
     @Subscribe(Subscribe.EventQueue.UI)
     public void onStoryUpdate(StoryUpdateEvent event) {
         if (getActivity() == null) { return; }
-        getActivity().runOnUiThread(() -> {
+        uiRunner.runOnUiThread(() -> {
             View view = storyViewMap.getByKey(event.getStory());
             if (view != null) {
                 decorateEntry(event.getStory(), view);
@@ -168,7 +166,7 @@ public class QueryFragment extends ListFragment {
     }
 
     private void updateLoading() {
-        getActivity().runOnUiThread(() -> {
+        uiRunner.runOnUiThread(() -> {
             footerView.findViewById(R.id.loading_progress).setVisibility(fetching ? View.VISIBLE : View.GONE);
 
             String pageString;
@@ -200,7 +198,7 @@ public class QueryFragment extends ListFragment {
             log.trace("Done, passing on to UI");
             stories.addAll(additions);
             hasMore = !page.isLast();
-            getActivity().runOnUiThread(((ArrayAdapter<?>) getListAdapter())::notifyDataSetChanged);
+            uiRunner.runOnUiThread(((ArrayAdapter<?>) getListAdapter())::notifyDataSetChanged);
             ok = true;
         } catch (Throwable e) {
             log.error("Failed to fetch page {}", page, e);

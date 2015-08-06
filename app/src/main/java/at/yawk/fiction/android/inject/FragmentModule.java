@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment;
 import at.yawk.fiction.android.ui.QueryFragment;
 import at.yawk.fiction.android.ui.StoryFragment;
 import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
 /**
  * @author yawkat
@@ -26,5 +28,11 @@ public class FragmentModule {
     @Deprecated
     FragmentModule() {
         throw new UnsupportedOperationException();
+    }
+
+    @Provides
+    @Singleton
+    public Fragment fragment() {
+        return fragment;
     }
 }
