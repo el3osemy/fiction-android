@@ -1,9 +1,7 @@
 package at.yawk.fiction.android.event;
 
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,8 +27,6 @@ public class EventBus {
     };
 
     private final Map<Class<?>, HandlerList> handlerLists = new ConcurrentHashMap<>();
-
-    private final ReferenceQueue<?> referenceQueue = new ReferenceQueue<>();
 
     private final Threader uiThreader;
 
