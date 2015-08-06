@@ -14,7 +14,7 @@ import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
 import butterknife.Bind;
 import dagger.Module;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -36,7 +36,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
     private TaskContext taskContext = new TaskContext();
 
     private SubCategoryOrder subCategoryOrder = SubCategoryOrder.SIZE;
-    private ArrayAdapter<FfnSubCategory> subCategoryArrayAdapter;
+    @Nullable private ArrayAdapter<FfnSubCategory> subCategoryArrayAdapter;
 
     @Bind(R.id.subCategory) Spinner subCategoryView;
     @Bind(R.id.category) Spinner categoryView;
@@ -49,10 +49,6 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
 
     @Override
     protected void bind() {
-        subCategoryArrayAdapter = new StringArrayAdapter<>(
-                getActivity(), new ArrayList<>(), FfnSubCategory::getName);
-
-        subCategoryView.setAdapter(subCategoryArrayAdapter);
         subCategoryView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -69,14 +65,26 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
         categoryView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                subCategoryArrayAdapter.clear();
                 taskManager.execute(taskContext, () -> {
                     FfnCategory category = (FfnCategory) parent.getSelectedItem();
                     try {
                         List<FfnSubCategory> subCategories =
                                 provider.getFictionProvider().fetchSubCategories(category);
                         Collections.sort(subCategories, subCategoryOrder);
-                        getActivity().runOnUiThread(() -> subCategoryArrayAdapter.addAll(subCategories));
+                        getActivity().runOnUiThread(() -> {
+                            subCategoryArrayAdapter = new StringArrayAdapter<>(
+                                    getActivity(), subCategories, FfnSubCategory::getName);
+                            subCategoryView.setAdapter(subCategoryArrayAdapter);
+                            FfnSubCategory subCategory = getQuery().getCategory();
+                            if (subCategory != null) {
+                                for (int i = 0; i < subCategories.size(); i++) {
+                                    if (subCategory.getName().equals(subCategories.get(i).getName())) {
+                                        subCategoryView.setSelection(i);
+                                        break;
+                                    }
+                                }
+                            }
+                        });
                     } catch (Exception e) {
                         log.error("Failed to fetch subcategories for {}", category, e);
                         //toasts.toast("Failed to fetch subcategories", e);
@@ -86,9 +94,13 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                subCategoryArrayAdapter.clear();
+                subCategoryView.setAdapter(null);
             }
         });
+        if (getQuery().getCategory() != null) {
+            categoryView.setSelection(Arrays.asList(FfnCategory.values())
+                                              .indexOf(getQuery().getCategory().getCategory()));
+        }
 
         subCategoryOrderView.setAdapter(
                 new StringArrayAdapter<>(getActivity(), SubCategoryOrder.values(), SubCategoryOrder::getName));
@@ -96,7 +108,9 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 subCategoryOrder = (SubCategoryOrder) parent.getSelectedItem();
-                subCategoryArrayAdapter.sort(subCategoryOrder);
+                if (subCategoryArrayAdapter != null) {
+                    subCategoryArrayAdapter.sort(subCategoryOrder);
+                }
             }
 
             @Override
