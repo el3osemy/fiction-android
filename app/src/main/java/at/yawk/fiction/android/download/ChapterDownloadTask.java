@@ -10,4 +10,9 @@ import lombok.Value;
 public class ChapterDownloadTask implements DownloadTask {
     private final StoryWrapper wrapper;
     private final int index;
+
+    @Override
+    public String getName() {
+        return "'" + wrapper.getStory().getTitle() + "' chapter " + index;
+    }
 }

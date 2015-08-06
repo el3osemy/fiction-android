@@ -37,4 +37,16 @@ public class ChapterRangeDownloadTask implements SplittableDownloadTask {
         }
         return tasks;
     }
+
+    @Override
+    public String getName() {
+        StringBuilder builder = new StringBuilder().append("'")
+                .append(story.getStory().getTitle()).append("'");
+        if (from + 1 < to) {
+            builder.append(" chapters ").append(from + 1).append(" to ").append(to);
+        } else {
+            builder.append(" chapter ").append(from + 1);
+        }
+        return builder.toString();
+    }
 }

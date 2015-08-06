@@ -2,6 +2,7 @@ package at.yawk.fiction.android.download;
 
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.event.EventBus;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
@@ -15,11 +16,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Singleton
 @Slf4j
-public class DownloadManager {
+public class DownloadManager implements DownloadManagerMetrics {
     private final TaskContext context = new TaskContext();
     private final Map<Class<? extends DownloadTask>, DownloadTaskHandler<?>> handlers = new HashMap<>();
 
     @Inject TaskManager taskManager;
+    @Inject EventBus bus;
 
     /**
      * All currently queued tasks, including the currently running task.
@@ -38,14 +40,10 @@ public class DownloadManager {
     }
 
     public void enqueue(DownloadTask task) {
-        enqueue(task, null, ProgressListener.NOOP);
-    }
-
-    private void enqueue(DownloadTask task, @Nullable Runnable completionCallback, ProgressListener progressListener) {
-        Runner<DownloadTask> runner = new Runner<>(MultiTaskExecutionStrategy.SEQUENTIAL, task, progressListener);
-        runner.addCompletionCallback(completionCallback);
+        Runner<DownloadTask> runner = new Runner<>(MultiTaskExecutionStrategy.SEQUENTIAL, task);
+        runner.progressListener = runner;
         runner.addCompletionCallback(() -> {
-            synchronized (DownloadManager.this) {
+            synchronized (this) {
                 Runner<?> completed = runnerQueue.poll();
                 assert completed == runner;
                 Runner<?> next = runnerQueue.peek();
@@ -53,6 +51,7 @@ public class DownloadManager {
                     next.scheduleOrSplit();
                 }
             }
+            postManagerUpdateEvent();
         });
         synchronized (this) {
             boolean startNow = runnerQueue.isEmpty();
@@ -61,17 +60,34 @@ public class DownloadManager {
                 runner.scheduleOrSplit();
             }
         }
+        postManagerUpdateEvent();
+    }
+
+    private void postManagerUpdateEvent() {
+        bus.post(new ManagerUpdateEvent());
+    }
+
+    @Override
+    public synchronized List<Task> getTasks() {
+        return new ArrayList<>(runnerQueue);
     }
 
     @RequiredArgsConstructor
-    private class Runner<T extends DownloadTask> implements Runnable {
+    private class Runner<T extends DownloadTask> implements Runnable, Task, ProgressListener {
         final MultiTaskExecutionStrategy multiTaskExecutionStrategy;
         final T task;
-        final ProgressListener progressListener;
+        ProgressListener progressListener = ProgressListener.NOOP;
+
+        volatile long currentProgress = 0;
+        volatile long maxProgress = -1;
 
         @Nullable private Runnable completionCallback;
 
+        volatile boolean running = false;
+
         void scheduleOrSplit() {
+            running = true;
+            postUpdateEvent();
             if (task instanceof SplittableDownloadTask) {
                 runSplit(((SplittableDownloadTask) task).getTasks());
             } else {
@@ -83,7 +99,8 @@ public class DownloadManager {
             List<Runnable> runners = new ArrayList<>(tasks.size());
             AtomicLong completed = new AtomicLong(0);
             for (DownloadTask subTask : tasks) {
-                Runner<?> runner = new Runner<>(multiTaskExecutionStrategy, subTask, progressListener.createSubLevel());
+                Runner<?> runner = new Runner<>(multiTaskExecutionStrategy, subTask);
+                runner.progressListener = progressListener.createSubLevel();
                 runner.addCompletionCallback(
                         () -> progressListener.progressDeterminate(completed.incrementAndGet(), tasks.size()));
                 runners.add(runner);
@@ -96,6 +113,8 @@ public class DownloadManager {
         }
 
         private void complete() {
+            running = false;
+            postUpdateEvent();
             if (completionCallback != null) {
                 completionCallback.run();
             }
@@ -124,6 +143,47 @@ public class DownloadManager {
                     callback.run();
                 };
             }
+        }
+
+        @Override
+        public boolean isRunning() {
+            return running;
+        }
+
+        @Override
+        public String getName() {
+            return task.getName();
+        }
+
+        @Override
+        public long getCurrentProgress() {
+            return currentProgress;
+        }
+
+        @Override
+        public long getMaxProgress() {
+            return maxProgress;
+        }
+
+        @Override
+        public ProgressListener createSubLevel() {
+            return ProgressListener.NOOP;
+        }
+
+        @Override
+        public void progressDeterminate(long progress, long limit) {
+            currentProgress = progress;
+            maxProgress = limit;
+            postUpdateEvent();
+        }
+
+        @Override
+        public void progressIndeterminate(boolean complete) {
+            progressDeterminate(0, -1);
+        }
+
+        private void postUpdateEvent() {
+            bus.post(new TaskUpdateEvent(this));
         }
     }
 }

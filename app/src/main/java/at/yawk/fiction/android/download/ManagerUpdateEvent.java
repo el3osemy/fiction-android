@@ -1,8 +1,9 @@
 package at.yawk.fiction.android.download;
 
+import lombok.Value;
+
 /**
  * @author yawkat
  */
-public interface DownloadTask {
-    String getName();
-}
+@Value
+public class ManagerUpdateEvent {}
