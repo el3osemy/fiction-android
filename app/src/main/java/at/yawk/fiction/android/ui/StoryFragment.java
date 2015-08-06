@@ -18,6 +18,11 @@ import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.download.ChapterDownloadTask;
+import at.yawk.fiction.android.download.ChapterRangeDownloadTask;
+import at.yawk.fiction.android.download.DownloadManager;
+import at.yawk.fiction.android.event.StoryUpdateEvent;
+import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
@@ -45,6 +50,7 @@ public class StoryFragment extends ContentViewFragment {
     @Inject EpubBuilder epubBuilder;
     @Inject ProviderManager providerManager;
     @Inject PojoMerger pojoMerger;
+    @Inject DownloadManager downloadManager;
 
     private TaskContext taskContext = new TaskContext();
 
@@ -60,6 +66,13 @@ public class StoryFragment extends ContentViewFragment {
         Bundle args = new Bundle();
         args.putParcelable("story", WrapperParcelable.objectToParcelable(wrapper.getStory()));
         setArguments(args);
+    }
+
+    @Subscribe(Subscribe.EventQueue.UI)
+    public void onStoryUpdate(StoryUpdateEvent event) {
+        if (event.getStory().equals(wrapper)) {
+            refresh();
+        }
     }
 
     @Override
@@ -194,29 +207,18 @@ public class StoryFragment extends ContentViewFragment {
                 return true;
             });
 
-            View.OnClickListener refreshListener = v -> fetchChapter(false);
+            View.OnClickListener refreshListener = v ->
+                    downloadManager.enqueue(new ChapterDownloadTask(wrapper, this.index));
             view.findViewById(R.id.chapterDownload).setOnClickListener(refreshListener);
             view.findViewById(R.id.chapterDownload).setOnLongClickListener(v -> {
-                showDialog(new AsyncAction(R.string.download_until_here, () -> {
-                    for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
-                        ChapterHolder holder = chapterHolders.get(i);
-                        // don't redownload
-                        if (!holder.hasText()) {
-                            holder.fetchChapter(true);
-                        }
-                    }
-                    refreshAsync();
-                }));
+                showDialog(new AsyncAction(R.string.download_until_here, () ->
+                        downloadManager.enqueue(new ChapterRangeDownloadTask(wrapper, 0, index + 1, true))));
                 return true;
             });
             view.findViewById(R.id.chapterRefresh).setOnClickListener(refreshListener);
             view.findViewById(R.id.chapterRefresh).setOnLongClickListener(v -> {
-                showDialog(new AsyncAction(R.string.refresh_until_here, () -> {
-                    for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
-                        chapterHolders.get(i).fetchChapter(true);
-                    }
-                    refreshAsync();
-                }));
+                showDialog(new AsyncAction(R.string.refresh_until_here, () ->
+                        downloadManager.enqueue(new ChapterRangeDownloadTask(wrapper, 0, index + 1, false))));
                 return true;
             });
         }
@@ -233,8 +235,10 @@ public class StoryFragment extends ContentViewFragment {
             ((TextView) view.findViewById(R.id.chapterName)).setText(name);
 
             boolean hasText = hasText();
+            boolean downloading = wrapper.isDownloading(index);
 
-            setChapterViewStatus(hasText ? R.id.chapterRefresh : R.id.chapterDownload);
+            setChapterViewStatus(downloading ? R.id.chapterDownloading :
+                                         (hasText ? R.id.chapterRefresh : R.id.chapterDownload));
 
             readBox.setVisibility(hasText ? View.VISIBLE : View.INVISIBLE);
             readBox.setChecked(wrapper.isChapterRead(index));
@@ -242,30 +246,6 @@ public class StoryFragment extends ContentViewFragment {
 
         boolean hasText() {
             return wrapper.hasChapterText(index);
-        }
-
-        void fetchChapter(boolean sync) {
-            getActivity().runOnUiThread(() -> setChapterViewStatus(R.id.chapterDownloading));
-
-            Story storyClone = pojoMerger.clone(wrapper.getStory());
-            Chapter chapter = storyClone.getChapters().get(index);
-            AndroidFictionProvider provider = providerManager.getProvider(storyClone);
-
-            Runnable task = () -> {
-                try {
-                    provider.fetchChapter(storyClone, chapter);
-                    storageManager.mergeStory(storyClone);
-                    refreshAsync();
-                } catch (Exception e) {
-                    log.error("Failed to fetch chapter", e);
-                    toasts.toast("Failed to fetch chapter", e);
-                }
-            };
-            if (sync) {
-                task.run();
-            } else {
-                taskManager.execute(taskContext, task);
-            }
         }
 
         private void setChapterViewStatus(int statusId) {

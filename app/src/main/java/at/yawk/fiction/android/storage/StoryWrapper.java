@@ -3,8 +3,8 @@ package at.yawk.fiction.android.storage;
 import at.yawk.fiction.Chapter;
 import at.yawk.fiction.FormattedText;
 import at.yawk.fiction.Story;
-import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.EventBus;
+import at.yawk.fiction.android.event.StoryUpdateEvent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
@@ -105,6 +105,10 @@ public class StoryWrapper {
 
     private synchronized void save() {
         objectStorageManager.save(this, getObjectId());
+        postUpdateEvent();
+    }
+
+    private void postUpdateEvent() {
         eventBus.post(new StoryUpdateEvent(this));
     }
 
@@ -169,9 +173,19 @@ public class StoryWrapper {
         return getChapterHolder(index).textHash;
     }
 
+    public synchronized void setDownloading(int chapterIndex, boolean downloading) {
+        getChapterHolder(chapterIndex).setDownloading(downloading);
+        postUpdateEvent();
+    }
+
+    public synchronized boolean isDownloading(int chapterIndex) {
+        return getChapterHolder(chapterIndex).isDownloading();
+    }
+
     @Data
     private static final class ChapterHolder {
         @Nullable String textHash;
         @Nullable String readHash;
+        @JsonIgnore transient boolean downloading;
     }
 }
