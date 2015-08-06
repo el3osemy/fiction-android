@@ -15,10 +15,12 @@ import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 @Singleton
 public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     @Inject StorageManager storageManager;
@@ -41,6 +43,7 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     @Override
     public Pageable<StoryWrapper> searchWrappers(SearchQuery searchQuery) {
         LocalSearchQuery localSearchQuery = (LocalSearchQuery) searchQuery;
+        log.info("Query: {}", localSearchQuery);
         return i -> {
             Pageable.Page<StoryWrapper> page = new Pageable.Page<>();
             page.setLast(true);

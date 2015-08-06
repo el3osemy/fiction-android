@@ -37,8 +37,12 @@ public class QueryManager {
     public synchronized void saveQuery(QueryWrapper wrapper) {
         boolean found = false;
         for (int i = 0; i < holder.queries.size(); i++) {
-            if (holder.queries.get(i).getId().equals(wrapper.getId())) {
-                holder.queries.set(i, wrapper);
+            QueryWrapper here = holder.queries.get(i);
+            if (here.getId().equals(wrapper.getId())) {
+                if (here != wrapper) {
+                    here.setName(wrapper.getName());
+                    here.setQuery(wrapper.getQuery());
+                }
                 found = true;
                 break;
             }

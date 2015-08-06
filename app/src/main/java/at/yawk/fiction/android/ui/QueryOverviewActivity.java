@@ -97,6 +97,7 @@ public class QueryOverviewActivity extends FragmentActivity {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                 case R.id.editQuery:
+                    log.info("Edit {}", System.identityHashCode(contextQuery));
                     editQuery(contextQuery);
                     return true;
                 case R.id.reorder:
@@ -192,7 +193,7 @@ public class QueryOverviewActivity extends FragmentActivity {
     private void editQuery(@Nullable QueryWrapper query) {
         Intent intent = new Intent(this, QueryWrapperActivity.class);
         if (query != null) {
-            intent.putExtra("query", WrapperParcelable.objectToParcelable(query));
+            intent.putExtra("query", WrapperParcelable.objectToParcelable(query.getId()));
         }
         startActivity(intent);
     }

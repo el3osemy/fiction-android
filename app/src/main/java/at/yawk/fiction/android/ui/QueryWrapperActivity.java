@@ -21,10 +21,12 @@ import butterknife.Bind;
 import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 @ContentView(R.layout.query_wrapper_editor)
 public class QueryWrapperActivity extends FragmentActivity {
     @Inject ProviderManager providerManager;
@@ -50,16 +52,25 @@ public class QueryWrapperActivity extends FragmentActivity {
         Parcelable queryParcel = getIntent().getParcelableExtra("query");
         AndroidFictionProvider firstProvider = null;
         if (queryParcel != null) {
-            query = WrapperParcelable.parcelableToObject(queryParcel);
-            firstProvider = providerManager.getProvider(query.getQuery());
-            queriesByProvider.put(firstProvider, query.getQuery());
-            acceptButton.setText(R.string.update_query);
-            removeButton.setVisibility(View.VISIBLE);
-        } else {
+            UUID id = WrapperParcelable.parcelableToObject(queryParcel);
+            for (QueryWrapper query : queryManager.getQueries()) {
+                if (query.getId().equals(id)) {
+                    this.query = query;
+                    break;
+                }
+            }
+        }
+
+        if (query == null) {
             query = new QueryWrapper();
             query.setId(UUID.randomUUID());
             acceptButton.setText(R.string.create_query);
             removeButton.setVisibility(View.GONE);
+        } else {
+            firstProvider = providerManager.getProvider(query.getQuery());
+            queriesByProvider.put(firstProvider, query.getQuery());
+            acceptButton.setText(R.string.update_query);
+            removeButton.setVisibility(View.VISIBLE);
         }
 
         queryName.setText(query.getName());
