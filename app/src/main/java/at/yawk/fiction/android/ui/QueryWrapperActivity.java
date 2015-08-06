@@ -48,11 +48,11 @@ public class QueryWrapperActivity extends FragmentActivity {
         Injector.initActivity(this);
 
         Parcelable queryParcel = getIntent().getParcelableExtra("query");
+        AndroidFictionProvider firstProvider = null;
         if (queryParcel != null) {
             query = WrapperParcelable.parcelableToObject(queryParcel);
-            AndroidFictionProvider provider = providerManager.getProvider(query.getQuery());
-            queriesByProvider.put(provider, query.getQuery());
-            selectProvider(provider);
+            firstProvider = providerManager.getProvider(query.getQuery());
+            queriesByProvider.put(firstProvider, query.getQuery());
             acceptButton.setText(R.string.update_query);
             removeButton.setVisibility(View.VISIBLE);
         } else {
@@ -77,6 +77,7 @@ public class QueryWrapperActivity extends FragmentActivity {
                 selectProvider(null);
             }
         });
+        providerSpinner.setSelection(providers.indexOf(firstProvider));
 
         updateSavable();
 
