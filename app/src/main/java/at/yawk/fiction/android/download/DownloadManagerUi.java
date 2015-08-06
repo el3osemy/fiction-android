@@ -8,11 +8,14 @@ import android.support.v4.app.NotificationCompat;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.event.Subscribe;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author yawkat
@@ -32,11 +35,19 @@ public class DownloadManagerUi {
     }
 
     @Subscribe
-    public void taskUpdate(TaskUpdateEvent event) {
-        buildNotification(event.getTask());
+    public void managerUpdate(ManagerUpdateEvent event) {
+        List<DownloadManagerMetrics.Task> tasks = metrics.getTasks();
+        for (DownloadManagerMetrics.Task task : tasks) {
+            buildNotification(tasks, task);
+        }
     }
 
-    private void buildNotification(DownloadManagerMetrics.Task task) {
+    @Subscribe
+    public void taskUpdate(TaskUpdateEvent event) {
+        buildNotification(metrics.getTasks(), event.getTask());
+    }
+
+    private void buildNotification(List<DownloadManagerMetrics.Task> allTasks, DownloadManagerMetrics.Task task) {
         boolean running = task.isRunning();
 
         int id;
@@ -62,9 +73,13 @@ public class DownloadManagerUi {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
             builder.setSmallIcon(R.drawable.ic_file_download_white_24dp);
             builder.setContentTitle(task.getName());
-            if (max != -1) {
-                builder.setContentText(current + "/" + max + " complete");
+            List<String> contentText = new ArrayList<>();
+            if (max != -1) { contentText.add(current + "/" + max + " complete"); }
+            if (allTasks.size() > 1) {
+                int otherTaskCount = allTasks.size() - 1;
+                contentText.add(otherTaskCount + " other task" + (otherTaskCount > 1 ? "s" : "") + " queued");
             }
+            builder.setContentText(StringUtils.join(contentText, " • "));
             builder.setProgress((int) max, (int) current, max == -1);
             builder.setOngoing(true);
             Notification notification = builder.build();
