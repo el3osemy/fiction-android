@@ -128,10 +128,9 @@ public class EventBus {
         }
 
         void post(Object event) {
-            for (Iterator<Handler> iterator = handlers.iterator(); iterator.hasNext(); ) {
-                Handler handler = iterator.next();
+            for (Handler handler : handlers) {
                 if (!handler.accept(event)) {
-                    iterator.remove();
+                    handlers.remove(handler);
                 }
             }
         }
