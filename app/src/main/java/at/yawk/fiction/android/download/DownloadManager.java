@@ -40,7 +40,7 @@ public class DownloadManager implements DownloadManagerMetrics {
     }
 
     public void enqueue(DownloadTask task) {
-        Runner<DownloadTask> runner = new Runner<>(MultiTaskExecutionStrategy.SEQUENTIAL, task);
+        Runner<DownloadTask> runner = new Runner<>(MultiTaskExecutionStrategy.PARALLEL, task);
         runner.progressListener = runner;
         runner.addCompletionCallback(() -> {
             synchronized (this) {
