@@ -12,9 +12,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import javax.inject.Inject;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,88 +29,100 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 // for performance, never give this class an equals/hashcode implementation.
 // there should only be one instance per story anyway.
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class StoryWrapper {
-    transient String objectId;
+    final String objectId;
+    @GuardedBy("lock")
+    final StoryData data;
 
-    @Inject transient StorageManager storageManager;
-    @Inject transient ObjectStorageManager objectStorageManager;
-    @Inject transient TextStorage textStorage;
-    @Inject transient PojoMerger pojoMerger;
-    transient EventBus eventBus;
+    final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    @JsonProperty private Story story;
+    @Inject StorageManager storageManager;
+    @Inject ObjectStorageManager objectStorageManager;
+    @Inject TextStorage textStorage;
+    @Inject PojoMerger pojoMerger;
+    @Inject EventBus eventBus;
 
-    @Deprecated
-    @JsonProperty
-    private Set<FormattedText> readChapters = new HashSet<>();
+    @Getter int downloadedChapterCount = -1;
+    @Getter int readChapterCount = -1;
 
-    @JsonProperty private List<ChapterHolder> chapterHolders = new ArrayList<>();
-
-    private transient int downloadedChapterCount = -1;
-    private transient int readChapterCount = -1;
+    StoryWrapper() {
+        // required for dagger
+        throw new UnsupportedOperationException();
+    }
 
     public Story getStory() {
+        Story story = data.story;
+        if (story == null) { throw new IllegalStateException(); }
         return story;
     }
 
-    @JsonIgnore
-    String getObjectId() {
-        if (objectId == null) {
-            objectId = storageManager.getObjectId(story);
-        }
-        return objectId;
-    }
-
-    public synchronized void updateStory(Story changes) {
-        Story merged = this.story == null ? changes : pojoMerger.merge(changes, this.story);
-        if (log.isTraceEnabled()) {
-            log.trace("Merging {} -> {} = {}",
-                      changes.hashCode(),
-                      story == null ? 0 : story.hashCode(),
-                      merged.hashCode());
-            log.trace("{} -> {} = {}",
-                      System.identityHashCode(changes),
-                      System.identityHashCode(story),
-                      System.identityHashCode(merged));
-        }
-        boolean updated = !merged.equals(story);
-        if (merged.getChapters() != null) {
-            List<? extends Chapter> chapters = merged.getChapters();
-            for (int i = 0; i < chapters.size(); i++) {
-                Chapter chapter = chapters.get(i);
-                FormattedText text = chapter.getText();
-                if (text != null) {
-                    ChapterHolder holder = getChapterHolder(i);
-                    String hash = textStorage.externalizeText(text);
-                    holder.setTextHash(hash);
-                    if (readChapters.contains(text)) {
-                        holder.setReadHash(hash);
+    public void updateStory(Story changes) {
+        lock.writeLock().lock();
+        try {
+            Story merged = data.story == null ? changes : pojoMerger.merge(changes, data.story);
+            if (log.isTraceEnabled()) {
+                log.trace("Merging {} -> {} = {}",
+                          changes.hashCode(),
+                          data.story == null ? 0 : data.story.hashCode(),
+                          merged.hashCode());
+                log.trace("{} -> {} = {}",
+                          System.identityHashCode(changes),
+                          System.identityHashCode(data.story),
+                          System.identityHashCode(merged));
+            }
+            boolean updated = !merged.equals(data.story);
+            if (merged.getChapters() != null) {
+                List<? extends Chapter> chapters = merged.getChapters();
+                for (int i = 0; i < chapters.size(); i++) {
+                    Chapter chapter = chapters.get(i);
+                    FormattedText text = chapter.getText();
+                    if (text != null) {
+                        ChapterData holder = getOrCreateChapterHolder(i);
+                        String hash = textStorage.externalizeText(text);
+                        holder.setTextHash(hash);
+                        //noinspection deprecation
+                        if (data.readChapters.contains(text)) {
+                            holder.setReadHash(hash);
+                        }
+                        chapter.setText(null);
+                        updated = true;
                     }
-                    chapter.setText(null);
-                    updated = true;
                 }
             }
-        }
-        if (!updated) { return; }
-        story = merged;
-        log.trace("saving");
-        bakeDownloadedChapterCount();
-        save();
-    }
-
-    public synchronized void setChapterRead(int index, boolean read) {
-        ChapterHolder holder = getChapterHolder(index);
-        if (holder.getTextHash() == null) { return; }
-        String newHash = read ? holder.textHash : null;
-        if (!Objects.equal(holder.readHash, newHash)) {
-            holder.readHash = newHash;
-            bakeReadChapterCount();
+            if (!updated) { return; }
+            data.story = merged;
+            log.trace("saving");
+            bakeDownloadedChapterCount();
             save();
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
-    private synchronized void save() {
-        objectStorageManager.save(this, getObjectId());
+    public void setChapterRead(int index, boolean read) {
+        ChapterData holder = getChapterHolder(index);
+        if (holder == null || holder.textHash == null) { return; }
+        String newHash = read ? holder.textHash : null;
+        lock.writeLock().lock();
+        try {
+            if (!Objects.equal(holder.readHash, newHash)) {
+                holder.readHash = newHash;
+                bakeReadChapterCount();
+                save();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    private void save() {
+        lock.readLock().lock();
+        try {
+            objectStorageManager.save(data, objectId);
+        } finally {
+            lock.readLock().unlock();
+        }
         postUpdateEvent();
     }
 
@@ -112,80 +130,109 @@ public class StoryWrapper {
         eventBus.post(new StoryUpdateEvent(this));
     }
 
-    @JsonIgnore
-    public int getReadChapterCount() {
-        if (readChapterCount == -1) {
-            bakeReadChapterCount();
-        }
-        return readChapterCount;
+    @Nullable
+    private ChapterData getChapterHolder(int index) {
+        return data.chapterHolders.size() > index ? data.chapterHolders.get(index) : null;
     }
 
-    @JsonIgnore
-    public synchronized int getDownloadedCount() {
-        if (downloadedChapterCount == -1) {
-            bakeDownloadedChapterCount();
-        }
-        return downloadedChapterCount;
-    }
+    private ChapterData getOrCreateChapterHolder(int index) {
+        // this relies on chapterHolders never shrinking to maintain thread safety
 
-    private synchronized ChapterHolder getChapterHolder(int index) {
-        while (chapterHolders.size() <= index) {
-            chapterHolders.add(new ChapterHolder());
-        }
-        return chapterHolders.get(index);
-    }
-
-    private synchronized void bakeReadChapterCount() {
-        readChapterCount = 0;
-        for (int i = 0; i < story.getChapters().size(); i++) {
-            if (isChapterRead(i)) {
-                readChapterCount++;
+        if (data.chapterHolders.size() <= index) {
+            lock.writeLock().lock();
+            try {
+                do {
+                    data.chapterHolders.add(new ChapterData());
+                } while (data.chapterHolders.size() <= index);
+            } finally {
+                lock.writeLock().unlock();
             }
         }
+        return data.chapterHolders.get(index);
     }
 
-    private synchronized void bakeDownloadedChapterCount() {
-        int chapterCount = getStory().getChapters().size();
-        downloadedChapterCount = 0;
-        for (int i = 0; i < chapterCount; i++) {
-            if (hasChapterText(i)) {
-                downloadedChapterCount++;
+    void bakeReadChapterCount() {
+        lock.readLock().lock();
+        try {
+            int readChapterCount = 0;
+            for (int i = 0; i < getStory().getChapters().size(); i++) {
+                if (isChapterRead(i)) {
+                    readChapterCount++;
+                }
             }
+            this.readChapterCount = readChapterCount;
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
-    public synchronized boolean isChapterRead(int index) {
-        ChapterHolder holder = getChapterHolder(index);
-        return holder.textHash != null && Objects.equal(holder.readHash, holder.textHash);
+    void bakeDownloadedChapterCount() {
+        lock.readLock().lock();
+        try {
+            int chapterCount = getStory().getChapters().size();
+            int downloadedChapterCount = 0;
+            for (int i = 0; i < chapterCount; i++) {
+                if (isChapterDownloaded(i)) {
+                    downloadedChapterCount++;
+                }
+            }
+            this.downloadedChapterCount = downloadedChapterCount;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
-    public synchronized boolean hasChapterText(int index) {
-        return getChapterHolder(index).textHash != null;
+    public boolean isChapterRead(int index) {
+        ChapterData holder = getChapterHolder(index);
+        if (holder == null) { return false; }
+        String textHash = holder.textHash;
+        return textHash != null && textHash.equals(holder.readHash);
+    }
+
+    public boolean isChapterDownloaded(int index) {
+        ChapterData holder = getChapterHolder(index);
+        return holder != null && holder.textHash != null;
     }
 
     @Nullable
-    public synchronized FormattedText loadChapterText(int index) {
-        String hash = getChapterHolder(index).textHash;
+    public FormattedText loadChapterText(int index) {
+        ChapterData holder = getChapterHolder(index);
+        if (holder == null) { return null; }
+        String hash = holder.textHash;
         return hash == null ? null : textStorage.getText(hash);
     }
 
-    public synchronized String getSavedTextHash(int index) {
-        return getChapterHolder(index).textHash;
+    @Nullable
+    public String getSavedTextHash(int index) {
+        ChapterData holder = getChapterHolder(index);
+        return holder == null ? null : holder.textHash;
     }
 
-    public synchronized void setDownloading(int chapterIndex, boolean downloading) {
-        getChapterHolder(chapterIndex).setDownloading(downloading);
+    public void setDownloading(int chapterIndex, boolean downloading) {
+        getOrCreateChapterHolder(chapterIndex).downloading = downloading;
         postUpdateEvent();
     }
 
-    public synchronized boolean isDownloading(int chapterIndex) {
-        return getChapterHolder(chapterIndex).isDownloading();
+    public boolean isDownloading(int chapterIndex) {
+        ChapterData holder = getChapterHolder(chapterIndex);
+        return holder != null && holder.downloading;
     }
 
     @Data
-    private static final class ChapterHolder {
+    static final class StoryData {
+        @Nullable Story story;
+        List<ChapterData> chapterHolders = new ArrayList<>();
+
+        @Deprecated
+        @JsonProperty
+        Set<FormattedText> readChapters = new HashSet<>();
+    }
+
+    @Data
+    static final class ChapterData {
         @Nullable String textHash;
         @Nullable String readHash;
+
         @JsonIgnore transient boolean downloading;
     }
 }

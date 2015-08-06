@@ -25,7 +25,7 @@ public class LocalSearchQuery extends SearchQuery {
 
     boolean accept(StoryWrapper wrapper) {
         int chapterCount = wrapper.getStory().getChapters().size();
-        int downloadedCount = wrapper.getDownloadedCount();
+        int downloadedCount = wrapper.getDownloadedChapterCount();
         int readCount = wrapper.getReadChapterCount();
 
         if (readCount <= 0) {

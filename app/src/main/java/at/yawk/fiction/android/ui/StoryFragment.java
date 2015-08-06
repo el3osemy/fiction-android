@@ -49,7 +49,6 @@ public class StoryFragment extends ContentViewFragment {
     @Inject TaskManager taskManager;
     @Inject EpubBuilder epubBuilder;
     @Inject ProviderManager providerManager;
-    @Inject PojoMerger pojoMerger;
     @Inject DownloadManager downloadManager;
 
     private TaskContext taskContext = new TaskContext();
@@ -245,7 +244,7 @@ public class StoryFragment extends ContentViewFragment {
         }
 
         boolean hasText() {
-            return wrapper.hasChapterText(index);
+            return wrapper.isChapterDownloaded(index);
         }
 
         private void setChapterViewStatus(int statusId) {

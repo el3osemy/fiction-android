@@ -31,7 +31,7 @@ public class ChapterRangeDownloadTask implements SplittableDownloadTask {
     public List<DownloadTask> getTasks() {
         List<DownloadTask> tasks = new ArrayList<>(to - from);
         for (int i = from; i < to; i++) {
-            if (!skipWhereTextPresent || !story.hasChapterText(i)) {
+            if (!skipWhereTextPresent || !story.isChapterDownloaded(i)) {
                 tasks.add(new ChapterDownloadTask(story, i));
             }
         }

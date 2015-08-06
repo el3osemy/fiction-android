@@ -1,7 +1,6 @@
 package at.yawk.fiction.android.storage;
 
 import at.yawk.fiction.Story;
-import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
@@ -22,23 +21,23 @@ public class StorageManager {
     @Inject ObjectStorageManager objectStorageManager;
     @Inject ProviderManager providerManager;
 
-    @Inject EventBus eventBus;
-
     final LoadingCache<String, StoryWrapper> storyCache;
 
     @Inject
     StorageManager() {
         storyCache = CacheBuilder.newBuilder()
                 .softValues().build(CacheLoader.from(input -> {
-                    StoryWrapper wrapper;
+                    StoryWrapper.StoryData data;
                     try {
-                        wrapper = objectStorageManager.load(StoryWrapper.class, input);
+                        data = objectStorageManager.load(StoryWrapper.StoryData.class, input);
                     } catch (NotFoundException e) {
-                        wrapper = new StoryWrapper();
+                        data = new StoryWrapper.StoryData();
                     } catch (UnreadableException e) {
                         throw new RuntimeException(e);
                     }
-                    wrapper.eventBus = eventBus;
+                    StoryWrapper wrapper = new StoryWrapper(input, data);
+                    wrapper.bakeDownloadedChapterCount();
+                    wrapper.bakeReadChapterCount();
                     Injector.inject(wrapper);
                     return wrapper;
                 }));

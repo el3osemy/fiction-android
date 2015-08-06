@@ -65,7 +65,7 @@ public class Importer implements Runnable {
                         }
 
                         Chapter chapter = story.getStory().getChapters().get(i);
-                        if (!story.hasChapterText(i)) {
+                        if (!story.isChapterDownloaded(i)) {
                             log.info("Fetching chapter {}/{}", keyStory.getId(), i);
                             provider.fetchChapter(keyStory, chapter);
                             story.updateStory(keyStory);

@@ -131,7 +131,7 @@ public class QueryFragment extends ListFragment {
         }
 
         TextView downloadedChapterDisplay = (TextView) view.findViewById(R.id.downloadedChapterDisplay);
-        downloadedChapterDisplay.setText(wrapper.getDownloadedCount() + "/");
+        downloadedChapterDisplay.setText(wrapper.getDownloadedChapterCount() + "/");
 
         storyViewMap.put(wrapper, view);
     }
