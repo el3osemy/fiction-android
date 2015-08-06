@@ -15,8 +15,8 @@ import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
-import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.event.Subscribe;
+import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import at.yawk.fiction.android.storage.StoryWrapper;
@@ -109,6 +109,7 @@ public class QueryFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
 
         StoryWrapper wrapper = (StoryWrapper) l.getItemAtPosition(position);
+        if (wrapper == null) { return; }
         Intent intent = new Intent(getActivity(), StoryActivity.class);
         intent.putExtra("story", WrapperParcelable.objectToParcelable(wrapper.getStory()));
         startActivity(intent);
