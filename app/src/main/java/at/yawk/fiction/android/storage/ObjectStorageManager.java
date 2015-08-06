@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.storage;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,13 @@ public class ObjectStorageManager {
     @Inject RootFile root;
     @Inject ObjectMapper objectMapper;
 
-    public <T> T load(Class<T> type, String key) throws NotFoundException {
+    public <T> T load(Class<T> type, String key) throws NotFoundException, UnreadableException {
         File file = new File(root.getRoot(), key);
         if (file.exists()) {
             try {
                 return objectMapper.readValue(file, type);
+            } catch (JsonMappingException e) {
+                throw new UnreadableException(e);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

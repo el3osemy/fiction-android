@@ -25,6 +25,8 @@ public class QueryManager {
             holder = new Holder();
             holder.setQueries(new ArrayList<>());
             holder.setSelectedQueryId(null);
+        } catch (UnreadableException e) {
+            throw new RuntimeException(e);
         }
     }
 

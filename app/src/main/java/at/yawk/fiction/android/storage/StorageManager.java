@@ -35,6 +35,8 @@ public class StorageManager {
                         wrapper = objectStorageManager.load(StoryWrapper.class, input);
                     } catch (NotFoundException e) {
                         wrapper = new StoryWrapper();
+                    } catch (UnreadableException e) {
+                        throw new RuntimeException(e);
                     }
                     wrapper.eventBus = eventBus;
                     Injector.inject(wrapper);

@@ -33,7 +33,7 @@ public class TextStorage {
     public FormattedText getText(String hash) {
         try {
             return objectStorage.load(FormattedText.class, getStorageId(hash));
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | UnreadableException e) {
             return null;
         }
     }
