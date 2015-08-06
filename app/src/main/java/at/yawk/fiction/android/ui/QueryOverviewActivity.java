@@ -43,6 +43,8 @@ public class QueryOverviewActivity extends FragmentActivity {
     @Bind(R.id.left_drawer) DragSortListView drawer;
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
 
+    private ActionMode actionMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,11 +78,19 @@ public class QueryOverviewActivity extends FragmentActivity {
             updateQueries(false);
         });
         drawer.setDragEnabled(false);
+
+        drawerParent.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                if (actionMode != null) { actionMode.finish(); }
+            }
+        });
     }
 
     private void longClickQuery(int position) {
         QueryWrapper contextQuery = queryArrayAdapter.getItem(position);
-        startActionMode(new ActionMode.Callback() {
+        actionMode = startActionMode(new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.setTitle(contextQuery.getName());
@@ -110,7 +120,9 @@ public class QueryOverviewActivity extends FragmentActivity {
             }
 
             @Override
-            public void onDestroyActionMode(ActionMode mode) {}
+            public void onDestroyActionMode(ActionMode mode) {
+                actionMode = null;
+            }
         });
     }
 
