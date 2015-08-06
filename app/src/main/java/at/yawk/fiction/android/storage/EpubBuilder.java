@@ -44,7 +44,7 @@ public class EpubBuilder {
 
     public File buildEpub(StoryWrapper wrapper) throws IOException {
         Story story = wrapper.getStory();
-        AndroidFictionProvider provider = storageManager.providerManager.getProvider(story);
+        AndroidFictionProvider provider = wrapper.getProvider();
         String id = provider.getStoryId(story, "/");
         File file = new File(root.getRoot(), "epub/" + provider.getId() + "/" + id + ".epub");
         //noinspection ResultOfMethodCallIgnored

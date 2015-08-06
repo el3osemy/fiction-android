@@ -27,7 +27,6 @@ import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.EpubBuilder;
-import at.yawk.fiction.android.storage.PojoMerger;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
@@ -126,7 +125,7 @@ public class StoryFragment extends ContentViewFragment {
             authorView.setText(author.getName());
         }
 
-        AndroidFictionProvider provider = providerManager.getProvider(wrapper.getStory());
+        AndroidFictionProvider provider = wrapper.getProvider();
         tagsView.setText(StringUtils.join(provider.getTags(wrapper.getStory()), " • "));
 
         FormattedText description = wrapper.getStory().getDescription();

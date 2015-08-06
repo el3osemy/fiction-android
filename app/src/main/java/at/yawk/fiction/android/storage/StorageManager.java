@@ -25,22 +25,22 @@ public class StorageManager {
 
     @Inject
     StorageManager() {
-        storyCache = CacheBuilder.newBuilder()
-                .softValues().build(CacheLoader.from(input -> {
-                    StoryWrapper.StoryData data;
-                    try {
-                        data = objectStorageManager.load(StoryWrapper.StoryData.class, input);
-                    } catch (NotFoundException e) {
-                        data = new StoryWrapper.StoryData();
-                    } catch (UnreadableException e) {
-                        throw new RuntimeException(e);
-                    }
-                    StoryWrapper wrapper = new StoryWrapper(input, data);
-                    wrapper.bakeDownloadedChapterCount();
-                    wrapper.bakeReadChapterCount();
-                    Injector.inject(wrapper);
-                    return wrapper;
-                }));
+        storyCache = CacheBuilder.newBuilder().softValues().build(CacheLoader.from(input -> {
+            StoryWrapper wrapper;
+            try {
+                StoryWrapper.StoryData data = objectStorageManager.load(StoryWrapper.StoryData.class, input);
+                wrapper = new StoryWrapper(input, data);
+                wrapper.provider = providerManager.getProvider(data.getStory());
+                wrapper.bakeDownloadedChapterCount();
+                wrapper.bakeReadChapterCount();
+            } catch (NotFoundException e) {
+                wrapper = new StoryWrapper(input, new StoryWrapper.StoryData());
+            } catch (UnreadableException e) {
+                throw new RuntimeException(e);
+            }
+            Injector.inject(wrapper);
+            return wrapper;
+        }));
     }
 
     String getObjectId(Story story) {

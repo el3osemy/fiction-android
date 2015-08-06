@@ -5,6 +5,8 @@ import at.yawk.fiction.FormattedText;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
+import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ProviderManager;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
@@ -42,9 +44,11 @@ public class StoryWrapper {
     @Inject TextStorage textStorage;
     @Inject PojoMerger pojoMerger;
     @Inject EventBus eventBus;
+    @Inject ProviderManager providerManager;
 
     @Getter int downloadedChapterCount = -1;
     @Getter int readChapterCount = -1;
+    @Getter AndroidFictionProvider provider;
 
     StoryWrapper() {
         // required for dagger
@@ -60,6 +64,10 @@ public class StoryWrapper {
     public void updateStory(Story changes) {
         lock.writeLock().lock();
         try {
+            if (provider == null) {
+                provider = providerManager.getProvider(changes);
+            }
+
             Story merged = data.story == null ? changes : pojoMerger.merge(changes, data.story);
             if (log.isTraceEnabled()) {
                 log.trace("Merging {} -> {} = {}",

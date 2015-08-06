@@ -23,7 +23,7 @@ class ChapterDownloadTaskHandler implements DownloadTaskHandler<ChapterDownloadT
             progressListener.progressIndeterminate(false);
             Story storyClone = pojoMerger.clone(task.getWrapper().getStory());
             Chapter chapter = storyClone.getChapters().get(task.getIndex());
-            AndroidFictionProvider provider = providerManager.getProvider(storyClone);
+            AndroidFictionProvider provider = task.getWrapper().getProvider();
             provider.fetchChapter(storyClone, chapter);
             task.getWrapper().updateStory(storyClone);
             progressListener.progressIndeterminate(true);
