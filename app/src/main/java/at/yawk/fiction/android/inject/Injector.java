@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.inject;
 
 import android.app.Activity;
+import android.app.Application;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,17 +19,21 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class Injector {
-    private static final Injector injector = new Injector();
+    private static Injector injector;
 
     private final BaseModule base;
     private final ObjectGraph global;
 
     private final ConcurrentMap<Object, ObjectGraph> contextMap = new MapMaker().weakKeys().weakValues().makeMap();
 
-    public Injector() {
-        base = new BaseModule();
+    private Injector(Application application) {
+        base = new BaseModule(application);
         ObjectGraph baseGraph = ObjectGraph.create(base);
         global = baseGraph.get(ProviderLoader.class).load(baseGraph);
+    }
+
+    public static void init(Application application) {
+        injector = new Injector(application);
     }
 
     private ObjectGraph module(Object context, Supplier<ObjectGraph> factory) {

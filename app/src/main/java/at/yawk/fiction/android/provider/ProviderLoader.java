@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.provider;
 
+import android.app.Application;
 import at.yawk.fiction.android.FictionApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.ObjectGraph;
@@ -21,13 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ProviderLoader {
     @Inject ObjectMapper objectMapper;
     @Getter private final List<AndroidFictionProvider> providers = new ArrayList<>();
+    @Inject Application application;
 
     @Inject
     public ProviderLoader() {}
 
     public ObjectGraph load(ObjectGraph graph) {
         try {
-            DexFile dexFile = new DexFile(FictionApplication.applicationInfo.sourceDir);
+            DexFile dexFile = new DexFile(application.getApplicationInfo().sourceDir);
             Enumeration<String> entries = dexFile.entries();
 
             while (entries.hasMoreElements()) {

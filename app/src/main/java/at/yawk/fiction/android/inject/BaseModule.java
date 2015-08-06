@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.inject;
 
+import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 import at.yawk.fiction.android.context.ObjectMapperProvider;
@@ -21,11 +22,22 @@ import javax.inject.Singleton;
 )
 public class BaseModule {
     final EventBus eventBus = new EventBus(new Handler(Looper.getMainLooper()));
+    final Application application;
+
+    BaseModule(Application application) {
+        this.application = application;
+    }
 
     @Provides
     @Singleton
     public EventBus eventBus() {
         return eventBus;
+    }
+
+    @Provides
+    @Singleton
+    public Application application() {
+        return application;
     }
 
     @Provides
