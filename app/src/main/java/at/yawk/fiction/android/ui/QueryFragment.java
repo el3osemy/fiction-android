@@ -2,21 +2,18 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
-import at.yawk.fiction.android.inject.Injector;
+import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import at.yawk.fiction.android.storage.StoryWrapper;
+import butterknife.Bind;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +23,14 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class QueryFragment extends ListFragment {
+@ContentView(R.layout.query_story_list)
+public class QueryFragment extends ContentViewFragment implements AdapterView.OnItemClickListener {
     @Inject ProviderManager providerManager;
     @Inject Toasts toasts;
     @Inject TaskManager taskManager;
     @Inject FragmentUiRunner uiRunner;
+
+    @Bind(R.id.storyList) ListView storyList;
 
     private final TaskContext taskContext = new TaskContext();
     private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
@@ -38,6 +38,8 @@ public class QueryFragment extends ListFragment {
     private View footerView;
 
     private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
+
+    private QueryWrapper query;
 
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
@@ -49,16 +51,7 @@ public class QueryFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Injector.initFragment(this);
-
-        QueryWrapper query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
-
-        setListAdapter(new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
-            @Override
-            protected void decorateView(View view, int position) {
-                decorateEntry(getItem(position), view);
-            }
-        });
+        query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
 
         pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
     }
@@ -86,12 +79,20 @@ public class QueryFragment extends ListFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, getListView(), false);
-        getListView().addFooterView(footerView, null, false);
+        storyList.setAdapter(new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
+            @Override
+            protected void decorateView(View view, int position) {
+                decorateEntry(getItem(position), view);
+            }
+        });
+        storyList.setOnItemClickListener(this);
+
+        footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, storyList, false);
+        storyList.addFooterView(footerView, null, false);
 
         checkFetchMore();
 
-        getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+        storyList.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {}
 
@@ -103,10 +104,8 @@ public class QueryFragment extends ListFragment {
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-
-        StoryWrapper wrapper = (StoryWrapper) l.getItemAtPosition(position);
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        StoryWrapper wrapper = (StoryWrapper) parent.getItemAtPosition(position);
         if (wrapper == null) { return; }
         Intent intent = new Intent(getActivity(), StoryActivity.class);
         intent.putExtra("story", WrapperParcelable.objectToParcelable(wrapper.getStory()));
@@ -146,8 +145,7 @@ public class QueryFragment extends ListFragment {
     private synchronized void checkFetchMore() {
         if (fetching || !isVisible()) { return; }
         if (hasMore) {
-            ListView listView = getListView();
-            if (listView.getLastVisiblePosition() >= stories.size() - 1) {
+            if (storyList.getLastVisiblePosition() >= stories.size() - 1) {
                 fetching = true;
                 taskManager.execute(taskContext, () -> {
                     if (!fetchOne()) {
@@ -198,7 +196,7 @@ public class QueryFragment extends ListFragment {
             log.trace("Done, passing on to UI");
             stories.addAll(additions);
             hasMore = !page.isLast();
-            uiRunner.runOnUiThread(((ArrayAdapter<?>) getListAdapter())::notifyDataSetChanged);
+            uiRunner.runOnUiThread(((ArrayAdapter<?>) storyList.getAdapter())::notifyDataSetChanged);
             ok = true;
         } catch (Throwable e) {
             log.error("Failed to fetch page {}", page, e);
