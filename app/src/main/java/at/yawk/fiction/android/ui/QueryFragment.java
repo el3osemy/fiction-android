@@ -3,7 +3,10 @@ package at.yawk.fiction.android.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.*;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
@@ -40,6 +43,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
 
     private QueryWrapper query;
+    private SimpleArrayAdapter<StoryWrapper> adapter;
 
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
@@ -52,8 +56,13 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         super.onCreate(savedInstanceState);
 
         query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
-
         pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
+        adapter = new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
+            @Override
+            protected void decorateView(View view, int position) {
+                decorateEntry(getItem(position), view);
+            }
+        };
     }
 
     @Subscribe(Subscribe.EventQueue.UI)
@@ -79,12 +88,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        storyList.setAdapter(new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
-            @Override
-            protected void decorateView(View view, int position) {
-                decorateEntry(getItem(position), view);
-            }
-        });
+        storyList.setAdapter(adapter);
         storyList.setOnItemClickListener(this);
 
         footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, storyList, false);
@@ -196,7 +200,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
             log.trace("Done, passing on to UI");
             stories.addAll(additions);
             hasMore = !page.isLast();
-            uiRunner.runOnUiThread(((ArrayAdapter<?>) storyList.getAdapter())::notifyDataSetChanged);
+            uiRunner.runOnUiThread(adapter::notifyDataSetChanged);
             ok = true;
         } catch (Throwable e) {
             log.error("Failed to fetch page {}", page, e);
