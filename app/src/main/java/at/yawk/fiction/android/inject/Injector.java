@@ -75,15 +75,12 @@ public class Injector {
         injector.inject(injector.global, o);
     }
 
-    public static void initFragment(Fragment fragment) {
+    public static void injectFragment(Fragment fragment) {
         injector.inject(injector.fragment(fragment), fragment);
     }
 
-    public static void initActivity(Activity activity) {
+    public static void injectActivity(Activity activity) {
         injector.inject(injector.activity(activity), activity);
-
-        View contentView = Injector.buildAndInjectContentView(activity, activity.getLayoutInflater(), null);
-        activity.setContentView(contentView);
     }
 
     public static View buildAndInjectContentView(Object o, LayoutInflater inflater, ViewGroup group) {

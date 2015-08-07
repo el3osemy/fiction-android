@@ -2,8 +2,10 @@ package at.yawk.fiction.android.inject;
 
 import android.app.Activity;
 import android.content.Context;
-import at.yawk.fiction.android.context.Toasts;
-import at.yawk.fiction.android.ui.*;
+import at.yawk.fiction.android.ui.MainPreferenceActivity;
+import at.yawk.fiction.android.ui.QueryOverviewActivity;
+import at.yawk.fiction.android.ui.QueryWrapperActivity;
+import at.yawk.fiction.android.ui.StoryActivity;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
@@ -17,6 +19,7 @@ import javax.inject.Singleton;
                 StoryActivity.class,
                 QueryOverviewActivity.class,
                 QueryWrapperActivity.class,
+                MainPreferenceActivity.class,
         },
         library = true
 )

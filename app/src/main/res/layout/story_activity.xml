@@ -4,6 +4,4 @@
     android:layout_height="match_parent"
     android:id="@+id/storyActivity"
     android:padding="3dp"
-    android:background="@color/background_material_dark">
-
-</FrameLayout>
+    android:background="?attr/primaryBackground" />

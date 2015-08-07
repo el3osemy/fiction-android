@@ -2,7 +2,6 @@ package at.yawk.fiction.android.ui;
 
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -28,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ContentView(R.layout.query_wrapper_editor)
-public class QueryWrapperActivity extends FragmentActivity {
+public class QueryWrapperActivity extends ContentViewActivity {
     @Inject ProviderManager providerManager;
     @Inject QueryManager queryManager;
 
@@ -46,8 +45,6 @@ public class QueryWrapperActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Injector.initActivity(this);
 
         Parcelable queryParcel = getIntent().getParcelableExtra("query");
         AndroidFictionProvider firstProvider = null;

@@ -11,4 +11,7 @@
     <string name="separator">Separator</string>
     <string name="edit_query">Edit Query</string>
     <string name="reorder">Reorder</string>
+    <string name="dark">Dark</string>
+    <string name="dark_amoled">Dark (AMOLED)</string>
+    <string name="theme">Theme</string>
 </resources>

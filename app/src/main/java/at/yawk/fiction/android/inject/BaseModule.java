@@ -1,8 +1,10 @@
 package at.yawk.fiction.android.inject;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import at.yawk.fiction.android.context.ObjectMapperProvider;
 import at.yawk.fiction.android.download.DownloadManagerUi;
 import at.yawk.fiction.android.event.EventBus;
@@ -45,5 +47,11 @@ public class BaseModule {
     @Singleton
     PageParserProvider pageParserProvider() {
         return new PageParserProvider();
+    }
+
+    @Provides
+    @Singleton
+    SharedPreferences preferences() {
+        return PreferenceManager.getDefaultSharedPreferences(application);
     }
 }

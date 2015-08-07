@@ -16,7 +16,7 @@ public abstract class ContentViewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Injector.initFragment(this);
+        Injector.injectFragment(this);
     }
 
     @Nullable

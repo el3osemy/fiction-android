@@ -3,7 +3,6 @@ package at.yawk.fiction.android.ui;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
@@ -17,7 +16,6 @@ import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import butterknife.Bind;
@@ -33,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ContentView(R.layout.query_overview)
-public class QueryOverviewActivity extends FragmentActivity {
+public class QueryOverviewActivity extends ContentViewActivity {
     @Inject QueryManager queryManager;
     @Inject Importer importer;
     @Inject Cleanup cleanup;
@@ -49,8 +47,6 @@ public class QueryOverviewActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Injector.initActivity(this);
 
         log.info("Creating query overview");
 
@@ -189,6 +185,9 @@ public class QueryOverviewActivity extends FragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.settings:
+            startActivity(new Intent(this, MainPreferenceActivity.class));
+            return true;
         case R.id.import_ffn:
             new Thread(importer).start();
             return true;
