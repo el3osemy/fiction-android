@@ -54,6 +54,7 @@ mdicons {
     pattern 'ic_reorder_white_24dp'
     pattern 'ic_refresh_white_24dp'
     pattern 'ic_file_download_white_24dp'
+    pattern 'ic_add_white_24dp'
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {

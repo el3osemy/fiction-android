@@ -9,12 +9,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.mobeta.android.dslv.DragSortListView
+    <RelativeLayout
         android:id="@+id/left_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
-        android:background="@color/background_floating_material_dark" />
+        android:background="@color/background_floating_material_dark">
+
+        <com.mobeta.android.dslv.DragSortListView
+            android:id="@+id/queryList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/createQuery"
+            android:layout_alignParentTop="true" />
+
+        <Button
+            android:id="@+id/createQuery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/listChoiceBackgroundIndicator"
+            android:drawableLeft="@drawable/ic_add_white_24dp"
+            android:drawablePadding="5dp"
+            android:gravity="left|center_vertical"
+            android:minHeight="?android:attr/listPreferredItemHeightSmall"
+            android:paddingLeft="@dimen/abc_list_item_padding_horizontal_material"
+            android:paddingRight="@dimen/abc_list_item_padding_horizontal_material"
+            android:text="@string/create_query"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </RelativeLayout>
 
 </android.support.v4.widget.DrawerLayout>

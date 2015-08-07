@@ -40,8 +40,9 @@ public class QueryOverviewActivity extends FragmentActivity {
 
     private ArrayAdapter<QueryWrapper> queryArrayAdapter;
 
-    @Bind(R.id.left_drawer) DragSortListView drawer;
+    @Bind(R.id.queryList) DragSortListView queryList;
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
+    @Bind(R.id.createQuery) View createQuery;
 
     private ActionMode actionMode;
 
@@ -63,21 +64,21 @@ public class QueryOverviewActivity extends FragmentActivity {
 
         updateQueries(true);
 
-        drawer.setAdapter(queryArrayAdapter);
+        queryList.setAdapter(queryArrayAdapter);
 
-        drawer.setOnItemClickListener((parent, view, position, id) -> {
+        queryList.setOnItemClickListener((parent, view, position, id) -> {
             showQuery(queryArrayAdapter.getItem(position), true);
             drawerParent.closeDrawers();
         });
-        drawer.setOnItemLongClickListener((parent, view, position, id) -> {
+        queryList.setOnItemLongClickListener((parent, view, position, id) -> {
             longClickQuery(position);
             return true;
         });
-        drawer.setDropListener((from, to) -> {
+        queryList.setDropListener((from, to) -> {
             queryManager.moveQuery(from, to);
             updateQueries(false);
         });
-        drawer.setDragEnabled(false);
+        queryList.setDragEnabled(false);
 
         drawerParent.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
@@ -86,6 +87,8 @@ public class QueryOverviewActivity extends FragmentActivity {
                 if (actionMode != null) { actionMode.finish(); }
             }
         });
+
+        createQuery.setOnClickListener(v -> editQuery(null));
     }
 
     private void longClickQuery(int position) {
@@ -107,11 +110,10 @@ public class QueryOverviewActivity extends FragmentActivity {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                 case R.id.editQuery:
-                    log.info("Edit {}", System.identityHashCode(contextQuery));
                     editQuery(contextQuery);
                     return true;
                 case R.id.reorder:
-                    drawer.setDragEnabled(true);
+                    queryList.setDragEnabled(true);
                     item.setVisible(false);
                     return true;
                 default:
@@ -129,7 +131,7 @@ public class QueryOverviewActivity extends FragmentActivity {
     @Override
     public void onActionModeFinished(ActionMode mode) {
         super.onActionModeFinished(mode);
-        drawer.setDragEnabled(false);
+        queryList.setDragEnabled(false);
     }
 
     private void updateQueries(boolean forceQueryReload) {
@@ -149,8 +151,6 @@ public class QueryOverviewActivity extends FragmentActivity {
         if (!forceRedraw && query.getId().equals(queryManager.getSelectedQueryId())) {
             return;
         }
-
-        log.info("ShowQuery {}", query);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         QueryFragment fragment = new QueryFragment();
@@ -189,9 +189,6 @@ public class QueryOverviewActivity extends FragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.create_query:
-            editQuery(null);
-            return true;
         case R.id.import_ffn:
             new Thread(importer).start();
             return true;
