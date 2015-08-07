@@ -11,7 +11,6 @@ import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.QueryManager;
@@ -27,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ContentView(R.layout.query_wrapper_editor)
+@ContentViewActivity.Dialog
 public class QueryWrapperActivity extends ContentViewActivity {
     @Inject ProviderManager providerManager;
     @Inject QueryManager queryManager;

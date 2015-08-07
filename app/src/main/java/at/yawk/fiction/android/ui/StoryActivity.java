@@ -12,6 +12,7 @@ import javax.inject.Inject;
  * @author yawkat
  */
 @ContentView(R.layout.story_activity)
+@ContentViewActivity.Dialog
 public class StoryActivity extends ContentViewActivity {
     @Inject StorageManager storageManager;
 
