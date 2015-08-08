@@ -2,6 +2,7 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -40,16 +41,17 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     @Inject DownloadManager downloadManager;
 
     @Bind(R.id.storyList) ListView storyList;
+    @Bind(R.id.refreshLayout) SwipeRefreshLayout refreshLayout;
 
     private final TaskContext taskContext = new TaskContext();
-    private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
 
     private View footerView;
 
     private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
 
     private QueryWrapper query;
-    private SimpleArrayAdapter<StoryWrapper> adapter;
+
+    Worker currentWorker;
 
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
@@ -64,13 +66,12 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         setHasOptionsMenu(true);
 
         query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
-        pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
-        adapter = new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
-            @Override
-            protected void decorateView(View view, int position) {
-                decorateEntry(getItem(position), view);
-            }
-        };
+    }
+
+    private void initWorker() {
+        currentWorker = new Worker();
+        storyList.setAdapter(currentWorker.adapter);
+        currentWorker.checkFetchMore();
     }
 
     @Subscribe(Subscribe.EventQueue.UI)
@@ -87,8 +88,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden) {
-            checkFetchMore();
+        if (!hidden && currentWorker != null) {
+            currentWorker.checkFetchMore();
         }
     }
 
@@ -96,13 +97,17 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        storyList.setAdapter(adapter);
+        refreshLayout.setOnRefreshListener(() -> {
+            refreshLayout.setRefreshing(false);
+            initWorker();
+        });
+
         storyList.setOnItemClickListener(this);
 
         footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, storyList, false);
         storyList.addFooterView(footerView, null, false);
 
-        checkFetchMore();
+        initWorker();
 
         storyList.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -110,7 +115,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                checkFetchMore();
+                currentWorker.checkFetchMore();
             }
         });
     }
@@ -155,7 +160,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.updateAll:
-            downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(stories)));
+            downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(currentWorker.stories)));
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -164,85 +169,111 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
     ///////////////////////////////
 
-    private Pageable<StoryWrapper> pageable;
-    private int page;
-    private int pageCount = -1;
-    private int failedAttemptCount = 0;
-    private boolean hasMore = true;
-    private boolean fetching = false;
-
-    private synchronized void checkFetchMore() {
-        if (fetching || !isVisible()) { return; }
-        if (hasMore) {
-            if (storyList.getLastVisiblePosition() >= stories.size() - 1) {
-                fetching = true;
-                taskManager.execute(taskContext, () -> {
-                    if (!fetchOne()) {
-                        Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-                    }
-                    synchronized (QueryFragment.this) {
-                        fetching = false;
-                        checkFetchMore();
-                    }
-                });
-            } else {
-                log.trace("Last item not visible, not fetching more");
-            }
-        }
-        updateLoading();
-    }
-
-    private void updateLoading() {
-        uiRunner.runOnUiThread(() -> {
-            footerView.findViewById(R.id.loading_progress).setVisibility(fetching ? View.VISIBLE : View.GONE);
-
-            String pageString;
-            if (hasMore) {
-                pageString = (page + 1) + " / " + (pageCount == -1 ? "?" : pageCount);
-            } else {
-                pageString = Integer.toString(page);
-            }
-            ((TextView) footerView.findViewById(R.id.loading_page))
-                    .setText(pageString);
-
-            ((TextView) footerView.findViewById(R.id.loading_failure_count))
-                    .setText(failedAttemptCount == 0 ? "" : "[" + failedAttemptCount + "]");
-        });
-    }
-
-    /**
-     * @return <code>true</code> if the page was fetched successfully, <code>false</code> otherwise.
-     */
-    private boolean fetchOne() {
-        boolean ok = false;
-        try {
-            log.trace("Fetching page {}", this.page);
-            Pageable.Page<StoryWrapper> page = pageable.getPage(this.page);
-            log.trace("Fetched, merging with database");
-            pageCount = page.getPageCount();
-
-            List<StoryWrapper> additions = new ArrayList<>(page.getEntries()); // eager copy
-            log.trace("Done, passing on to UI");
-            stories.addAll(additions);
-            hasMore = !page.isLast();
-            uiRunner.runOnUiThread(adapter::notifyDataSetChanged);
-            ok = true;
-        } catch (Throwable e) {
-            log.error("Failed to fetch page {}", page, e);
-            toasts.toast("Failed to fetch page {}", page, e);
-        }
-        if (ok) {
-            page++;
-            failedAttemptCount = 0;
-        } else {
-            failedAttemptCount++;
-        }
-        return ok;
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         taskContext.destroy();
+    }
+
+    private class Worker {
+        private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
+        private final Pageable<StoryWrapper> pageable;
+        private final SimpleArrayAdapter<StoryWrapper> adapter;
+
+        private int page = 0;
+        private int pageCount = -1;
+        private int failedAttemptCount = 0;
+        private boolean hasMore = true;
+        private boolean fetching = false;
+
+        Worker() {
+            pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
+            adapter = new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
+                @Override
+                protected void decorateView(View view, int position) {
+                    decorateEntry(getItem(position), view);
+                }
+            };
+        }
+
+        synchronized void checkFetchMore() {
+            if (fetching || !isVisible() || !isValid()) { return; }
+            if (hasMore) {
+                if (storyList.getLastVisiblePosition() >= stories.size() - 1) {
+                    fetching = true;
+                    taskManager.execute(taskContext, () -> {
+                        if (!fetchOne()) {
+                            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+                        }
+                        synchronized (QueryFragment.this) {
+                            fetching = false;
+                            checkFetchMore();
+                        }
+                    });
+                } else {
+                    log.trace("Last item not visible, not fetching more");
+                }
+            }
+            updateLoading();
+        }
+
+        /**
+         * @return <code>true</code> if the page was fetched successfully, <code>false</code> otherwise.
+         */
+        private boolean fetchOne() {
+            boolean ok = false;
+            try {
+                log.trace("Fetching page {}", this.page);
+                Pageable.Page<StoryWrapper> page = pageable.getPage(this.page);
+                log.trace("Fetched, merging with database");
+                pageCount = page.getPageCount();
+
+                List<StoryWrapper> additions = new ArrayList<>(page.getEntries()); // eager copy
+
+                log.trace("Done, passing on to UI");
+                stories.addAll(additions);
+                hasMore = !page.isLast();
+                runOnUiThread(adapter::notifyDataSetChanged);
+                ok = true;
+            } catch (Throwable e) {
+                log.error("Failed to fetch page {}", page, e);
+                if (isValid()) {
+                    toasts.toast("Failed to fetch page {}", page, e);
+                }
+            }
+            if (ok) {
+                page++;
+                failedAttemptCount = 0;
+            } else {
+                failedAttemptCount++;
+            }
+            return ok;
+        }
+
+        private void updateLoading() {
+            runOnUiThread(() -> {
+                footerView.findViewById(R.id.loading_progress).setVisibility(fetching ? View.VISIBLE : View.GONE);
+
+                String pageString;
+                if (hasMore) {
+                    pageString = (page + 1) + " / " + (pageCount == -1 ? "?" : pageCount);
+                } else {
+                    pageString = Integer.toString(page);
+                }
+                ((TextView) footerView.findViewById(R.id.loading_page))
+                        .setText(pageString);
+
+                ((TextView) footerView.findViewById(R.id.loading_failure_count))
+                        .setText(failedAttemptCount == 0 ? "" : "[" + failedAttemptCount + "]");
+            });
+        }
+
+        private void runOnUiThread(Runnable task) {
+            if (isValid()) { uiRunner.runOnUiThread(task); }
+        }
+
+        boolean isValid() {
+            return QueryFragment.this.currentWorker == this;
+        }
     }
 }
