@@ -4,15 +4,29 @@
 
     <!-- Base themes -->
 
-    <style name="FTheme" parent="Theme.AppCompat.NoActionBar" />
+    <style name="FNoActionBar" parent="Theme.AppCompat.NoActionBar" />
 
-    <style name="FTheme.Dark">
+    <style name="FNoActionBar.Dark">
         <item name="android:windowBackground">?attr/primaryBackground</item>
         <item name="primaryBackground">@color/background_material_dark</item>
     </style>
 
 
-    <style name="FTheme.Dark.Amoled">
+    <style name="FNoActionBar.Dark.Amoled">
+        <item name="primaryBackground">@android:color/black</item>
+    </style>
+
+    <!-- Base themes -->
+
+    <style name="FActionBar" parent="Theme.AppCompat" />
+
+    <style name="FActionBar.Dark">
+        <item name="android:windowBackground">?attr/primaryBackground</item>
+        <item name="primaryBackground">@color/background_material_dark</item>
+    </style>
+
+
+    <style name="FActionBar.Dark.Amoled">
         <item name="primaryBackground">@android:color/black</item>
     </style>
 

@@ -10,7 +10,7 @@
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/FTheme.Dark">
+        android:theme="@style/FActionBar.Dark">
 
         <activity
             android:name=".ui.QueryOverviewActivity"
@@ -31,8 +31,12 @@
             android:name=".ui.StoryActivity"
             android:theme="@style/FDialog" />
 
-        <activity android:name=".ui.MainPreferenceActivity" />
-        <activity android:name=".ui.DownloadManagerActivity" />
+        <activity
+            android:name=".ui.MainPreferenceActivity"
+            android:label="@string/settings" />
+        <activity
+            android:name=".ui.DownloadManagerActivity"
+            android:label="@string/downloads" />
 
     </application>
 

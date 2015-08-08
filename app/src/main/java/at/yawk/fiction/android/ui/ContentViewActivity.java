@@ -13,8 +13,12 @@ import javax.inject.Inject;
  */
 public class ContentViewActivity extends AppCompatActivity {
     private static final int[] THEME_IDS_NORMAL = {
-            R.style.FTheme_Dark,
-            R.style.FTheme_Dark_Amoled,
+            R.style.FActionBar_Dark,
+            R.style.FActionBar_Dark_Amoled,
+    };
+    private static final int[] THEME_IDS_NO_ACTION_BAR = {
+            R.style.FNoActionBar_Dark,
+            R.style.FNoActionBar_Dark_Amoled,
     };
     private static final int[] THEME_IDS_DIALOG = {
             R.style.FDialog_Dark,
@@ -28,7 +32,15 @@ public class ContentViewActivity extends AppCompatActivity {
         Injector.injectActivity(this);
 
         boolean dialog = getClass().isAnnotationPresent(Dialog.class);
-        int[] themeSet = dialog ? THEME_IDS_DIALOG : THEME_IDS_NORMAL;
+        boolean noActionBar = getClass().isAnnotationPresent(NoActionBar.class);
+        int[] themeSet;
+        if (dialog) {
+            themeSet = THEME_IDS_DIALOG;
+        } else if (noActionBar) {
+            themeSet = THEME_IDS_NO_ACTION_BAR;
+        } else {
+            themeSet = THEME_IDS_NORMAL;
+        }
 
         // choice settings can only be strings: https://code.google.com/p/android/issues/detail?id=2096
         setTheme(themeSet[Integer.parseInt(preferences.getString("theme", "0"))]);
@@ -42,4 +54,9 @@ public class ContentViewActivity extends AppCompatActivity {
     @Retention(RetentionPolicy.RUNTIME)
     @Inherited
     protected @interface Dialog {}
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Inherited
+    protected @interface NoActionBar {}
 }

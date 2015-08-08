@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ContentView(R.layout.query_overview)
+@ContentViewActivity.NoActionBar
 public class QueryOverviewActivity extends ContentViewActivity {
     @Inject QueryManager queryManager;
     @Inject Importer importer;
