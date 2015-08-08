@@ -4,12 +4,7 @@
 
     <!-- Base themes -->
 
-    <style name="FTheme" parent="Theme.AppCompat">
-        <item name="android:windowActionBar">true</item>
-        <item name="android:windowNoTitle">false</item>
-        <item name="android:windowActionBarOverlay">false</item>
-        <item name="windowActionBarOverlay">false</item>
-    </style>
+    <style name="FTheme" parent="Theme.AppCompat" />
 
     <style name="FTheme.Dark">
         <item name="android:windowBackground">?attr/primaryBackground</item>
@@ -23,7 +18,10 @@
 
     <!-- Dialog themes -->
 
-    <style name="FDialog" parent="Theme.AppCompat.Dialog" />
+    <style name="FDialog" parent="Theme.AppCompat.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 
     <style name="FDialog.Dark">
         <item name="android:windowBackground">?attr/primaryBackground</item>

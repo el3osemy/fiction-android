@@ -2,7 +2,7 @@ package at.yawk.fiction.android.ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.inject.Injector;
 import java.lang.annotation.*;
@@ -11,7 +11,7 @@ import javax.inject.Inject;
 /**
  * @author yawkat
  */
-public class ContentViewActivity extends FragmentActivity {
+public class ContentViewActivity extends AppCompatActivity {
     private static final int[] THEME_IDS_NORMAL = {
             R.style.FTheme_Dark,
             R.style.FTheme_Dark_Amoled,
@@ -25,8 +25,6 @@ public class ContentViewActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         Injector.injectActivity(this);
 
         boolean dialog = getClass().isAnnotationPresent(Dialog.class);
@@ -34,6 +32,8 @@ public class ContentViewActivity extends FragmentActivity {
 
         // choice settings can only be strings: https://code.google.com/p/android/issues/detail?id=2096
         setTheme(themeSet[Integer.parseInt(preferences.getString("theme", "0"))]);
+
+        super.onCreate(savedInstanceState);
 
         setContentView(Injector.buildAndInjectContentView(this, getLayoutInflater(), null));
     }
