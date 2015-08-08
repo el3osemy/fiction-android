@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+    android:background="@drawable/selectable_button"
     android:gravity="center_vertical">
 
     <TextView

@@ -61,6 +61,8 @@ public class QueryOverviewActivity extends ContentViewActivity {
             @Override
             protected void decorateView(View view, int position) {
                 ((TextView) view.findViewById(R.id.queryName)).setText(getItem(position).getName());
+
+                view.setSelected(getItem(position).getId().equals(queryManager.getSelectedQueryId()));
             }
         };
 
@@ -164,6 +166,9 @@ public class QueryOverviewActivity extends ContentViewActivity {
         ft.commit();
 
         toolbar.setTitle(getName(query));
+
+        // update selected status
+        queryArrayAdapter.notifyDataSetChanged();
 
         queryManager.setSelectedQueryId(query.getId());
     }
