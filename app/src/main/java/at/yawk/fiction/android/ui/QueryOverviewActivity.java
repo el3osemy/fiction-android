@@ -1,10 +1,13 @@
 package at.yawk.fiction.android.ui;
 
-import android.app.ActionBar;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,14 +45,16 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
     @Bind(R.id.createQuery) View createQuery;
     @Bind(R.id.settings) View settings;
+    @Bind(R.id.toolbar) Toolbar toolbar;
 
     private ActionMode actionMode;
+    private ActionBarDrawerToggle drawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        log.info("Creating query overview");
+        setSupportActionBar(toolbar);
 
         queryArrayAdapter = new SimpleArrayAdapter<QueryWrapper>(
                 this, R.layout.query_overview_query_item, new ArrayList<>()) {
@@ -77,16 +82,18 @@ public class QueryOverviewActivity extends ContentViewActivity {
         });
         queryList.setDragEnabled(false);
 
-        drawerParent.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+        createQuery.setOnClickListener(v -> editQuery(null));
+        settings.setOnClickListener(v -> startActivity(new Intent(this, MainPreferenceActivity.class)));
+
+        drawerToggle = new ActionBarDrawerToggle(
+                this, drawerParent, toolbar, R.string.open_queries, R.string.close_queries) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
                 if (actionMode != null) { actionMode.finish(); }
             }
-        });
-
-        createQuery.setOnClickListener(v -> editQuery(null));
-        settings.setOnClickListener(v -> startActivity(new Intent(this, MainPreferenceActivity.class)));
+        };
+        drawerParent.setDrawerListener(drawerToggle);
     }
 
     private void longClickQuery(int position) {
@@ -156,10 +163,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
         ft.replace(R.id.content_frame, fragment);
         ft.commit();
 
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(getName(query));
-        }
+        toolbar.setTitle(getName(query));
 
         queryManager.setSelectedQueryId(query.getId());
     }
@@ -194,7 +198,13 @@ public class QueryOverviewActivity extends ContentViewActivity {
             new Thread(cleanup).start();
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return drawerToggle.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onPostCreate(savedInstanceState, persistentState);
+        drawerToggle.syncState();
     }
 
     private void editQuery(@Nullable QueryWrapper query) {
@@ -203,5 +213,11 @@ public class QueryOverviewActivity extends ContentViewActivity {
             intent.putExtra("query", WrapperParcelable.objectToParcelable(query.getId()));
         }
         startActivity(intent);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 }
