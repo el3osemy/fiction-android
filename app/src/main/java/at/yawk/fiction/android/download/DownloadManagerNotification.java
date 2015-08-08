@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author yawkat
  */
 @Singleton
-public class DownloadManagerUi {
+public class DownloadManagerNotification {
     @Inject Application application;
     @Inject DownloadManager metrics;
 
@@ -30,7 +30,7 @@ public class DownloadManagerUi {
     private final Map<DownloadManagerMetrics.Task, Integer> shownNotificationIds = new HashMap<>();
 
     @Inject
-    public DownloadManagerUi(EventBus eventBus) {
+    public DownloadManagerNotification(EventBus eventBus) {
         eventBus.addWeakListeners(this);
     }
 

@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import at.yawk.fiction.android.context.ObjectMapperProvider;
-import at.yawk.fiction.android.download.DownloadManagerUi;
+import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.provider.ProviderLoader;
 import at.yawk.fiction.android.storage.StoryWrapper;
@@ -21,7 +21,7 @@ import javax.inject.Singleton;
 @Module(
         library = true,
         includes = { ObjectMapperProvider.class },
-        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerUi.class }
+        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerNotification.class }
 )
 public class BaseModule {
     final EventBus eventBus = new EventBus(new Handler(Looper.getMainLooper()));

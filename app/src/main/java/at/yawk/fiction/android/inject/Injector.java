@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import at.yawk.fiction.android.download.DownloadManagerUi;
+import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.provider.ProviderLoader;
 import butterknife.ButterKnife;
 import com.google.common.base.Supplier;
@@ -33,7 +33,7 @@ public class Injector {
         global = baseGraph.get(ProviderLoader.class).load(baseGraph);
 
         // make sure the download manager ui is available
-        global.get(DownloadManagerUi.class);
+        global.get(DownloadManagerNotification.class);
     }
 
     public static void init(Application application) {
