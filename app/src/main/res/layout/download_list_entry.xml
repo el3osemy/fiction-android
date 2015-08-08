@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:padding="?attr/listPreferredItemPaddingRight">
+
+    <TextView
+        android:id="@+id/taskName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:singleLine="false"
+        android:text="Task Name"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ProgressBar
+        android:id="@+id/taskProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/taskName"
+        android:indeterminate="true" />
+
+    <TextView
+        android:id="@+id/taskProgressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/taskProgress"
+        android:text="5/10 complete"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <ImageButton
+        android:id="@+id/cancelTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/taskName"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignTop="@+id/taskName"
+        android:alpha="0.7"
+        android:background="@null"
+        android:contentDescription="@string/cancel_task"
+        android:src="@drawable/ic_cancel_white_24dp" />
+</RelativeLayout>

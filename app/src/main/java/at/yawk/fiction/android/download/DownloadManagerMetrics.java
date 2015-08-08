@@ -19,5 +19,7 @@ public interface DownloadManagerMetrics {
          * @return The current maximum progress or <code>-1</code> if the progress is indeterminate.
          */
         long getMaxProgress();
+
+        void cancel();
     }
 }

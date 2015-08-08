@@ -27,6 +27,8 @@ public class DownloadManager implements DownloadManagerMetrics {
      * All currently queued tasks, including the currently running task.
      */
     private final Queue<Runner<?>> runnerQueue = new ArrayDeque<>();
+    private final MultiTaskExecutionStrategy multiTaskExecutionStrategy =
+            new LimitedParallelMultiTaskExecutionStrategy(4);
 
     @Inject
     DownloadManager(
@@ -42,7 +44,7 @@ public class DownloadManager implements DownloadManagerMetrics {
     }
 
     public void enqueue(DownloadTask task) {
-        Runner<DownloadTask> runner = new Runner<>(MultiTaskExecutionStrategy.PARALLEL, task);
+        Runner<DownloadTask> runner = new Runner<>(multiTaskExecutionStrategy, task);
         runner.progressListener = runner;
         runner.addCompletionCallback(() -> {
             synchronized (this) {
@@ -78,6 +80,9 @@ public class DownloadManager implements DownloadManagerMetrics {
     private class Runner<T extends DownloadTask> implements Runnable, Task, ProgressListener {
         final MultiTaskExecutionStrategy multiTaskExecutionStrategy;
         final T task;
+
+        @Nullable Runner<?> parent;
+
         ProgressListener progressListener = ProgressListener.NOOP;
 
         volatile long currentProgress = 0;
@@ -86,6 +91,7 @@ public class DownloadManager implements DownloadManagerMetrics {
         @Nullable private Runnable completionCallback;
 
         volatile boolean running = false;
+        volatile boolean cancelled = false;
 
         void scheduleOrSplit() {
             running = true;
@@ -103,15 +109,15 @@ public class DownloadManager implements DownloadManagerMetrics {
             for (DownloadTask subTask : tasks) {
                 Runner<?> runner = new Runner<>(multiTaskExecutionStrategy, subTask);
                 runner.progressListener = progressListener.createSubLevel();
+                runner.parent = this;
                 runner.addCompletionCallback(
                         () -> progressListener.progressDeterminate(completed.incrementAndGet(), tasks.size()));
                 runners.add(runner);
             }
 
             progressListener.progressDeterminate(0, tasks.size());
-            multiTaskExecutionStrategy.execute(r -> taskManager.execute(context, r),
-                                               runners,
-                                               this::complete);
+            multiTaskExecutionStrategy.execute(
+                    r -> taskManager.execute(context, r), runners, this::complete, this::isCancelled);
         }
 
         private void complete() {
@@ -165,6 +171,15 @@ public class DownloadManager implements DownloadManagerMetrics {
         @Override
         public long getMaxProgress() {
             return maxProgress;
+        }
+
+        @Override
+        public void cancel() {
+            cancelled = true;
+        }
+
+        private boolean isCancelled() {
+            return cancelled || (parent != null && parent.isCancelled());
         }
 
         @Override

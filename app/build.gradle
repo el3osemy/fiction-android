@@ -37,6 +37,7 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:cardview-v7:22.2.1'
     compile files('../dep/build/libs/dep-all.jar')
     provided 'org.projectlombok:lombok:1.16.4'
     provided 'com.google.code.findbugs:annotations:2.0.2'
@@ -56,6 +57,7 @@ mdicons {
     pattern 'ic_file_download_white_24dp'
     pattern 'ic_add_white_24dp'
     pattern 'ic_settings_white_24dp'
+    pattern 'ic_cancel_white_24dp'
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {

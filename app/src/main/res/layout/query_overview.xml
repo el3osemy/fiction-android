@@ -47,7 +47,16 @@
             style="@style/DrawerButton"
             android:drawableLeft="@drawable/ic_add_white_24dp"
             android:text="@string/create_query"
-            android:layout_above="@+id/settings" />
+            android:layout_above="@+id/downloads" />
+
+        <Button
+            android:id="@+id/downloads"
+            style="@style/DrawerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/settings"
+            android:drawableLeft="@drawable/ic_file_download_white_24dp"
+            android:text="@string/downloads" />
 
         <Button
             android:id="@+id/settings"

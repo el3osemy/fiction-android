@@ -2,10 +2,7 @@ package at.yawk.fiction.android.inject;
 
 import android.app.Activity;
 import android.content.Context;
-import at.yawk.fiction.android.ui.MainPreferenceActivity;
-import at.yawk.fiction.android.ui.QueryOverviewActivity;
-import at.yawk.fiction.android.ui.QueryWrapperActivity;
-import at.yawk.fiction.android.ui.StoryActivity;
+import at.yawk.fiction.android.ui.*;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
@@ -20,6 +17,7 @@ import javax.inject.Singleton;
                 QueryOverviewActivity.class,
                 QueryWrapperActivity.class,
                 MainPreferenceActivity.class,
+                DownloadManagerActivity.class,
         },
         library = true
 )

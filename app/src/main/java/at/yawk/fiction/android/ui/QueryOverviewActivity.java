@@ -45,6 +45,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
     @Bind(R.id.createQuery) View createQuery;
     @Bind(R.id.settings) View settings;
+    @Bind(R.id.downloads) View downloads;
     @Bind(R.id.toolbar) Toolbar toolbar;
 
     private ActionMode actionMode;
@@ -86,6 +87,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
 
         createQuery.setOnClickListener(v -> editQuery(null));
         settings.setOnClickListener(v -> startActivity(new Intent(this, MainPreferenceActivity.class)));
+        downloads.setOnClickListener(v -> startActivity(new Intent(this, DownloadManagerActivity.class)));
 
         drawerToggle = new ActionBarDrawerToggle(
                 this, drawerParent, toolbar, R.string.open_queries, R.string.close_queries) {

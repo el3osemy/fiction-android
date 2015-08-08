@@ -32,6 +32,7 @@
             android:theme="@style/FDialog" />
 
         <activity android:name=".ui.MainPreferenceActivity" />
+        <activity android:name=".ui.DownloadManagerActivity" />
 
     </application>
 

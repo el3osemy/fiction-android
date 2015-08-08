@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.inject;
 
 import android.support.v4.app.Fragment;
+import at.yawk.fiction.android.ui.DownloadManagerFragment;
 import at.yawk.fiction.android.ui.MainPreferenceFragment;
 import at.yawk.fiction.android.ui.QueryFragment;
 import at.yawk.fiction.android.ui.StoryFragment;
@@ -17,6 +18,7 @@ import javax.inject.Singleton;
                 QueryFragment.class,
                 StoryFragment.class,
                 MainPreferenceFragment.class,
+                DownloadManagerFragment.class,
         }
 )
 public class FragmentModule {

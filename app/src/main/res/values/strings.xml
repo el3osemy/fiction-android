@@ -17,4 +17,7 @@
     <string name="settings">Settings</string>
     <string name="open_queries">Open Query Drawer</string>
     <string name="close_queries">Close Query Drawer</string>
+    <string name="downloads">Downloads</string>
+    <string name="cancel_task">Cancel Task</string>
+    <string name="no_downloads">No Downloads</string>
 </resources>
