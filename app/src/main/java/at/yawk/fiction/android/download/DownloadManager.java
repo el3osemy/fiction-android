@@ -30,9 +30,11 @@ public class DownloadManager implements DownloadManagerMetrics {
 
     @Inject
     DownloadManager(
-            ChapterDownloadTaskHandler chapterDownloadTaskHandler
+            ChapterDownloadTaskHandler chapterDownloadTaskHandler,
+            StoryUpdateTaskHandler storyUpdateTaskHandler
     ) {
         addHandler(ChapterDownloadTask.class, chapterDownloadTaskHandler);
+        addHandler(StoryUpdateTask.class, storyUpdateTaskHandler);
     }
 
     private <T extends DownloadTask> void addHandler(Class<T> type, DownloadTaskHandler<T> handler) {

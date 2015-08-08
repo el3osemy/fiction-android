@@ -2,6 +2,9 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -10,6 +13,8 @@ import android.widget.TextView;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
+import at.yawk.fiction.android.download.DownloadManager;
+import at.yawk.fiction.android.download.StoryListUpdateTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
@@ -32,6 +37,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     @Inject Toasts toasts;
     @Inject TaskManager taskManager;
     @Inject FragmentUiRunner uiRunner;
+    @Inject DownloadManager downloadManager;
 
     @Bind(R.id.storyList) ListView storyList;
 
@@ -54,6 +60,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
 
         query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
         pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
@@ -135,6 +143,23 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         downloadedChapterDisplay.setText(wrapper.getDownloadedChapterCount() + "/");
 
         storyViewMap.put(wrapper, view);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.query_story_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.updateAll:
+            downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(stories)));
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     ///////////////////////////////
