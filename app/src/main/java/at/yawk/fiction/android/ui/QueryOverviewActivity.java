@@ -41,6 +41,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Bind(R.id.queryList) DragSortListView queryList;
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
     @Bind(R.id.createQuery) View createQuery;
+    @Bind(R.id.settings) View settings;
 
     private ActionMode actionMode;
 
@@ -85,6 +86,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
         });
 
         createQuery.setOnClickListener(v -> editQuery(null));
+        settings.setOnClickListener(v -> startActivity(new Intent(this, MainPreferenceActivity.class)));
     }
 
     private void longClickQuery(int position) {
@@ -185,9 +187,6 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.settings:
-            startActivity(new Intent(this, MainPreferenceActivity.class));
-            return true;
         case R.id.import_ffn:
             new Thread(importer).start();
             return true;

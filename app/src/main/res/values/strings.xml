@@ -14,4 +14,5 @@
     <string name="dark">Dark</string>
     <string name="dark_amoled">Dark (AMOLED)</string>
     <string name="theme">Theme</string>
+    <string name="settings">Settings</string>
 </resources>

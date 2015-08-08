@@ -28,16 +28,19 @@
             android:id="@+id/createQuery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="?attr/listChoiceBackgroundIndicator"
+            style="@style/DrawerButton"
             android:drawableLeft="@drawable/ic_add_white_24dp"
-            android:drawablePadding="5dp"
-            android:gravity="left|center_vertical"
-            android:minHeight="?android:attr/listPreferredItemHeightSmall"
-            android:paddingLeft="@dimen/abc_list_item_padding_horizontal_material"
-            android:paddingRight="@dimen/abc_list_item_padding_horizontal_material"
             android:text="@string/create_query"
-            android:textAppearance="?attr/textAppearanceListItem" />
+            android:layout_above="@+id/settings" />
+
+        <Button
+            android:id="@+id/settings"
+            style="@style/DrawerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:drawableLeft="@drawable/ic_settings_white_24dp"
+            android:text="@string/settings" />
     </RelativeLayout>
 
 </android.support.v4.widget.DrawerLayout>
