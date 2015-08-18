@@ -34,6 +34,7 @@ public class TextStorage {
         try {
             return objectStorage.load(FormattedText.class, getStorageId(hash));
         } catch (NotFoundException | UnreadableException e) {
+            log.warn("Could not load text {}", hash, e);
             return null;
         }
     }

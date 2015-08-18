@@ -30,7 +30,6 @@ import org.jsoup.safety.Whitelist;
  */
 @Singleton
 public class EpubBuilder {
-    @Inject StorageManager storageManager;
     @Inject RootFile root;
 
     public void openEpub(Activity activity, StoryWrapper story) throws IOException {

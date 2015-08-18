@@ -22,7 +22,6 @@ import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
-import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.EpubBuilder;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
@@ -134,7 +133,6 @@ public class StoryFragment extends ContentViewFragment {
             descriptionView.setText("");
         }
 
-
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
         for (int i = 0; i < chapters.size(); i++) {
             ChapterHolder holder;
@@ -191,7 +189,7 @@ public class StoryFragment extends ContentViewFragment {
             this.index = index;
 
             readBox = (CheckBox) view.findViewById(R.id.chapterRead);
-            readBox.setOnCheckedChangeListener((buttonView, isChecked) -> setRead(isChecked));
+            readBox.setOnClickListener(buttonView -> setRead(readBox.isChecked()));
             readBox.setOnLongClickListener(v -> {
                 showDialog(new AsyncAction(R.string.read_until_here, () -> {
                     for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
