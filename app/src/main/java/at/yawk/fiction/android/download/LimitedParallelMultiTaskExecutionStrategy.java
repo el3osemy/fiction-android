@@ -27,10 +27,10 @@ public class LimitedParallelMultiTaskExecutionStrategy implements MultiTaskExecu
                 completionCallback.run();
             }
         };
-        executeOne(executor, new Semaphore(limit), iterator, wrappedCompletionCallback, cancelProvider);
+        executeSome(executor, new Semaphore(limit), iterator, wrappedCompletionCallback, cancelProvider);
     }
 
-    private static void executeOne(Executor executor,
+    private static void executeSome(Executor executor,
                                    Semaphore semaphore,
                                    Iterator<Runnable> taskIterator,
                                    Runnable completionCallback,
@@ -40,7 +40,7 @@ public class LimitedParallelMultiTaskExecutionStrategy implements MultiTaskExecu
             return;
         }
 
-        if (semaphore.tryAcquire()) {
+        while (semaphore.tryAcquire()) {
             Runnable task;
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized (taskIterator) {
@@ -56,7 +56,7 @@ public class LimitedParallelMultiTaskExecutionStrategy implements MultiTaskExecu
                     task.run();
                 } finally {
                     semaphore.release();
-                    executeOne(executor, semaphore, taskIterator, completionCallback, cancelProvider);
+                    executeSome(executor, semaphore, taskIterator, completionCallback, cancelProvider);
                 }
             });
         }
