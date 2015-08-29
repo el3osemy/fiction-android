@@ -43,7 +43,7 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     @Override
     public Pageable<StoryWrapper> searchWrappers(SearchQuery searchQuery) {
         LocalSearchQuery localSearchQuery = (LocalSearchQuery) searchQuery;
-        log.info("Query: {}", localSearchQuery);
+        log.debug("Query: {}", localSearchQuery);
         return i -> {
             Pageable.Page<StoryWrapper> page = new Pageable.Page<>();
             page.setLast(true);
@@ -54,7 +54,7 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
             }
 
             List<StoryWrapper> stories = new ArrayList<>();
-            for (StoryWrapper wrapper : storageManager.listStories()) {
+            for (StoryWrapper wrapper : storageManager.listStories(localSearchQuery::acceptIndex)) {
                 if (localSearchQuery.accept(wrapper)) {
                     stories.add(wrapper);
                 }

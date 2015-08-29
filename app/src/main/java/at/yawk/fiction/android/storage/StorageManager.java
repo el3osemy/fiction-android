@@ -4,10 +4,12 @@ import at.yawk.fiction.Story;
 import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
+import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +22,15 @@ import lombok.extern.slf4j.Slf4j;
 public class StorageManager {
     @Inject ObjectStorageManager objectStorageManager;
     @Inject ProviderManager providerManager;
+    Index index;
 
     final LoadingCache<String, StoryWrapper> storyCache;
 
     @Inject
-    StorageManager() {
+    StorageManager(Index index) {
+        this.index = index;
+        index.storageManager = this;
+
         storyCache = CacheBuilder.newBuilder().softValues().build(CacheLoader.from(input -> {
             StoryWrapper wrapper;
             try {
@@ -63,14 +69,27 @@ public class StorageManager {
     }
 
     public StoryWrapper getStory(Story story) {
-        return getStory0(getObjectId(story));
+        return getStory(getObjectId(story));
     }
 
-    private StoryWrapper getStory0(String id) {
+    StoryWrapper getStory(String id) {
         return storyCache.getUnchecked(id);
     }
 
     public Iterable<StoryWrapper> listStories() {
-        return Iterables.transform(objectStorageManager.list("story"), this::getStory0);
+        return listStories(null);
+    }
+
+    /**
+     * List all stories based on a given condition.
+     *
+     * Returned stories are not guaranteed to satisfy this condition - this is up to the implementation.
+     */
+    public Iterable<StoryWrapper> listStories(@Nullable Predicate<StoryIndexEntry> indexFilter) {
+        Iterable<String> keys = objectStorageManager.list("story");
+        if (indexFilter != null) {
+            keys = Iterables.filter(keys, key -> indexFilter.apply(index.findIndexEntry(key)));
+        }
+        return Iterables.transform(keys, this::getStory);
     }
 }

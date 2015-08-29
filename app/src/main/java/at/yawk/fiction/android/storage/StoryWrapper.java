@@ -45,6 +45,7 @@ public class StoryWrapper {
     @Inject PojoMerger pojoMerger;
     @Inject EventBus eventBus;
     @Inject ProviderManager providerManager;
+    @Inject Index index;
 
     @Getter int downloadedChapterCount = -1;
     @Getter int readChapterCount = -1;
@@ -53,6 +54,14 @@ public class StoryWrapper {
     StoryWrapper() {
         // required for dagger
         throw new UnsupportedOperationException();
+    }
+
+    StoryIndexEntry createIndexEntry() throws IllegalStateException {
+        StoryIndexEntry entry = new StoryIndexEntry();
+        entry.setTotalChapterCount(getStory().getChapters().size());
+        entry.setReadChapterCount(readChapterCount);
+        entry.setDownloadedChapterCount(downloadedChapterCount);
+        return entry;
     }
 
     public Story getStory() {
@@ -131,6 +140,7 @@ public class StoryWrapper {
         } finally {
             lock.readLock().unlock();
         }
+        index.invalidate(this);
         postUpdateEvent();
     }
 
