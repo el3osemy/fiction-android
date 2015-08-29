@@ -16,11 +16,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import java.util.ArrayList;
 import javax.inject.Inject;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 @ContentView(R.layout.download_list)
 public class DownloadManagerFragment extends ContentViewFragment {
     @Inject DownloadManager downloadManager;
@@ -41,6 +42,7 @@ public class DownloadManagerFragment extends ContentViewFragment {
             @Override
             protected void decorateView(View view, int position) {
                 DownloadManagerMetrics.Task task = getItem(position);
+                log.info("task {} view {}", task, view);
                 decoratorMap.put(task, view);
                 new TaskDecorator(view).decorate(task);
             }
@@ -56,7 +58,8 @@ public class DownloadManagerFragment extends ContentViewFragment {
         DownloadManagerMetrics.Task task = event.getTask();
         View view = decoratorMap.getByKey(task);
         if (view != null) {
-            new TaskDecorator(view).decorate(task);
+            //new TaskDecorator(view).decorate(task);
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -70,18 +73,17 @@ public class DownloadManagerFragment extends ContentViewFragment {
         adapter.addAll(downloadManager.getTasks());
     }
 
-    @RequiredArgsConstructor
     static class TaskDecorator {
-        private final View view;
-
         @Bind(R.id.taskName) TextView taskName;
         @Bind(R.id.taskProgressText) TextView taskProgressText;
         @Bind(R.id.taskProgress) ProgressBar taskProgress;
         @Bind(R.id.cancelTask) View cancelTask;
 
-        void decorate(DownloadManagerMetrics.Task task) {
+        TaskDecorator(View view) {
             ButterKnife.bind(this, view);
+        }
 
+        void decorate(DownloadManagerMetrics.Task task) {
             taskName.setText(task.getName());
 
             long current = task.getCurrentProgress();

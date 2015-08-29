@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -77,6 +78,7 @@ public class DownloadManager implements DownloadManagerMetrics {
     }
 
     @RequiredArgsConstructor
+    @ToString(callSuper = true, of = { "task", "running", "cancelled", "parent" })
     private class Runner<T extends DownloadTask> implements Runnable, Task, ProgressListener {
         final MultiTaskExecutionStrategy multiTaskExecutionStrategy;
         final T task;
@@ -111,7 +113,10 @@ public class DownloadManager implements DownloadManagerMetrics {
                 runner.progressListener = progressListener.createSubLevel();
                 runner.parent = this;
                 runner.addCompletionCallback(
-                        () -> progressListener.progressDeterminate(completed.incrementAndGet(), tasks.size()));
+                        () -> {
+                            log.info("completed split task, notifying {}", progressListener);
+                            progressListener.progressDeterminate(completed.incrementAndGet(), tasks.size());
+                        });
                 runners.add(runner);
             }
 
@@ -140,8 +145,7 @@ public class DownloadManager implements DownloadManagerMetrics {
             complete();
         }
 
-        void addCompletionCallback(@Nullable Runnable callback) {
-            if (callback == null) { return; }
+        void addCompletionCallback(Runnable callback) {
             if (completionCallback == null) {
                 completionCallback = callback;
             } else {
