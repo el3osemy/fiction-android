@@ -1,12 +1,12 @@
 package at.yawk.fiction.android.download;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author yawkat
  */
 public interface DownloadManagerMetrics {
-    List<Task> getTasks();
+    Collection<Task> getTasks();
 
     interface Task {
         boolean isRunning();

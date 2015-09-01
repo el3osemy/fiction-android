@@ -9,11 +9,8 @@ import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.download.task.TaskUpdateEvent;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.event.Subscribe;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
+import javax.annotation.concurrent.GuardedBy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +23,8 @@ public class DownloadManagerNotification {
     @Inject Application application;
     @Inject DownloadManager metrics;
 
-    private final AtomicInteger nextId = new AtomicInteger();
+    @GuardedBy("this")
+    private volatile int nextId = 0;
 
     private final Map<DownloadManagerMetrics.Task, Integer> shownNotificationIds = new HashMap<>();
 
@@ -37,7 +35,7 @@ public class DownloadManagerNotification {
 
     @Subscribe
     public void managerUpdate(ManagerUpdateEvent event) {
-        List<DownloadManagerMetrics.Task> tasks = metrics.getTasks();
+        Collection<DownloadManagerMetrics.Task> tasks = metrics.getTasks();
         for (DownloadManagerMetrics.Task task : tasks) {
             buildNotification(tasks, task);
         }
@@ -48,8 +46,8 @@ public class DownloadManagerNotification {
         buildNotification(metrics.getTasks(), event.getTask());
     }
 
-    private void buildNotification(List<DownloadManagerMetrics.Task> allTasks, DownloadManagerMetrics.Task task) {
-        boolean running = task.isRunning();
+    private void buildNotification(Collection<DownloadManagerMetrics.Task> allTasks, DownloadManagerMetrics.Task task) {
+        boolean running = task.isRunning() && allTasks.contains(task);
 
         int id;
         synchronized (this) {
@@ -60,7 +58,7 @@ public class DownloadManagerNotification {
             }
 
             if (idObj == null) {
-                idObj = nextId.getAndIncrement();
+                idObj = nextId++;
                 shownNotificationIds.put(task, idObj);
             }
             id = idObj;
