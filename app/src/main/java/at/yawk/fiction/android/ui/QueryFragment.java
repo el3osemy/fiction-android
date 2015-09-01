@@ -15,7 +15,7 @@ import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
 import at.yawk.fiction.android.download.DownloadManager;
-import at.yawk.fiction.android.download.StoryListUpdateTask;
+import at.yawk.fiction.android.download.task.StoryListUpdateTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;

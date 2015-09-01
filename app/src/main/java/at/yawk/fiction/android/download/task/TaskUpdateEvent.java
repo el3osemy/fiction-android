@@ -1,5 +1,6 @@
-package at.yawk.fiction.android.download;
+package at.yawk.fiction.android.download.task;
 
+import at.yawk.fiction.android.download.DownloadManagerMetrics;
 import lombok.Value;
 
 /**

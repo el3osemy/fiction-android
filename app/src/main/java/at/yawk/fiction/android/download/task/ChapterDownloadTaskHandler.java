@@ -1,7 +1,8 @@
-package at.yawk.fiction.android.download;
+package at.yawk.fiction.android.download.task;
 
 import at.yawk.fiction.Chapter;
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.download.ProgressListener;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.PojoMerger;
@@ -12,9 +13,8 @@ import javax.inject.Singleton;
  * @author yawkat
  */
 @Singleton
-class ChapterDownloadTaskHandler implements DownloadTaskHandler<ChapterDownloadTask> {
+public class ChapterDownloadTaskHandler implements DownloadTaskHandler<ChapterDownloadTask> {
     @Inject PojoMerger pojoMerger;
-    @Inject ProviderManager providerManager;
 
     @Override
     public void run(ChapterDownloadTask task, ProgressListener progressListener) throws Exception {

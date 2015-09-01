@@ -2,6 +2,7 @@ package at.yawk.fiction.android.download;
 
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.download.task.*;
 import at.yawk.fiction.android.event.EventBus;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;

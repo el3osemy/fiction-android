@@ -1,4 +1,4 @@
-package at.yawk.fiction.android.download;
+package at.yawk.fiction.android.download.task;
 
 import at.yawk.fiction.android.storage.StoryWrapper;
 import java.util.ArrayList;

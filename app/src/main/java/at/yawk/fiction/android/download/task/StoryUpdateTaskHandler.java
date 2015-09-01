@@ -1,6 +1,7 @@
-package at.yawk.fiction.android.download;
+package at.yawk.fiction.android.download.task;
 
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.download.ProgressListener;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.PojoMerger;
 import javax.inject.Inject;
@@ -8,7 +9,7 @@ import javax.inject.Inject;
 /**
  * @author yawkat
  */
-class StoryUpdateTaskHandler implements DownloadTaskHandler<StoryUpdateTask> {
+public class StoryUpdateTaskHandler implements DownloadTaskHandler<StoryUpdateTask> {
     @Inject PojoMerger pojoMerger;
 
     @Override

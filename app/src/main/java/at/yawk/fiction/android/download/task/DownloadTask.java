@@ -1,4 +1,4 @@
-package at.yawk.fiction.android.download;
+package at.yawk.fiction.android.download.task;
 
 /**
  * @author yawkat

@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 import at.yawk.fiction.android.R;
+import at.yawk.fiction.android.download.task.TaskUpdateEvent;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.event.Subscribe;
 import java.util.ArrayList;

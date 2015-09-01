@@ -9,7 +9,7 @@ import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.download.DownloadManager;
 import at.yawk.fiction.android.download.DownloadManagerMetrics;
 import at.yawk.fiction.android.download.ManagerUpdateEvent;
-import at.yawk.fiction.android.download.TaskUpdateEvent;
+import at.yawk.fiction.android.download.task.TaskUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
 import butterknife.Bind;
