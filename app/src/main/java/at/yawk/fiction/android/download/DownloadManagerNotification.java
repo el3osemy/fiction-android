@@ -3,12 +3,15 @@ package at.yawk.fiction.android.download;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.download.task.TaskUpdateEvent;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.event.Subscribe;
+import at.yawk.fiction.android.ui.DownloadManagerActivity;
 import java.util.*;
 import javax.annotation.concurrent.GuardedBy;
 import javax.inject.Inject;
@@ -81,6 +84,8 @@ public class DownloadManagerNotification {
             builder.setContentText(StringUtils.join(contentText, " • "));
             builder.setProgress((int) max, (int) current, max == -1);
             builder.setOngoing(true);
+            builder.setContentIntent(PendingIntent.getActivity(
+                    application, id, new Intent(application, DownloadManagerActivity.class), 0));
             Notification notification = builder.build();
 
             notificationManager.notify(id, notification);
