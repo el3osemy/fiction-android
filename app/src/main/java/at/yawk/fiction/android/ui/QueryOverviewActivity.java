@@ -89,6 +89,20 @@ public class QueryOverviewActivity extends ContentViewActivity {
                 case R.id.editQuery:
                     editQuery(query);
                     return true;
+                case R.id.up:
+                    List<QueryWrapper> queries = queryManager.getQueries();
+                    int oldIndex = queries.indexOf(query);
+                    if (oldIndex > 0) {
+                        queryManager.moveQuery(oldIndex, oldIndex - 1);
+                    }
+                    return true;
+                case R.id.down:
+                    queries = queryManager.getQueries();
+                    oldIndex = queries.indexOf(query);
+                    if (oldIndex < queries.size() - 1) {
+                        queryManager.moveQuery(oldIndex, oldIndex + 1);
+                    }
+                    return true;
                 default:
                     return false;
                 }

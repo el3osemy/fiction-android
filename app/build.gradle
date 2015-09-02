@@ -42,7 +42,6 @@ dependencies {
     provided 'org.projectlombok:lombok:1.16.4'
     provided 'com.google.code.findbugs:annotations:2.0.2'
     compile 'org.slf4j:slf4j-api:1.7.12'
-    compile 'com.vandalsoftware.android:dslv:0.6.3'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.squareup.dagger:dagger:1.2.2'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
@@ -52,12 +51,13 @@ dependencies {
 
 mdicons {
     pattern 'ic_edit_white_24dp'
-    pattern 'ic_reorder_white_24dp'
     pattern 'ic_refresh_white_24dp'
     pattern 'ic_file_download_white_24dp'
     pattern 'ic_add_white_24dp'
     pattern 'ic_settings_white_24dp'
     pattern 'ic_cancel_white_24dp'
+    pattern 'ic_keyboard_arrow_up_white_24dp'
+    pattern 'ic_keyboard_arrow_down_white_24dp'
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {
