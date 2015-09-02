@@ -53,7 +53,10 @@
 
     <!-- -->
 
-    <style name="DrawerItem">
+    <!-- overridden in v16 -->
+    <style name="DrawerItemFontBase" />
+
+    <style name="DrawerItem" parent="DrawerItemFontBase">
         <!--
          https://www.google.de/design/spec/patterns/navigation-drawer.html#navigation-drawer-specs
          Icons are 24dp
@@ -68,7 +71,7 @@
     </style>
 
     <style name="DrawerButton" parent="DrawerItem">
-        <item name="android:background">?attr/listChoiceBackgroundIndicator</item>
+        <item name="android:background">@drawable/selectable_button</item>
     </style>
 
     <style name="DrawerSubHeader" parent="DrawerItem">

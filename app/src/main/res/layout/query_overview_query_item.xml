@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    style="@style/DrawerButton"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/DrawerButton"
-    android:text="Query Name"
-    android:id="@+id/queryName"/>
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/queryName"
+        style="@style/DrawerItemFontBase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Query Name" />
+
+</RelativeLayout>
