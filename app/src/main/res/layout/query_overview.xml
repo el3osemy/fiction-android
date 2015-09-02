@@ -24,48 +24,51 @@
             android:layout_below="@id/toolbar" />
     </RelativeLayout>
 
-    <RelativeLayout
+
+    <ScrollView
         android:id="@+id/left_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:choiceMode="singleChoice"
         android:background="@color/background_floating_material_dark">
 
-        <com.mobeta.android.dslv.DragSortListView
-            android:id="@+id/queryList"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/createQuery"
-            android:layout_alignParentTop="true"
-            android:divider="@null" />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/createQuery"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/DrawerButton"
-            android:drawableLeft="@drawable/ic_add_white_24dp"
-            android:text="@string/create_query"
-            android:layout_above="@+id/downloads" />
+            <Button
+                android:id="@+id/createQuery"
+                style="@style/DrawerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_add_white_24dp"
+                android:text="@string/create_query" />
 
-        <Button
-            android:id="@+id/downloads"
-            style="@style/DrawerButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/settings"
-            android:drawableLeft="@drawable/ic_file_download_white_24dp"
-            android:text="@string/downloads" />
+            <Button
+                android:id="@+id/downloads"
+                style="@style/DrawerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_file_download_white_24dp"
+                android:text="@string/downloads" />
 
-        <Button
-            android:id="@+id/settings"
-            style="@style/DrawerButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:drawableLeft="@drawable/ic_settings_white_24dp"
-            android:text="@string/settings" />
-    </RelativeLayout>
+            <Button
+                android:id="@+id/settings"
+                style="@style/DrawerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_settings_white_24dp"
+                android:text="@string/settings" />
+
+            <LinearLayout
+                android:id="@+id/queryList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@null"
+                android:isScrollContainer="false"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
 
 </android.support.v4.widget.DrawerLayout>

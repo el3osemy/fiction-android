@@ -4,8 +4,10 @@
         android:id="@+id/editQuery"
         android:icon="@drawable/ic_edit_white_24dp"
         android:title="@string/edit_query" />
+    <!--
     <item
         android:id="@+id/reorder"
         android:icon="@drawable/ic_reorder_white_24dp"
         android:title="@string/reorder" />
+    -->
 </menu>

@@ -8,11 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.*;
 import android.widget.TextView;
 import at.yawk.fiction.android.Cleanup;
 import at.yawk.fiction.android.Importer;
@@ -24,8 +20,6 @@ import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import butterknife.Bind;
-import com.mobeta.android.dslv.DragSortListView;
-import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -42,9 +36,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Inject Importer importer;
     @Inject Cleanup cleanup;
 
-    private ArrayAdapter<QueryWrapper> queryArrayAdapter;
-
-    @Bind(R.id.queryList) DragSortListView queryList;
+    @Bind(R.id.queryList) ViewGroup queryList;
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
     @Bind(R.id.createQuery) View createQuery;
     @Bind(R.id.settings) View settings;
@@ -60,33 +52,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
 
         setSupportActionBar(toolbar);
 
-        queryArrayAdapter = new SimpleArrayAdapter<QueryWrapper>(
-                this, R.layout.query_overview_query_item, new ArrayList<>()) {
-            @Override
-            protected void decorateView(View view, int position) {
-                QueryWrapper query = getItem(position);
-                ((TextView) view.findViewById(R.id.queryName)).setText(getName(query));
-                view.setSelected(query.getId().equals(queryManager.getSelectedQueryId()));
-            }
-        };
-
         updateQueries(true);
-
-        queryList.setAdapter(queryArrayAdapter);
-
-        queryList.setOnItemClickListener((parent, view, position, id) -> {
-            showQuery(queryArrayAdapter.getItem(position), true);
-            drawerParent.closeDrawers();
-        });
-        queryList.setOnItemLongClickListener((parent, view, position, id) -> {
-            longClickQuery(position);
-            return true;
-        });
-        queryList.setDropListener((from, to) -> {
-            queryManager.moveQuery(from, to);
-            updateQueries(false);
-        });
-        queryList.setDragEnabled(false);
 
         createQuery.setOnClickListener(v -> editQuery(null));
         settings.setOnClickListener(v -> startActivity(new Intent(this, MainPreferenceActivity.class)));
@@ -103,12 +69,11 @@ public class QueryOverviewActivity extends ContentViewActivity {
         drawerParent.setDrawerListener(drawerToggle);
     }
 
-    private void longClickQuery(int position) {
-        QueryWrapper contextQuery = queryArrayAdapter.getItem(position);
+    private void longClickQuery(QueryWrapper query) {
         actionMode = startActionMode(new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.setTitle(getName(contextQuery));
+                mode.setTitle(getName(query));
                 mode.getMenuInflater().inflate(R.menu.query_context, menu);
                 return true;
             }
@@ -122,11 +87,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                 case R.id.editQuery:
-                    editQuery(contextQuery);
-                    return true;
-                case R.id.reorder:
-                    queryList.setDragEnabled(true);
-                    item.setVisible(false);
+                    editQuery(query);
                     return true;
                 default:
                     return false;
@@ -140,16 +101,29 @@ public class QueryOverviewActivity extends ContentViewActivity {
         });
     }
 
-    @Override
-    public void onActionModeFinished(ActionMode mode) {
-        super.onActionModeFinished(mode);
-        queryList.setDragEnabled(false);
-    }
-
     private void updateQueries(boolean forceQueryReload) {
         List<QueryWrapper> queries = queryManager.getQueries();
-        queryArrayAdapter.clear();
-        queryArrayAdapter.addAll(queries);
+
+        for (int i = 0; i < queries.size(); i++) {
+            View view;
+            if (queryList.getChildCount() <= i) {
+                view = getLayoutInflater().inflate(R.layout.query_overview_query_item, queryList);
+            } else {
+                view = queryList.getChildAt(i);
+            }
+            QueryWrapper query = queries.get(i);
+            ((TextView) view.findViewById(R.id.queryName)).setText(getName(query));
+            view.setSelected(query.getId().equals(queryManager.getSelectedQueryId()));
+
+            view.setOnLongClickListener(v -> {
+                longClickQuery(query);
+                return true;
+            });
+            view.setOnClickListener(v -> {
+                showQuery(query, true);
+                drawerParent.closeDrawers();
+            });
+        }
 
         for (QueryWrapper query : queries) {
             if (query.getId().equals(queryManager.getSelectedQueryId())) {
@@ -171,9 +145,6 @@ public class QueryOverviewActivity extends ContentViewActivity {
         ft.commit();
 
         toolbar.setTitle(getName(query));
-
-        // update selected status
-        queryArrayAdapter.notifyDataSetChanged();
 
         queryManager.setSelectedQueryId(query.getId());
     }
