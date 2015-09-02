@@ -9,6 +9,8 @@
     <style name="FNoActionBar.Dark">
         <item name="android:windowBackground">?attr/primaryBackground</item>
         <item name="primaryBackground">@color/background_material_dark</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
 
