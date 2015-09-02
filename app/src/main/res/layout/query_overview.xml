@@ -64,6 +64,12 @@
                 android:drawableLeft="@drawable/ic_settings_white_24dp"
                 android:text="@string/settings" />
 
+            <TextView
+                style="@style/DrawerSubHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Queries" />
+
             <LinearLayout
                 android:id="@+id/queryList"
                 android:layout_width="match_parent"

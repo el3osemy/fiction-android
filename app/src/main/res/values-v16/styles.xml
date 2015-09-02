@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DrawerItem">
+        <!--
+         https://www.google.de/design/spec/patterns/navigation-drawer.html#navigation-drawer-specs
+         Icons are 24dp
+        -->
+        <item name="android:drawablePadding">32dp</item>
+
+        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:paddingLeft">@dimen/abc_list_item_padding_horizontal_material</item>
+        <item name="android:paddingRight">@dimen/abc_list_item_padding_horizontal_material</item>
+        <item name="android:textAppearance">?attr/textAppearanceListItem</item>
+
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+</resources>

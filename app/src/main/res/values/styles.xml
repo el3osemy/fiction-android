@@ -53,7 +53,7 @@
 
     <!-- -->
 
-    <style name="DrawerButton">
+    <style name="DrawerItem">
         <!--
          https://www.google.de/design/spec/patterns/navigation-drawer.html#navigation-drawer-specs
          Icons are 24dp
@@ -65,7 +65,16 @@
         <item name="android:paddingLeft">@dimen/abc_list_item_padding_horizontal_material</item>
         <item name="android:paddingRight">@dimen/abc_list_item_padding_horizontal_material</item>
         <item name="android:textAppearance">?attr/textAppearanceListItem</item>
+    </style>
+
+    <style name="DrawerButton" parent="DrawerItem">
         <item name="android:background">?attr/listChoiceBackgroundIndicator</item>
+    </style>
+
+    <style name="DrawerSubHeader" parent="DrawerItem">
+        <item name="android:alpha">0.54</item>
+        <item name="android:background">@drawable/border</item>
+        <item name="android:layout_marginTop">8dp</item>
     </style>
 
     <color name="chaptersReadNone">@color/secondary_text_default_material_dark</color>
