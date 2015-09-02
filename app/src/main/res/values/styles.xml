@@ -1,10 +1,13 @@
 <resources>
 
     <attr name="primaryBackground" format="color" />
+    <attr name="toolbarBackground" format="color" />
 
     <!-- Base themes -->
 
-    <style name="FNoActionBar" parent="Theme.AppCompat.NoActionBar" />
+    <style name="FNoActionBar" parent="Theme.AppCompat.NoActionBar">
+        <item name="toolbarBackground">#ff303f9f</item>
+    </style>
 
     <style name="FNoActionBar.Dark">
         <item name="android:windowBackground">?attr/primaryBackground</item>

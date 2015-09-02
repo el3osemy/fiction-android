@@ -2,6 +2,7 @@ package at.yawk.fiction.android.ui;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.FragmentTransaction;
@@ -36,6 +37,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Inject Importer importer;
     @Inject Cleanup cleanup;
 
+    @Bind(R.id.left_drawer) View drawer;
     @Bind(R.id.queryList) ViewGroup queryList;
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
     @Bind(R.id.createQuery) View createQuery;
@@ -67,6 +69,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
             }
         };
         drawerParent.setDrawerListener(drawerToggle);
+        drawerParent.setStatusBarBackgroundColor(((ColorDrawable) toolbar.getBackground()).getColor());
     }
 
     private void longClickQuery(QueryWrapper query) {
