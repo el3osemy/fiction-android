@@ -2,6 +2,7 @@ package at.yawk.fiction.android.download;
 
 import at.yawk.fiction.android.download.task.DownloadTask;
 import at.yawk.fiction.android.download.task.DownloadTaskHandler;
+import at.yawk.fiction.android.download.task.TaskUpdateEvent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,6 +24,7 @@ class SimpleTask<T extends DownloadTask> extends AbstractTask<T> {
     protected synchronized void fireCompletion() {
         complete = true;
         super.fireCompletion();
+        getManager().bus.post(new TaskUpdateEvent(this));
     }
 
     @Override

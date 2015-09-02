@@ -39,7 +39,7 @@ class SplitTask extends AbstractTask<SplittableDownloadTask> {
 
     @Override
     public boolean isRunning() {
-        return completed.get() < taskCount;
+        return completed.get() < taskCount && !cancelled;
     }
 
     @Override
