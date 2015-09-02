@@ -10,19 +10,21 @@ import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
+import at.yawk.fiction.android.download.DownloadManager;
 import at.yawk.fiction.android.download.task.ChapterDownloadTask;
 import at.yawk.fiction.android.download.task.ChapterRangeDownloadTask;
-import at.yawk.fiction.android.download.DownloadManager;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.EpubBuilder;
+import at.yawk.fiction.android.storage.PojoMerger;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
@@ -45,6 +47,7 @@ public class StoryFragment extends ContentViewFragment {
     @Inject EpubBuilder epubBuilder;
     @Inject DownloadManager downloadManager;
     @Inject FragmentUiRunner uiRunner;
+    @Inject PojoMerger merger;
 
     private TaskContext taskContext = new TaskContext();
 
@@ -55,6 +58,7 @@ public class StoryFragment extends ContentViewFragment {
     @Bind(R.id.author) TextView authorView;
     @Bind(R.id.tags) TextView tagsView;
     @Bind(R.id.description) TextView descriptionView;
+    @Bind(R.id.updateStory) Button updateStory;
 
     public void setStory(StoryWrapper wrapper) {
         Bundle args = new Bundle();
@@ -105,6 +109,15 @@ public class StoryFragment extends ContentViewFragment {
             }));
             return false;
         });
+        updateStory.setOnClickListener(v -> taskManager.execute(taskContext, () -> {
+            Story story = merger.clone(wrapper.getStory());
+            try {
+                wrapper.getProvider().fetchStory(story);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            wrapper.updateStory(story);
+        }));
         refresh();
     }
 
@@ -134,25 +147,30 @@ public class StoryFragment extends ContentViewFragment {
         }
 
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
-        for (int i = 0; i < chapters.size(); i++) {
-            ChapterHolder holder;
-            if (i >= chapterHolders.size()) {
-                View view = getActivity().getLayoutInflater().inflate(R.layout.chapter, chapterGroup, false);
-                chapterGroup.addView(view);
-                chapterHolders.add(holder = new ChapterHolder(view, i));
-            } else {
-                holder = chapterHolders.get(i);
+        if (chapters == null || chapters.isEmpty()) {
+            updateStory.setVisibility(View.VISIBLE);
+        } else {
+            updateStory.setVisibility(View.GONE);
+            for (int i = 0; i < chapters.size(); i++) {
+                ChapterHolder holder;
+                if (i >= chapterHolders.size()) {
+                    View view = getActivity().getLayoutInflater().inflate(R.layout.chapter, chapterGroup, false);
+                    chapterGroup.addView(view);
+                    chapterHolders.add(holder = new ChapterHolder(view, i));
+                } else {
+                    holder = chapterHolders.get(i);
+                }
+
+                holder.setChapter(chapters.get(i));
             }
 
-            holder.setChapter(chapters.get(i));
-        }
-
-        if (chapters.size() < chapterHolders.size()) {
-            List<ChapterHolder> toRemove = chapterHolders.subList(chapters.size(), chapterHolders.size());
-            for (int i = 0; i < toRemove.size(); i++) {
-                chapterGroup.removeViewAt(chapters.size() + i);
+            if (chapters.size() < chapterHolders.size()) {
+                List<ChapterHolder> toRemove = chapterHolders.subList(chapters.size(), chapterHolders.size());
+                for (int i = 0; i < toRemove.size(); i++) {
+                    chapterGroup.removeViewAt(chapters.size() + i);
+                }
+                toRemove.clear();
             }
-            toRemove.clear();
         }
     }
 

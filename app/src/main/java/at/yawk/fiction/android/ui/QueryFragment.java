@@ -11,6 +11,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import at.yawk.fiction.Chapter;
 import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
@@ -133,7 +134,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         ((TextView) view.findViewById(R.id.storyTitle)).setText(wrapper.getStory().getTitle());
 
         TextView readChapterDisplay = (TextView) view.findViewById(R.id.readChapterDisplay);
-        int chapterCount = wrapper.getStory().getChapters().size();
+        List<? extends Chapter> chapters = wrapper.getStory().getChapters();
+        int chapterCount = chapters == null ? 0 : chapters.size();
         int readChapterCount = wrapper.getReadChapterCount();
         readChapterDisplay.setText(readChapterCount + "/" + chapterCount);
         if (readChapterCount >= chapterCount) {

@@ -58,7 +58,8 @@ public class StoryWrapper {
 
     StoryIndexEntry createIndexEntry() throws IllegalStateException {
         StoryIndexEntry entry = new StoryIndexEntry();
-        entry.setTotalChapterCount(getStory().getChapters().size());
+        List<? extends Chapter> chapters = getStory().getChapters();
+        entry.setTotalChapterCount(chapters == null ? 0 : chapters.size());
         entry.setReadChapterCount(readChapterCount);
         entry.setDownloadedChapterCount(downloadedChapterCount);
         return entry;
@@ -89,8 +90,8 @@ public class StoryWrapper {
                           System.identityHashCode(merged));
             }
             boolean updated = !merged.equals(data.story);
-            if (merged.getChapters() != null) {
-                List<? extends Chapter> chapters = merged.getChapters();
+            List<? extends Chapter> chapters = merged.getChapters();
+            if (chapters != null) {
                 for (int i = 0; i < chapters.size(); i++) {
                     Chapter chapter = chapters.get(i);
                     FormattedText text = chapter.getText();
@@ -173,9 +174,12 @@ public class StoryWrapper {
         lock.readLock().lock();
         try {
             int readChapterCount = 0;
-            for (int i = 0; i < getStory().getChapters().size(); i++) {
-                if (isChapterRead(i)) {
-                    readChapterCount++;
+            List<? extends Chapter> chapters = getStory().getChapters();
+            if (chapters != null) {
+                for (int i = 0; i < chapters.size(); i++) {
+                    if (isChapterRead(i)) {
+                        readChapterCount++;
+                    }
                 }
             }
             this.readChapterCount = readChapterCount;
@@ -187,7 +191,8 @@ public class StoryWrapper {
     void bakeDownloadedChapterCount() {
         lock.readLock().lock();
         try {
-            int chapterCount = getStory().getChapters().size();
+            List<? extends Chapter> chapters = getStory().getChapters();
+            int chapterCount = chapters == null ? 0 : chapters.size();
             int downloadedChapterCount = 0;
             for (int i = 0; i < chapterCount; i++) {
                 if (isChapterDownloaded(i)) {

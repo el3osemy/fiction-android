@@ -57,24 +57,26 @@ public class EpubBuilder {
         }
 
         List<? extends Chapter> chapters = story.getChapters();
-        for (int i = 0; i < chapters.size(); i++) {
-            Chapter chapter = chapters.get(i);
-            String name = chapter.getName();
-            if (name == null) {
-                name = "Chapter " + (i + 1);
-            }
+        if (chapters != null) {
+            for (int i = 0; i < chapters.size(); i++) {
+                Chapter chapter = chapters.get(i);
+                String name = chapter.getName();
+                if (name == null) {
+                    name = "Chapter " + (i + 1);
+                }
 
-            FormattedText text = wrapper.loadChapterText(i);
-            Resource resource;
-            if (text instanceof HtmlText) {
-                resource = createHtmlResource(Jsoup.clean(((HtmlText) text).getHtml(), Whitelist.basicWithImages()));
-            } else if (text instanceof RawText) {
-                resource = createHtmlResource(StringEscapeUtils.escapeHtml4(((RawText) text).getText()));
-            } else {
-                assert text == null : "Unsupported " + text.getClass().getName();
-                resource = createHtmlResource("Not Downloaded");
+                FormattedText text = wrapper.loadChapterText(i);
+                Resource resource;
+                if (text instanceof HtmlText) {
+                    resource = createHtmlResource(Jsoup.clean(((HtmlText) text).getHtml(), Whitelist.basicWithImages()));
+                } else if (text instanceof RawText) {
+                    resource = createHtmlResource(StringEscapeUtils.escapeHtml4(((RawText) text).getText()));
+                } else {
+                    assert text == null : "Unsupported " + text.getClass().getName();
+                    resource = createHtmlResource("Not Downloaded");
+                }
+                book.addSection(name, resource);
             }
-            book.addSection(name, resource);
         }
 
         EpubWriter writer = new EpubWriter();
