@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.storage;
 
 import com.google.common.base.Supplier;
+import com.google.common.primitives.Primitives;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -31,7 +32,9 @@ public class PojoMerger {
 
     @SuppressWarnings("unchecked")
     private <T> Merger<T> getMerger(Class<T> type) {
-        if (type.isPrimitive()) { return (Merger<T>) IDENTITY; }
+        if (type.isPrimitive() || type.isEnum() || Primitives.isWrapperType(type)) {
+            return (Merger<T>) IDENTITY;
+        }
 
         Merger<?> present = mergers.get(type);
         if (present == null) {
@@ -82,7 +85,7 @@ public class PojoMerger {
 
         @Override
         public Object merge(PojoMerger merger, Object a, Object b) {
-            return a;
+            return a == null ? b : a;
         }
     };
 
