@@ -18,6 +18,8 @@ import at.yawk.fiction.android.Cleanup;
 import at.yawk.fiction.android.Importer;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.WrapperParcelable;
+import at.yawk.fiction.android.event.QueryListUpdateEvent;
+import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
@@ -181,13 +183,9 @@ public class QueryOverviewActivity extends ContentViewActivity {
         return name == null || name.isEmpty() ? "Unnamed Query" : name;
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-
-        if (hasFocus) {
-            updateQueries(false);
-        }
+    @Subscribe
+    public void onQueryListUpdated(QueryListUpdateEvent event) {
+        updateQueries(false);
     }
 
     @Override

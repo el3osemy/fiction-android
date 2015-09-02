@@ -31,7 +31,7 @@ public class QueryWrapperActivity extends ContentViewActivity {
     @Inject ProviderManager providerManager;
     @Inject QueryManager queryManager;
 
-    private QueryWrapper query;
+    private final QueryWrapper query = new QueryWrapper();
 
     private Map<AndroidFictionProvider, SearchQuery> queriesByProvider = new HashMap<>();
     private QueryEditorFragment queryEditorFragment;
@@ -52,14 +52,15 @@ public class QueryWrapperActivity extends ContentViewActivity {
             UUID id = WrapperParcelable.parcelableToObject(queryParcel);
             for (QueryWrapper query : queryManager.getQueries()) {
                 if (query.getId().equals(id)) {
-                    this.query = query;
+                    this.query.setId(query.getId());
+                    this.query.setName(query.getName());
+                    this.query.setQuery(query.getQuery());
                     break;
                 }
             }
         }
 
-        if (query == null) {
-            query = new QueryWrapper();
+        if (query.getId() == null) {
             query.setId(UUID.randomUUID());
             acceptButton.setText(R.string.create_query);
             removeButton.setVisibility(View.GONE);

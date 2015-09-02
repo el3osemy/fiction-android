@@ -1,5 +1,7 @@
 package at.yawk.fiction.android.storage;
 
+import at.yawk.fiction.android.event.EventBus;
+import at.yawk.fiction.android.event.QueryListUpdateEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -7,14 +9,18 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
 @Singleton
+@Slf4j
 public class QueryManager {
     private final ObjectStorageManager objectStorageManager;
     private Holder holder;
+
+    @Inject EventBus bus;
 
     @Inject
     public QueryManager(ObjectStorageManager objectStorageManager) {
@@ -32,6 +38,7 @@ public class QueryManager {
 
     private synchronized void save() {
         objectStorageManager.save(holder, "queryManager");
+        bus.post(new QueryListUpdateEvent());
     }
 
     public synchronized void saveQuery(QueryWrapper wrapper) {
@@ -39,6 +46,7 @@ public class QueryManager {
         for (int i = 0; i < holder.queries.size(); i++) {
             QueryWrapper here = holder.queries.get(i);
             if (here.getId().equals(wrapper.getId())) {
+                log.trace("found {} -> {}", here, wrapper);
                 if (here != wrapper) {
                     here.setName(wrapper.getName());
                     here.setQuery(wrapper.getQuery());
@@ -47,7 +55,10 @@ public class QueryManager {
                 break;
             }
         }
-        if (!found) { holder.queries.add(wrapper); }
+        if (!found) {
+            log.trace("not found, append instead");
+            holder.queries.add(wrapper);
+        }
         save();
     }
 
