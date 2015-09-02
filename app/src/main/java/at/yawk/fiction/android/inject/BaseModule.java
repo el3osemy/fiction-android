@@ -9,6 +9,7 @@ import at.yawk.fiction.android.context.ObjectMapperProvider;
 import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.provider.ProviderLoader;
+import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.impl.PageParserProvider;
 import dagger.Module;
@@ -21,7 +22,7 @@ import javax.inject.Singleton;
 @Module(
         library = true,
         includes = { ObjectMapperProvider.class },
-        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerNotification.class }
+        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerNotification.class, QueryManager.class }
 )
 public class BaseModule {
     final EventBus eventBus = new EventBus(new Handler(Looper.getMainLooper()));

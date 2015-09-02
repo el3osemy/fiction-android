@@ -64,9 +64,9 @@ public class QueryOverviewActivity extends ContentViewActivity {
                 this, R.layout.query_overview_query_item, new ArrayList<>()) {
             @Override
             protected void decorateView(View view, int position) {
-                ((TextView) view.findViewById(R.id.queryName)).setText(getItem(position).getName());
-
-                view.setSelected(getItem(position).getId().equals(queryManager.getSelectedQueryId()));
+                QueryWrapper query = getItem(position);
+                ((TextView) view.findViewById(R.id.queryName)).setText(getName(query));
+                view.setSelected(query.getId().equals(queryManager.getSelectedQueryId()));
             }
         };
 
@@ -108,7 +108,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
         actionMode = startActionMode(new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.setTitle(contextQuery.getName());
+                mode.setTitle(getName(contextQuery));
                 mode.getMenuInflater().inflate(R.menu.query_context, menu);
                 return true;
             }
