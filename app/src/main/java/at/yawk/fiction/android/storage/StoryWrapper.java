@@ -112,6 +112,7 @@ public class StoryWrapper {
             data.story = merged;
             log.trace("saving");
             bakeDownloadedChapterCount();
+            bakeReadChapterCount();
             save();
         } finally {
             lock.writeLock().unlock();
