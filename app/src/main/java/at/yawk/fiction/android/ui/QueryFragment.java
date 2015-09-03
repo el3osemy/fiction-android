@@ -28,6 +28,8 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -135,16 +137,10 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
         TextView readChapterDisplay = (TextView) view.findViewById(R.id.readChapterDisplay);
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
-        int chapterCount = chapters == null ? 0 : chapters.size();
-        int readChapterCount = wrapper.getReadChapterCount();
-        readChapterDisplay.setText(readChapterCount + "/" + chapterCount);
-        if (readChapterCount >= chapterCount) {
-            readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadAll));
-        } else if (readChapterCount > 0) {
-            readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadSome));
-        } else {
-            readChapterDisplay.setTextColor(getResources().getColor(R.color.chaptersReadNone));
-        }
+        readChapterDisplay.setText(wrapper.getReadChapterCount() + "/" +
+                                   (chapters == null ? "?" : Integer.toString(chapters.size())));
+        //noinspection deprecation
+        readChapterDisplay.setTextColor(getResources().getColor(wrapper.getReadProgressType().getColorResource()));
 
         TextView downloadedChapterDisplay = (TextView) view.findViewById(R.id.downloadedChapterDisplay);
         downloadedChapterDisplay.setText(wrapper.getDownloadedChapterCount() + "/");

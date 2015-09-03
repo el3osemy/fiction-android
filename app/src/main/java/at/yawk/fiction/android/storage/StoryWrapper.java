@@ -3,6 +3,7 @@ package at.yawk.fiction.android.storage;
 import at.yawk.fiction.Chapter;
 import at.yawk.fiction.FormattedText;
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.ProgressStatus;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
@@ -240,6 +241,15 @@ public class StoryWrapper {
     public boolean isDownloading(int chapterIndex) {
         ChapterData holder = getChapterHolder(chapterIndex);
         return holder != null && holder.downloading;
+    }
+
+    public ProgressStatus getReadProgressType() {
+        List<? extends Chapter> chapters = getStory().getChapters();
+        return ProgressStatus.of(getReadChapterCount(), chapters == null ? 0 : chapters.size());
+    }
+
+    public ProgressStatus getDownloadProgressType() {
+        return ProgressStatus.of(getDownloadedChapterCount(), getStory().getChapters().size());
     }
 
     @Data

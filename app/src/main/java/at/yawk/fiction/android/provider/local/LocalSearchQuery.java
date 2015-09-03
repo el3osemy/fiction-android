@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider.local;
 
 import at.yawk.fiction.SearchQuery;
+import at.yawk.fiction.android.ProgressStatus;
 import at.yawk.fiction.android.storage.StoryIndexEntry;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import java.util.HashSet;
@@ -29,11 +30,7 @@ public class LocalSearchQuery extends SearchQuery {
     StoryOrder order = StoryOrder.ALPHABETICAL;
 
     boolean acceptIndex(StoryIndexEntry indexEntry) {
-        int chapterCount = indexEntry.getTotalChapterCount();
-        int downloadedCount = indexEntry.getDownloadedChapterCount();
-        int readCount = indexEntry.getReadChapterCount();
-
-        return accept(chapterCount, downloadedCount, readCount);
+        return accept(indexEntry.getReadProgressType(), indexEntry.getDownloadProgressType());
     }
 
     boolean accept(StoryWrapper wrapper) {
@@ -41,29 +38,33 @@ public class LocalSearchQuery extends SearchQuery {
             return false;
         }
 
-        int chapterCount = wrapper.getStory().getChapters() == null ? 0 : wrapper.getStory().getChapters().size();
-        int downloadedCount = wrapper.getDownloadedChapterCount();
-        int readCount = wrapper.getReadChapterCount();
-
-        return accept(chapterCount, downloadedCount, readCount);
+        return accept(wrapper.getReadProgressType(), wrapper.getDownloadProgressType());
 
     }
 
-    private boolean accept(int chapterCount, int downloadedCount, int readCount) {
-        if (readCount <= 0) {
+    private boolean accept(ProgressStatus readStatus, ProgressStatus downloadStatus) {
+        switch (readStatus) {
+        case NONE:
             if (!readNone) { return false; }
-        } else if (readCount >= chapterCount) {
-            if (!readAll) { return false; }
-        } else {
+            break;
+        case SOME:
             if (!readSome) { return false; }
+            break;
+        case ALL:
+            if (!readAll) { return false; }
+            break;
         }
 
-        if (downloadedCount <= 0) {
+        switch (downloadStatus) {
+        case NONE:
             if (!downloadedNone) { return false; }
-        } else if (downloadedCount >= chapterCount) {
-            if (!downloadedAll) { return false; }
-        } else {
+            break;
+        case SOME:
             if (!downloadedSome) { return false; }
+            break;
+        case ALL:
+            if (!downloadedAll) { return false; }
+            break;
         }
         return true;
     }
