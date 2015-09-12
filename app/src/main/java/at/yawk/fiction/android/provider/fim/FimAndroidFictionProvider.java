@@ -21,6 +21,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lib.org.apache.http.client.HttpClient;
+import lib.org.apache.http.impl.client.BasicCookieStore;
+import lib.org.apache.http.impl.cookie.BasicClientCookie;
 import lombok.SneakyThrows;
 
 /**
@@ -68,7 +71,15 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
     @Override
     public FimFictionProvider getFictionProvider() {
         if (fictionProvider == null) {
-            fictionProvider = new FimFictionProvider(pageParserProvider, createHttpClient(), objectMapper);
+            BasicCookieStore cookieStore = new BasicCookieStore();
+            BasicClientCookie cookie = new BasicClientCookie("view_mature", "true");
+            cookie.setDomain("www.fimfiction.net");
+            cookieStore.addCookie(cookie);
+
+            HttpClient httpClient = createHttpClientBuilder()
+                    .setDefaultCookieStore(cookieStore)
+                    .build();
+            fictionProvider = new FimFictionProvider(pageParserProvider, httpClient, objectMapper);
             sharedPreferences.registerOnSharedPreferenceChangeListener((sp, key) -> updateLogin());
             updateLogin();
         }
