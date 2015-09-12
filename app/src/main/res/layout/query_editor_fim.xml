@@ -58,4 +58,18 @@
         android:layout_gravity="center_horizontal"
         android:text="Unread"
         android:checked="false" />
+
+    <org.apmem.tools.layouts.FlowLayout
+        android:id="@+id/tagList"
+        orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/addTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Tag"
+            style="@style/Base.Widget.AppCompat.Button.Small" />
+    </org.apmem.tools.layouts.FlowLayout>
 </LinearLayout>

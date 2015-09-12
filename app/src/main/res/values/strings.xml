@@ -23,4 +23,8 @@
     <string name="update">Update</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="include">Include</string>
+    <string name="exclude">Exclude</string>
+    <string name="cancel">Cancel</string>
+    <string name="filter_tag">Filter Tag</string>
 </resources>

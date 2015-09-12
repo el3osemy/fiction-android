@@ -45,6 +45,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.squareup.dagger:dagger:1.2.2'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
+    compile 'org.apmem.tools:layouts:1.9@aar'
 
     testCompile 'org.testng:testng:6.9.6'
 }
