@@ -80,6 +80,18 @@
         <item name="android:layout_marginTop">8dp</item>
     </style>
 
+    <style name="ListItemText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:color">?attr/colorPrimary</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="ListItem" parent="ListItemText">
+        <item name="android:padding">3dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:background">?attr/listChoiceBackgroundIndicator</item>
+    </style>
+
     <color name="chaptersReadNone">@color/secondary_text_default_material_dark</color>
     <color name="chaptersReadSome">#ff9800</color>
     <color name="chaptersReadAll">#2196f3</color>
