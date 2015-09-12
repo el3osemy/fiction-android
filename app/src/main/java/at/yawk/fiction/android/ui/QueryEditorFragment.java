@@ -55,6 +55,15 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Content
         saveTasks.add(() -> setter.set(getQuery(), editor.getText().toString()));
     }
 
+    protected void bindInteger(EditText editor, Getter<S, Integer> getter, Setter<S, Integer> setter) {
+        Integer value = getter.get(getQuery());
+        editor.setText(value == null ? null : String.valueOf(value));
+        saveTasks.add(() -> {
+            String text = editor.getText().toString();
+            setter.set(getQuery(), text.isEmpty() ? null : Integer.valueOf(text));
+        });
+    }
+
     protected <C> void bindChoice(Spinner spinner,
                                   Getter<S, C> getter,
                                   Setter<S, C> setter,
