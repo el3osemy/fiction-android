@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -145,6 +146,9 @@ public class StoryFragment extends ContentViewFragment {
         } else {
             descriptionView.setText("");
         }
+
+        descriptionView.setMovementMethod(LinkMovementMethod.getInstance());
+        descriptionView.setOnClickListener(v -> descriptionView.setMaxHeight(Integer.MAX_VALUE));
 
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
         if (chapters == null || chapters.isEmpty()) {

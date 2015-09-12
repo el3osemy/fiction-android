@@ -34,6 +34,7 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="Description"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:maxHeight="91dp"
                 android:text="Lorem ipsum dolor sit amet" />
 
             <TextView
