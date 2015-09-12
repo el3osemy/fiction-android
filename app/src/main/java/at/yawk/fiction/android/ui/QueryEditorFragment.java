@@ -96,7 +96,7 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Content
     }
 
     protected void bindBoolean(CheckBox editor, Getter<S, Boolean> getter, Setter<S, Boolean> setter) {
-        editor.setChecked(getter.get(getQuery()));
+        editor.setChecked(Boolean.TRUE.equals(getter.get(getQuery())));
         saveTasks.add(() -> setter.set(getQuery(), editor.isChecked()));
     }
 

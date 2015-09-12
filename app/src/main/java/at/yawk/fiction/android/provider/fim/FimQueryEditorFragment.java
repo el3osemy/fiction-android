@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.provider.fim;
 
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
@@ -37,6 +38,7 @@ public class FimQueryEditorFragment extends QueryEditorFragment<FimSearchQuery> 
     @Bind(R.id.minWords) EditText minWords;
     @Bind(R.id.maxWords) EditText maxWords;
     @Bind(R.id.shelf) Spinner shelf;
+    @Bind(R.id.unread) CheckBox unread;
 
     @Override
     protected void bind() {
@@ -61,6 +63,11 @@ public class FimQueryEditorFragment extends QueryEditorFragment<FimSearchQuery> 
         bindInteger(maxWords,
                     FimSearchQuery::getMaxWords,
                     FimSearchQuery::setMaxWords);
+
+        bindBoolean(unread,
+                    FimSearchQuery::getUnread,
+                    // not checked = we don't care
+                    (q, unread) -> q.setUnread(unread ? true : null));
 
         bindShelves(Collections.emptyList());
 
