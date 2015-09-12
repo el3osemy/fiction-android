@@ -6,7 +6,7 @@ apply plugin: 'com.tmiyamon.mdicons'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23"
+    buildToolsVersion "23.0.1"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
