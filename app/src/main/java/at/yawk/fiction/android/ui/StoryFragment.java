@@ -207,11 +207,23 @@ public class StoryFragment extends ContentViewFragment {
             this.index = index;
 
             readBox = (CheckBox) view.findViewById(R.id.chapterRead);
-            readBox.setOnClickListener(buttonView -> setRead(readBox.isChecked()));
+            readBox.setOnClickListener(buttonView -> taskManager.execute(taskContext, () -> {
+                try {
+                    setRead(readBox.isChecked());
+                } catch (Exception e) {
+                    log.warn("Failed to set chapter read", e);
+                    toasts.toast("Failed to set chapter read", e);
+                }
+            }));
             readBox.setOnLongClickListener(v -> {
                 showDialog(new AsyncAction(R.string.read_until_here, () -> {
-                    for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
-                        chapterHolders.get(i).setRead(true);
+                    try {
+                        for (int i = 0; i <= index && i < chapterHolders.size(); i++) {
+                            chapterHolders.get(i).setRead(true);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Failed to set chapters read", e);
+                        toasts.toast("Failed to set chapters read", e);
                     }
                     refreshAsync();
                 }));
@@ -234,7 +246,10 @@ public class StoryFragment extends ContentViewFragment {
             });
         }
 
-        void setRead(boolean read) {
+        /**
+         * Blocking operation!
+         */
+        void setRead(boolean read) throws Exception {
             wrapper.setChapterRead(index, read);
         }
 
@@ -251,8 +266,13 @@ public class StoryFragment extends ContentViewFragment {
             setChapterViewStatus(downloading ? R.id.chapterDownloading :
                                          (hasText ? R.id.chapterRefresh : R.id.chapterDownload));
 
-            readBox.setVisibility(hasText ? View.VISIBLE : View.INVISIBLE);
-            readBox.setChecked(wrapper.isChapterRead(index));
+            Boolean read = wrapper.isChapterRead(index);
+            if (read != null) {
+                readBox.setVisibility(View.VISIBLE);
+                readBox.setChecked(read);
+            } else {
+                readBox.setVisibility(View.INVISIBLE);
+            }
         }
 
         boolean hasText() {

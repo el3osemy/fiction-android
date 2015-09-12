@@ -76,6 +76,23 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
         return null;
     }
 
+    /**
+     * Whether the read status system provided in {@link Chapter#read} should be used. If {@code false}, the local read
+     * status system will be used.
+     *
+     * If {@code true} is returned, {@link #setRead(Story, Chapter, boolean)} must be supported.
+     */
+    public boolean useProvidedReadStatus() {
+        return false;
+    }
+
+    /**
+     * Mark the given chapter as read.
+     */
+    public void setRead(Story story, Chapter chapter, boolean read) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
     @JsonIgnore
     public abstract FictionProvider getFictionProvider();
 

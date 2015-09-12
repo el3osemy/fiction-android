@@ -13,4 +13,9 @@
         android:inputType="textPassword"
         android:key="fim.password"
         android:title="@string/password" />
+    <CheckBoxPreference
+        android:contentDescription="Instead of managing read status locally, use the read status from your fimfiction account. You will not be able to change read status when offline."
+        android:defaultValue="true"
+        android:key="fim.useProvidedReadStatus"
+        android:title="Use fimfiction read status" />
 </PreferenceScreen>

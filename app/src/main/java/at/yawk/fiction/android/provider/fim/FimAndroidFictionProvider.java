@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import at.yawk.fiction.Chapter;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.inject.BaseModule;
@@ -35,6 +36,7 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
 
     @Nullable
     private FimAuthentication lastAuthentication = null;
+    private boolean useProvidedReadStatus;
 
     public FimAndroidFictionProvider() {
         super("fim", "FimFiction.net",
@@ -48,6 +50,19 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
                 "inflateFromResource",
                 Context.class, int.class, PreferenceScreen.class);
         return (PreferenceScreen) inflateFromResource.invoke(manager, context, R.xml.settings_fim, null);
+    }
+
+    @Override
+    public boolean useProvidedReadStatus() {
+        return useProvidedReadStatus;
+    }
+
+    @Override
+    public void setRead(Story story, Chapter chapter, boolean read) throws Exception {
+        while (chapter.getRead() == null ||
+               chapter.getRead() != read) {
+            getFictionProvider().toggleRead(chapter);
+        }
     }
 
     @Override
@@ -75,6 +90,8 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
             fictionProvider.setDefaultAuthentication(authentication);
             lastAuthentication = authentication;
         }
+
+        useProvidedReadStatus = sharedPreferences.getBoolean("fim.useProvidedReadStatus", true);
     }
 
     @Override

@@ -120,19 +120,27 @@ public class StoryWrapper {
         }
     }
 
-    public void setChapterRead(int index, boolean read) {
-        ChapterData holder = getChapterHolder(index);
-        if (holder == null || holder.textHash == null) { return; }
-        String newHash = read ? holder.textHash : null;
-        lock.writeLock().lock();
-        try {
-            if (!Objects.equal(holder.readHash, newHash)) {
-                holder.readHash = newHash;
-                bakeReadChapterCount();
-                save();
+    /**
+     * Mark this chapter as read. This may be a blocking operation.
+     */
+    public void setChapterRead(int index, boolean read) throws Exception {
+        if (provider.useProvidedReadStatus()) {
+            provider.setRead(getStory(), getStory().getChapters().get(index), read);
+            save();
+        } else {
+            ChapterData holder = getChapterHolder(index);
+            if (holder == null || holder.textHash == null) { return; }
+            String newHash = read ? holder.textHash : null;
+            lock.writeLock().lock();
+            try {
+                if (!Objects.equal(holder.readHash, newHash)) {
+                    holder.readHash = newHash;
+                    bakeReadChapterCount();
+                    save();
+                }
+            } finally {
+                lock.writeLock().unlock();
             }
-        } finally {
-            lock.writeLock().unlock();
         }
     }
 
@@ -179,7 +187,7 @@ public class StoryWrapper {
             List<? extends Chapter> chapters = getStory().getChapters();
             if (chapters != null) {
                 for (int i = 0; i < chapters.size(); i++) {
-                    if (isChapterRead(i)) {
+                    if (Boolean.TRUE.equals(isChapterRead(i))) {
                         readChapterCount++;
                     }
                 }
@@ -207,11 +215,20 @@ public class StoryWrapper {
         }
     }
 
-    public boolean isChapterRead(int index) {
-        ChapterData holder = getChapterHolder(index);
-        if (holder == null) { return false; }
-        String textHash = holder.textHash;
-        return textHash != null && textHash.equals(holder.readHash);
+    /**
+     * @return {@code null} if undefined.
+     */
+    @Nullable
+    public Boolean isChapterRead(int index) {
+        if (provider.useProvidedReadStatus()) {
+            return getStory().getChapters().get(index).getRead();
+        } else {
+            ChapterData holder = getChapterHolder(index);
+            if (holder == null) { return null; }
+            String textHash = holder.textHash;
+            if (textHash == null) { return null; }
+            return textHash.equals(holder.readHash);
+        }
     }
 
     public boolean isChapterDownloaded(int index) {
