@@ -28,8 +28,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -211,8 +209,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                 } else {
                     log.trace("Last item not visible, not fetching more");
                 }
+                updateLoading();
             }
-            updateLoading();
         }
 
         /**
@@ -231,7 +229,10 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                 log.trace("Done, passing on to UI");
                 stories.addAll(additions);
                 hasMore = !page.isLast();
-                runOnUiThread(adapter::notifyDataSetChanged);
+                runOnUiThread(() -> {
+                    adapter.notifyDataSetChanged();
+                    updateLoading();
+                });
                 ok = true;
             } catch (Throwable e) {
                 log.error("Failed to fetch page {}", page, e);
