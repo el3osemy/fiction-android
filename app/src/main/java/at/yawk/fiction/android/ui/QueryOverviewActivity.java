@@ -37,7 +37,6 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Inject Importer importer;
     @Inject Cleanup cleanup;
 
-    @Bind(R.id.left_drawer) View drawer;
     @Bind(R.id.queryList) ViewGroup queryList;
     @Bind(R.id.drawer_layout) DrawerLayout drawerParent;
     @Bind(R.id.createQuery) View createQuery;
@@ -161,7 +160,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
         ft.replace(R.id.content_frame, fragment);
         ft.commit();
 
-        toolbar.setTitle(getName(query));
+        setTitle(getName(query));
 
         queryManager.setSelectedQueryId(query.getId());
     }
