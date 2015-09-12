@@ -30,6 +30,10 @@ public class LocalSearchQuery extends SearchQuery {
     StoryOrder order = StoryOrder.ALPHABETICAL;
 
     boolean acceptIndex(StoryIndexEntry indexEntry) {
+        if (excludedProviders.contains(indexEntry.getProviderId())) {
+            return false;
+        }
+
         return accept(indexEntry.getReadProgressType(), indexEntry.getDownloadProgressType());
     }
 

@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class StoryIndexEntry {
+    private String providerId;
     private int totalChapterCount;
     private int readChapterCount;
     private int downloadedChapterCount;

@@ -60,6 +60,7 @@ public class StoryWrapper {
     StoryIndexEntry createIndexEntry() throws IllegalStateException {
         StoryIndexEntry entry = new StoryIndexEntry();
         List<? extends Chapter> chapters = getStory().getChapters();
+        entry.setProviderId(provider.getId());
         entry.setTotalChapterCount(chapters == null ? 0 : chapters.size());
         entry.setReadChapterCount(readChapterCount);
         entry.setDownloadedChapterCount(downloadedChapterCount);
