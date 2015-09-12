@@ -14,9 +14,9 @@ import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fimfiction.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import dagger.Module;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -106,7 +106,7 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
 
     @Override
     public List<String> getTags(Story story) {
-        return Collections.emptyList(); // todo
+        return Lists.transform(((FimStory) story).getTags(), FimTag::getName);
     }
 
     @Override
