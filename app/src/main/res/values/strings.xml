@@ -21,4 +21,6 @@
     <string name="cancel_task">Cancel Task</string>
     <string name="no_downloads">No Downloads</string>
     <string name="update">Update</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
 </resources>

@@ -55,7 +55,18 @@ public class Injector {
         return module(activity, () -> global.plus(new ActivityModule(activity)));
     }
 
-    private ObjectGraph fragment(Fragment fragment) {
+    private ObjectGraph supportFragment(Fragment fragment) {
+        return module(fragment, () -> {
+            SupportFragmentModule module = new SupportFragmentModule(fragment);
+            return activity(fragment.getActivity()).plus(
+                    fragment instanceof ExternalInjectable ?
+                            new Object[]{ module, ((ExternalInjectable) fragment).createModule() } :
+                            new Object[]{ module }
+            );
+        });
+    }
+
+    private ObjectGraph fragment(android.app.Fragment fragment) {
         return module(fragment, () -> {
             FragmentModule module = new FragmentModule(fragment);
             return activity(fragment.getActivity()).plus(
@@ -76,6 +87,10 @@ public class Injector {
     }
 
     public static void injectFragment(Fragment fragment) {
+        injector.inject(injector.supportFragment(fragment), fragment);
+    }
+
+    public static void injectFragment(android.app.Fragment fragment) {
         injector.inject(injector.fragment(fragment), fragment);
     }
 

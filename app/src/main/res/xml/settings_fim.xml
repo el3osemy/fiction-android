@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="fim"
+    android:persistent="false"
+    android:title="FimFiction.net">
+    <EditTextPreference
+        android:defaultValue=""
+        android:inputType="textFilter"
+        android:key="fim.username"
+        android:title="@string/username" />
+    <EditTextPreference
+        android:defaultValue=""
+        android:inputType="textPassword"
+        android:key="fim.password"
+        android:title="@string/password" />
+</PreferenceScreen>

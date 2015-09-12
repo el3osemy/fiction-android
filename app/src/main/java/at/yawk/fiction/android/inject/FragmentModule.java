@@ -1,12 +1,8 @@
 package at.yawk.fiction.android.inject;
 
-import android.support.v4.app.Fragment;
-import at.yawk.fiction.android.ui.DownloadManagerFragment;
+import android.app.Fragment;
 import at.yawk.fiction.android.ui.MainPreferenceFragment;
-import at.yawk.fiction.android.ui.QueryFragment;
-import at.yawk.fiction.android.ui.StoryFragment;
 import dagger.Module;
-import dagger.Provides;
 import javax.inject.Singleton;
 
 /**
@@ -15,10 +11,7 @@ import javax.inject.Singleton;
 @Module(
         addsTo = ActivityModule.class,
         injects = {
-                QueryFragment.class,
-                StoryFragment.class,
                 MainPreferenceFragment.class,
-                DownloadManagerFragment.class,
         }
 )
 public class FragmentModule {
@@ -34,7 +27,7 @@ public class FragmentModule {
         throw new UnsupportedOperationException();
     }
 
-    @Provides
+    //@Provides
     @Singleton
     public Fragment fragment() {
         return fragment;

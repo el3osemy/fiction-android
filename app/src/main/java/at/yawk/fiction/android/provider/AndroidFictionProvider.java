@@ -1,5 +1,8 @@
 package at.yawk.fiction.android.provider;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.inject.ExternalInjectable;
 import at.yawk.fiction.android.storage.StorageManager;
@@ -10,6 +13,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lib.org.apache.http.client.HttpClient;
 import lombok.Getter;
@@ -65,6 +69,11 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
 
     public SearchQuery createQuery() {
         return getFictionProvider().createQuery();
+    }
+
+    @Nullable
+    public PreferenceScreen inflatePreference(Context context, PreferenceManager manager) {
+        return null;
     }
 
     @JsonIgnore

@@ -9,7 +9,7 @@ import at.yawk.fiction.android.context.FragmentUiRunner;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.FragmentModule;
+import at.yawk.fiction.android.inject.SupportFragmentModule;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
@@ -175,7 +175,7 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
         return new M();
     }
 
-    @Module(addsTo = FragmentModule.class, injects = FfnQueryEditorFragment.class)
+    @Module(addsTo = SupportFragmentModule.class, injects = FfnQueryEditorFragment.class)
     static class M {}
 
     @RequiredArgsConstructor

@@ -5,7 +5,7 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.FragmentModule;
+import at.yawk.fiction.android.inject.SupportFragmentModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
@@ -78,6 +78,6 @@ public class LocalQueryEditorFragment extends QueryEditorFragment<LocalSearchQue
         return new M();
     }
 
-    @Module(addsTo = FragmentModule.class, injects = LocalQueryEditorFragment.class)
+    @Module(addsTo = SupportFragmentModule.class, injects = LocalQueryEditorFragment.class)
     static class M {}
 }

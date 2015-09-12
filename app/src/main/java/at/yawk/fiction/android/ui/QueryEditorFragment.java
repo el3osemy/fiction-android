@@ -10,6 +10,7 @@ import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.inject.ExternalInjectable;
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,9 +126,16 @@ public abstract class QueryEditorFragment<S extends SearchQuery> extends Content
      * Return a list containing null and the given item array.
      */
     protected static <T> List<T> andNull(T[] items) {
-        List<T> list = new ArrayList<>(items.length + 1);
+        return andNull(Arrays.asList(items));
+    }
+
+    /**
+     * Return a list containing null and the given item list.
+     */
+    protected static <T> List<T> andNull(List<T> items) {
+        List<T> list = new ArrayList<>(items.size() + 1);
         list.add(null);
-        list.addAll(Arrays.asList(items));
+        list.addAll(items);
         return list;
     }
 }
