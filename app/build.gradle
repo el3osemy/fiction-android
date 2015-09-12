@@ -50,14 +50,40 @@ dependencies {
 }
 
 mdicons {
-    pattern 'ic_edit_white_24dp'
-    pattern 'ic_refresh_white_24dp'
-    pattern 'ic_file_download_white_24dp'
-    pattern 'ic_add_white_24dp'
-    pattern 'ic_settings_white_24dp'
-    pattern 'ic_cancel_white_24dp'
-    pattern 'ic_keyboard_arrow_up_white_24dp'
-    pattern 'ic_keyboard_arrow_down_white_24dp'
+    defcolor "white", "#ffffff"
+
+    assets {
+        image {
+            colors "white"
+            sizes "24dp"
+            names "edit"
+        }
+        nav {
+            colors "white"
+            sizes "24dp"
+            names "refresh", "cancel"
+        }
+        file {
+            colors "white"
+            sizes "24dp"
+            names "file_download"
+        }
+        content {
+            colors "white"
+            sizes "24dp"
+            names "add"
+        }
+        action {
+            colors "white"
+            sizes "24dp"
+            names "settings"
+        }
+        hardware {
+            colors "white"
+            sizes "24dp"
+            names "keyboard_arrow_up", "keyboard_arrow_right"
+        }
+    }
 }
 
 task resizeResources(type: com.eowise.imagemagick.tasks.Magick) {
