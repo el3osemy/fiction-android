@@ -61,7 +61,7 @@ mdicons {
         nav {
             colors "white"
             sizes "24dp"
-            names "refresh", "cancel"
+            names "refresh", "cancel", "menu"
         }
         file {
             colors "white"
@@ -81,7 +81,7 @@ mdicons {
         hardware {
             colors "white"
             sizes "24dp"
-            names "keyboard_arrow_up", "keyboard_arrow_right"
+            names "keyboard_arrow_up", "keyboard_arrow_down"
         }
     }
 }

@@ -73,7 +73,7 @@ public class DownloadManagerNotification {
             long current = task.getCurrentProgress();
             long max = task.getMaxProgress();
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
-            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp);
+            builder.setSmallIcon(R.mipmap.ic_file_download_white_24dp);
             builder.setContentTitle(task.getName());
             List<String> contentText = new ArrayList<>();
             if (max != -1) { contentText.add(current + "/" + max + " complete"); }

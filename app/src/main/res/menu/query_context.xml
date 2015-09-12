@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/editQuery"
-        android:icon="@drawable/ic_edit_white_24dp"
+        android:icon="@mipmap/ic_edit_white_24dp"
         android:title="@string/edit_query" />
     <item
         android:id="@+id/up"
-        android:icon="@drawable/ic_keyboard_arrow_up_white_24dp"
+        android:icon="@mipmap/ic_keyboard_arrow_up_white_24dp"
         android:title="Move Up" />
     <item
         android:id="@+id/down"
-        android:icon="@drawable/ic_keyboard_arrow_down_white_24dp"
+        android:icon="@mipmap/ic_keyboard_arrow_down_white_24dp"
         android:title="Move Down" />
 </menu>
