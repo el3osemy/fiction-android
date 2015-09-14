@@ -14,16 +14,21 @@ import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fimfiction.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.squareup.okhttp.OkHttpClient;
 import dagger.Module;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lib.org.apache.http.client.HttpClient;
-import lib.org.apache.http.impl.client.BasicCookieStore;
-import lib.org.apache.http.impl.cookie.BasicClientCookie;
 import lombok.SneakyThrows;
 
 /**
@@ -69,16 +74,17 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
     }
 
     @Override
+    @SneakyThrows(IOException.class)
     public FimFictionProvider getFictionProvider() {
         if (fictionProvider == null) {
-            BasicCookieStore cookieStore = new BasicCookieStore();
-            BasicClientCookie cookie = new BasicClientCookie("view_mature", "true");
-            cookie.setDomain("www.fimfiction.net");
-            cookieStore.addCookie(cookie);
+            CookieHandler cookieMgr = new CookieManager();
+            cookieMgr.put(URI.create("https://www.fimfiction.net/"),
+                          ImmutableMap.of("Set-Cookie", Collections.singletonList("view_mature=true")));
 
-            HttpClient httpClient = createHttpClientBuilder()
-                    .setDefaultCookieStore(cookieStore)
-                    .build();
+            OkHttpClient okClient = new OkHttpClient();
+            okClient.setCookieHandler(cookieMgr);
+
+            HttpClient httpClient = getHttpClientFactory().createHttpClient(okClient);
             fictionProvider = new FimFictionProvider(pageParserProvider, httpClient, objectMapper);
             sharedPreferences.registerOnSharedPreferenceChangeListener((sp, key) -> updateLogin());
             updateLogin();

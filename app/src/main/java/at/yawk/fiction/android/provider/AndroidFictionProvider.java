@@ -16,7 +16,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lib.org.apache.http.client.HttpClient;
-import lib.org.apache.http.impl.client.HttpClientBuilder;
 import lombok.Getter;
 
 /**
@@ -29,7 +28,7 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
     private final Set<Class<?>> providingClasses;
 
     @Inject StorageManager storageManager;
-    @Inject HttpClientFactory httpClientFactory;
+    @Inject @Getter HttpClientFactory httpClientFactory;
 
     HttpClient httpClient;
 
@@ -41,10 +40,6 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
 
     protected HttpClient createHttpClient() {
         return httpClientFactory.createHttpClient();
-    }
-
-    protected HttpClientBuilder createHttpClientBuilder() {
-        return httpClientFactory.createHttpClientBuilder();
     }
 
     public void fetchStory(Story story) throws Exception {

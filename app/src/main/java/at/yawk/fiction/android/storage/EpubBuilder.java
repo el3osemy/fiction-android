@@ -87,6 +87,9 @@ public class EpubBuilder {
             Closeables.close(stream, true);
         }
 
+        //noinspection ResultOfMethodCallIgnored
+        file.setReadable(true, false);
+
         return file;
     }
 

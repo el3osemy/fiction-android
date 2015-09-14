@@ -57,13 +57,22 @@ public class EventBus {
     }
 
     private void addListeners0(Class<?> declaring, Object handle) {
-        for (Method method : declaring.getDeclaredMethods()) {
-            Subscribe annotation = method.getAnnotation(Subscribe.class);
-            if (annotation != null) {
-                method.setAccessible(true);
-                Threader threader = annotation.value() == Subscribe.EventQueue.UI ? uiThreader : sameThreader;
-                addHandler(method.getParameterTypes()[0],
-                           new RefHandler(new WeakReference<>(handle), method, threader));
+        Method[] declaredMethods = null;
+        try {
+            declaredMethods = declaring.getDeclaredMethods();
+        } catch (Throwable t) {
+            // this can happen sometimes on android
+            log.warn("Error in {}.class.getDeclaredMethods", declaring.getName(), t);
+        }
+        if (declaredMethods != null) {
+            for (Method method : declaredMethods) {
+                Subscribe annotation = method.getAnnotation(Subscribe.class);
+                if (annotation != null) {
+                    method.setAccessible(true);
+                    Threader threader = annotation.value() == Subscribe.EventQueue.UI ? uiThreader : sameThreader;
+                    addHandler(method.getParameterTypes()[0],
+                               new RefHandler(new WeakReference<>(handle), method, threader));
+                }
             }
         }
         Class<?> superclass = declaring.getSuperclass();

@@ -5,4 +5,6 @@
             <item android:state_selected="true" android:drawable="@color/button_material_dark"/>
         </selector>
     </item>
+
+    <item android:drawable="?attr/listChoiceBackgroundIndicator"/>
 </layer-list>

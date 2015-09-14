@@ -10,10 +10,12 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class RootFile {
-    private final File root = new File(Environment.getExternalStorageDirectory(), "Fiction");
+    private final File root;
 
     @Inject
-    RootFile() {}
+    RootFile() {
+        root = new File(Environment.getExternalStorageDirectory(), "Fiction");
+    }
 
     public File getRoot() {
         return root;

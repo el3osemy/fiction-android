@@ -109,7 +109,7 @@ public class ObjectStorageManager {
                         }
 
                         void findNextHere() {
-                            if (index >= entries.length) {
+                            if (entries == null || index >= entries.length) {
                                 node = parent;
                                 return;
                             }

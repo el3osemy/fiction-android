@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.android.R;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class QueryWrapperActivity extends ContentViewActivity {
     @Inject ProviderManager providerManager;
     @Inject QueryManager queryManager;
+    @Inject Toasts toasts;
 
     private final QueryWrapper query = new QueryWrapper();
 
@@ -93,8 +95,13 @@ public class QueryWrapperActivity extends ContentViewActivity {
         acceptButton.setOnClickListener(v -> {
             updateSavable();
             if (isSavable()) {
-                save();
-                finish();
+                try {
+                    save();
+                    finish();
+                } catch (Throwable t) {
+                    log.error("Failed to save query", t);
+                    toasts.toast("Failed to save query", t);
+                }
             }
         });
         cancelButton.setOnClickListener(v -> finish());
