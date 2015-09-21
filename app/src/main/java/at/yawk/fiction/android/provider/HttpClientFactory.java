@@ -22,6 +22,7 @@ public class HttpClientFactory {
     HttpClientFactory() {}
 
     public HttpClient createHttpClient(OkHttpClient client) {
+        client.setFollowRedirects(false);
         client.setConnectionPool(connectionPool);
         if (client.getCookieHandler() == null) {
             client.setCookieHandler(new CookieManager());
