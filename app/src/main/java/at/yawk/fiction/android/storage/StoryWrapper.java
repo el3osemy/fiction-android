@@ -127,6 +127,7 @@ public class StoryWrapper {
     public void setChapterRead(int index, boolean read) throws Exception {
         if (provider.useProvidedReadStatus()) {
             provider.setRead(getStory(), getStory().getChapters().get(index), read);
+            bakeReadChapterCount();
             save();
         } else {
             ChapterData holder = getChapterHolder(index);
