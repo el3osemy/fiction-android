@@ -15,7 +15,6 @@ import at.yawk.fiction.impl.fimfiction.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.squareup.okhttp.OkHttpClient;
 import dagger.Module;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -123,7 +123,15 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
 
     @Override
     public List<String> getTags(Story story) {
-        return Lists.transform(((FimStory) story).getTags(), FimTag::getName);
+        List<String> tags = new ArrayList<>();
+        FimStatus status = ((FimStory) story).getStatus();
+        if (status != null) {
+            tags.add(status.name());
+        }
+        for (FimTag tag : ((FimStory) story).getTags()) {
+            tags.add(tag.getName());
+        }
+        return tags;
     }
 
     @Override
