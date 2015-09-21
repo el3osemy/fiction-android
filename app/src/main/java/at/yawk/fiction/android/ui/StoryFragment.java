@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Html;
@@ -148,7 +149,11 @@ public class StoryFragment extends ContentViewFragment {
         }
 
         descriptionView.setMovementMethod(LinkMovementMethod.getInstance());
-        descriptionView.setOnClickListener(v -> descriptionView.setMaxHeight(Integer.MAX_VALUE));
+        int defMaxHeight = getMaxHeight(descriptionView);
+        descriptionView.setOnClickListener(v -> {
+            boolean expanded = getMaxHeight(descriptionView) == Integer.MAX_VALUE;
+            descriptionView.setMaxHeight(expanded ? defMaxHeight : Integer.MAX_VALUE);
+        });
 
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
         if (chapters == null || chapters.isEmpty()) {
@@ -175,6 +180,14 @@ public class StoryFragment extends ContentViewFragment {
                 }
                 toRemove.clear();
             }
+        }
+    }
+
+    private static int getMaxHeight(TextView descriptionView) {
+        if (Build.VERSION.SDK_INT < 16) {
+            return 0;
+        } else {
+            return descriptionView.getMaxHeight();
         }
     }
 
