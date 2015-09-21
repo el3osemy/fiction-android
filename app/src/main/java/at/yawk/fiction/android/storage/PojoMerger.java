@@ -6,6 +6,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,6 +26,7 @@ public class PojoMerger {
     PojoMerger() {
         mergers.put(String.class, IDENTITY);
         mergers.put(URI.class, IDENTITY);
+        mergers.put(URL.class, IDENTITY);
         mergers.put(Instant.class, IDENTITY);
         mergers.put(List.class, new CollectionMerger<>(ArrayList::new));
         mergers.put(Set.class, new CollectionMerger<>(HashSet::new));
