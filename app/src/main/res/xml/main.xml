@@ -6,4 +6,6 @@
         android:entryValues="@array/theme_selection_values"
         android:key="theme"
         android:title="@string/theme" />
+
+    <Preference android:key="update" />
 </PreferenceScreen>

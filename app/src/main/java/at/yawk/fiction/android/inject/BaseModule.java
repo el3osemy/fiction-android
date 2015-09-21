@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import at.yawk.fiction.android.FictionApplication;
 import at.yawk.fiction.android.context.ObjectMapperProvider;
 import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.event.EventBus;
@@ -22,7 +23,8 @@ import javax.inject.Singleton;
 @Module(
         library = true,
         includes = { ObjectMapperProvider.class },
-        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerNotification.class, QueryManager.class }
+        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerNotification.class, QueryManager.class,
+                FictionApplication.class }
 )
 public class BaseModule {
     final EventBus eventBus = new EventBus(new Handler(Looper.getMainLooper()));

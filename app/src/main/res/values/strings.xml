@@ -27,4 +27,7 @@
     <string name="exclude">Exclude</string>
     <string name="cancel">Cancel</string>
     <string name="filter_tag">Filter Tag</string>
+    <string name="no_update_available">No Update available.</string>
+    <string name="update_available">Download update</string>
+    <string name="update_available_toast">An update is available. You can download it in the settings.</string>
 </resources>
