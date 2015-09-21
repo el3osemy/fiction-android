@@ -16,11 +16,13 @@ import java.util.*;
 import javax.annotation.concurrent.GuardedBy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author yawkat
  */
+@Slf4j
 @Singleton
 public class DownloadManagerNotification {
     @Inject Application application;
@@ -65,32 +67,32 @@ public class DownloadManagerNotification {
                 shownNotificationIds.put(task, idObj);
             }
             id = idObj;
-        }
 
-        NotificationManager notificationManager =
-                (NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (running) {
-            long current = task.getCurrentProgress();
-            long max = task.getMaxProgress();
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
-            builder.setSmallIcon(R.mipmap.ic_file_download_white_24dp);
-            builder.setContentTitle(task.getName());
-            List<String> contentText = new ArrayList<>();
-            if (max != -1) { contentText.add(current + "/" + max + " complete"); }
-            if (allTasks.size() > 1) {
-                int otherTaskCount = allTasks.size() - 1;
-                contentText.add(otherTaskCount + " other task" + (otherTaskCount > 1 ? "s" : "") + " queued");
+            NotificationManager notificationManager =
+                    (NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (running) {
+                long current = task.getCurrentProgress();
+                long max = task.getMaxProgress();
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
+                builder.setSmallIcon(R.mipmap.ic_file_download_white_24dp);
+                builder.setContentTitle(task.getName());
+                List<String> contentText = new ArrayList<>();
+                if (max != -1) { contentText.add(current + "/" + max + " complete"); }
+                if (allTasks.size() > 1) {
+                    int otherTaskCount = allTasks.size() - 1;
+                    contentText.add(otherTaskCount + " other task" + (otherTaskCount > 1 ? "s" : "") + " queued");
+                }
+                builder.setContentText(StringUtils.join(contentText, " • "));
+                builder.setProgress((int) max, (int) current, max == -1);
+                builder.setOngoing(true);
+                builder.setContentIntent(PendingIntent.getActivity(
+                        application, id, new Intent(application, DownloadManagerActivity.class), 0));
+                Notification notification = builder.build();
+
+                notificationManager.notify(id, notification);
+            } else {
+                notificationManager.cancel(id);
             }
-            builder.setContentText(StringUtils.join(contentText, " • "));
-            builder.setProgress((int) max, (int) current, max == -1);
-            builder.setOngoing(true);
-            builder.setContentIntent(PendingIntent.getActivity(
-                    application, id, new Intent(application, DownloadManagerActivity.class), 0));
-            Notification notification = builder.build();
-
-            notificationManager.notify(id, notification);
-        } else {
-            notificationManager.cancel(id);
         }
     }
 }
