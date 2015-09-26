@@ -30,6 +30,7 @@ import at.yawk.fiction.android.storage.PojoMerger;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -37,6 +38,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Instant;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.safety.Cleaner;
+import org.jsoup.safety.Whitelist;
 
 /**
  * @author yawkat
@@ -143,7 +149,15 @@ public class StoryFragment extends ContentViewFragment {
 
         FormattedText description = wrapper.getStory().getDescription();
         if (description instanceof HtmlText) {
-            descriptionView.setText(Html.fromHtml(((HtmlText) description).getHtml()));
+            URI uri = wrapper.getStory().getUri();
+            Document document = Jsoup.parse(((HtmlText) description).getHtml(), uri == null ? "" : uri.toString());
+            Cleaner cleaner = new Cleaner(Whitelist.basic());
+            cleaner.clean(document);
+            for (Element link : document.getElementsByTag("a")) {
+                link.attr("href", link.absUrl("href"));
+            }
+
+            descriptionView.setText(Html.fromHtml(document.outerHtml()));
         } else if (description instanceof RawText) {
             descriptionView.setText(((RawText) description).getText());
         } else {
