@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.Instant;
 
 /**
  * @author yawkat
@@ -101,6 +102,7 @@ public class StoryFragment extends ContentViewFragment {
                 } finally {
                     uiRunner.runOnUiThread(dialog::hide);
                 }
+                wrapper.setLastActionTime(Instant.now());
             });
         });
         titleView.setOnLongClickListener(v -> {

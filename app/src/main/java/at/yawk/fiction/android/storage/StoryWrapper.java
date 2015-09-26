@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.Instant;
 
 /**
  * @author yawkat
@@ -91,7 +92,7 @@ public class StoryWrapper {
                           System.identityHashCode(data.story),
                           System.identityHashCode(merged));
             }
-            boolean updated = !merged.equals(data.story);
+            boolean updatedChapterText = false;
             List<? extends Chapter> chapters = merged.getChapters();
             if (chapters != null) {
                 for (int i = 0; i < chapters.size(); i++) {
@@ -105,17 +106,21 @@ public class StoryWrapper {
                         if (data.readChapters.contains(text)) {
                             holder.setReadHash(hash);
                         }
+                        updatedChapterText |= hash.equals(holder.getTextHash());
                         chapter.setText(null);
-                        updated = true;
                     }
                 }
             }
-            if (!updated) { return; }
-            data.story = merged;
-            log.trace("saving");
-            bakeDownloadedChapterCount();
-            bakeReadChapterCount();
-            save();
+            if (updatedChapterText || !merged.equals(data.story)) {
+                data.story = merged;
+                log.trace("saving");
+                bakeDownloadedChapterCount();
+                bakeReadChapterCount();
+                if (updatedChapterText) {
+                    data.lastActionTime = Instant.now();
+                }
+                save();
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -128,6 +133,7 @@ public class StoryWrapper {
         if (provider.useProvidedReadStatus()) {
             provider.setRead(getStory(), getStory().getChapters().get(index), read);
             bakeReadChapterCount();
+            data.lastActionTime = Instant.now();
             save();
         } else {
             ChapterData holder = getChapterHolder(index);
@@ -138,6 +144,7 @@ public class StoryWrapper {
                 if (!Objects.equal(holder.readHash, newHash)) {
                     holder.readHash = newHash;
                     bakeReadChapterCount();
+                    data.lastActionTime = Instant.now();
                     save();
                 }
             } finally {
@@ -271,10 +278,24 @@ public class StoryWrapper {
         return ProgressStatus.of(getDownloadedChapterCount(), getStory().getChapters().size());
     }
 
+    @Nullable
+    public Instant getLastActionTime() {
+        return data.getLastActionTime();
+    }
+
+    public void setLastActionTime(Instant lastOpenTime) {
+        data.setLastActionTime(lastOpenTime);
+        save();
+    }
+
     @Data
     static final class StoryData {
         @Nullable Story story;
         List<ChapterData> chapterHolders = new ArrayList<>();
+        /**
+         * The last time this story was opened or a chapter was downloaded.
+         */
+        @Nullable Instant lastActionTime;
 
         @Deprecated
         @JsonProperty
