@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.provider.ffn;
 
+import android.net.Uri;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
@@ -10,6 +11,9 @@ import at.yawk.fiction.impl.fanfiction.*;
 import dagger.Module;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +64,21 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
             }
         }
         return list;
+    }
+
+    @Nullable
+    @Override
+    public Story getStory(Uri uri) {
+        if (uri.getHost().matches("(www\\.|m\\.|)fanfiction\\.net")) {
+            Pattern pathPattern = Pattern.compile("/s/(\\d+)(/.*)?");
+            Matcher pathMatcher = pathPattern.matcher(uri.getPath());
+            if (pathMatcher.matches()) {
+                FfnStory ffnStory = new FfnStory();
+                ffnStory.setId(Integer.parseInt(pathMatcher.group(1)));
+                return ffnStory;
+            }
+        }
+        return super.getStory(uri);
     }
 
     @Override

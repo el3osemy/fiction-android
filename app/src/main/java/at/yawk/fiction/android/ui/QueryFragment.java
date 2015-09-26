@@ -1,6 +1,5 @@
 package at.yawk.fiction.android.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.Menu;
@@ -125,9 +124,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         StoryWrapper wrapper = (StoryWrapper) parent.getItemAtPosition(position);
         if (wrapper == null) { return; }
-        Intent intent = new Intent(getActivity(), StoryActivity.class);
-        intent.putExtra("story", WrapperParcelable.objectToParcelable(wrapper.getStory()));
-        startActivity(intent);
+        startActivity(StoryActivity.createLaunchIntent(getActivity(), wrapper));
     }
 
     private void decorateEntry(StoryWrapper wrapper, View view) {

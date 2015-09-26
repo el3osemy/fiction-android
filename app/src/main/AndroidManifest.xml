@@ -30,7 +30,59 @@
 
         <activity
             android:name=".ui.StoryActivity"
-            android:theme="@style/FDialog" />
+            android:theme="@style/FDialog">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <!-- fimfiction.net -->
+                <data
+                    android:host="fimfiction.net"
+                    android:pathPattern="/story/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.fimfiction.net"
+                    android:pathPattern="/story/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="fimfiction.net"
+                    android:pathPattern="/story/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.fimfiction.net"
+                    android:pathPattern="/story/.*"
+                    android:scheme="https" />
+
+                <data
+                    android:host="fanfiction.net"
+                    android:pathPattern="/s/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="www.fanfiction.net"
+                    android:pathPattern="/s/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="m.fanfiction.net"
+                    android:pathPattern="/s/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanfiction.net"
+                    android:pathPattern="/s/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="www.fanfiction.net"
+                    android:pathPattern="/s/.*"
+                    android:scheme="https" />
+                <data
+                    android:host="m.fanfiction.net"
+                    android:pathPattern="/s/.*"
+                    android:scheme="https" />
+            </intent-filter>
+
+        </activity>
 
         <activity
             android:name=".ui.MainPreferenceActivity"

@@ -58,6 +58,15 @@ public class StoryWrapper {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Get a unique id of this story.
+     *
+     * @see StorageManager#getStory(String)
+     */
+    public String getId() {
+        return objectId;
+    }
+
     StoryIndexEntry createIndexEntry() throws IllegalStateException {
         StoryIndexEntry entry = new StoryIndexEntry();
         List<? extends Chapter> chapters = getStory().getChapters();
@@ -68,9 +77,16 @@ public class StoryWrapper {
         return entry;
     }
 
+    /**
+     * @return {@code true} if story data (beyond ID) is present, {@code false} otherwise.
+     */
+    public boolean hasData() {
+        return data.story != null;
+    }
+
     public Story getStory() {
         Story story = data.story;
-        if (story == null) { throw new IllegalStateException(); }
+        if (story == null) { throw new IllegalStateException("Story not loaded"); }
         return story;
     }
 

@@ -2,6 +2,7 @@ package at.yawk.fiction.android.provider.fim;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import at.yawk.fiction.Chapter;
@@ -26,6 +27,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -134,6 +137,21 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
             tags.add(tag.getName());
         }
         return tags;
+    }
+
+    @Nullable
+    @Override
+    public Story getStory(Uri uri) {
+        if (uri.getHost().matches("(www\\.)?fimfiction\\.net")) {
+            Pattern pathPattern = Pattern.compile("/story/(\\d+)(/.*)?");
+            Matcher pathMatcher = pathPattern.matcher(uri.getPath());
+            if (pathMatcher.matches()) {
+                FimStory fimStory = new FimStory();
+                fimStory.setId(Integer.parseInt(pathMatcher.group(1)));
+                return fimStory;
+            }
+        }
+        return super.getStory(uri);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package at.yawk.fiction.android.provider;
 
 import android.content.Context;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import at.yawk.fiction.*;
@@ -100,4 +101,13 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
     public abstract String getStoryId(Story story, String separator);
 
     public abstract List<String> getTags(Story story);
+
+    /**
+     * If the given uri is managed by this provider, return whatever story info we can deduce from it, otherwise return
+     * {@code null}.
+     */
+    @Nullable
+    public Story getStory(Uri uri) {
+        return null;
+    }
 }

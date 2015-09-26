@@ -72,7 +72,7 @@ public class StorageManager {
         return getStory(getObjectId(story));
     }
 
-    StoryWrapper getStory(String id) {
+    public StoryWrapper getStory(String id) {
         return storyCache.getUnchecked(id);
     }
 
