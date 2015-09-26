@@ -3,6 +3,7 @@ package at.yawk.fiction.android.provider.ffn;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.Provider;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fanfiction.*;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Singleton
+@Provider(priority = 1000)
 public class FfnAndroidFictionProvider extends AndroidFictionProvider {
     private FfnFictionProvider fictionProvider;
 

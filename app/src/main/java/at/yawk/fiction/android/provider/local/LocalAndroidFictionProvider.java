@@ -6,6 +6,7 @@ import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.Provider;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Singleton
+@Provider(priority = 0)
 public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     @Inject StorageManager storageManager;
 

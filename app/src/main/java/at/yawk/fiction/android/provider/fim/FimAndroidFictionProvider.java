@@ -9,6 +9,7 @@ import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
+import at.yawk.fiction.android.provider.Provider;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fimfiction.*;
@@ -35,6 +36,7 @@ import lombok.SneakyThrows;
  * @author yawkat
  */
 @Singleton
+@Provider(priority = 2000)
 public class FimAndroidFictionProvider extends AndroidFictionProvider {
     private FimFictionProvider fictionProvider;
 

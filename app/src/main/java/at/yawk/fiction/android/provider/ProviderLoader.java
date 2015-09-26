@@ -1,14 +1,10 @@
 package at.yawk.fiction.android.provider;
 
 import android.app.Application;
-import at.yawk.fiction.android.FictionApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.ObjectGraph;
 import dalvik.system.DexFile;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
@@ -32,6 +28,7 @@ public class ProviderLoader {
             DexFile dexFile = new DexFile(application.getApplicationInfo().sourceDir);
             Enumeration<String> entries = dexFile.entries();
 
+            Map<AndroidFictionProvider, Provider> annotations = new HashMap<>();
             while (entries.hasMoreElements()) {
                 String providerClassName = entries.nextElement();
                 Class<?> providerClass;
@@ -41,13 +38,15 @@ public class ProviderLoader {
                     continue;
                 }
 
-                if (!AndroidFictionProvider.class.isAssignableFrom(providerClass) ||
-                    Modifier.isAbstract(providerClass.getModifiers())) {
+                Provider providerAnnotation = providerClass.getAnnotation(Provider.class);
+                if (providerAnnotation == null) {
                     continue;
                 }
 
                 log.info("Adding provider {}", providerClass.getName());
                 AndroidFictionProvider provider = (AndroidFictionProvider) providerClass.newInstance();
+
+                annotations.put(provider, providerAnnotation);
 
                 //noinspection Convert2streamapi
                 for (Class<?> provided : provider.getProvidingClasses()) {
@@ -56,6 +55,9 @@ public class ProviderLoader {
 
                 providers.add(provider);
             }
+
+            Collections.sort(providers, (lhs, rhs) ->
+                    annotations.get(lhs).priority() - annotations.get(rhs).priority());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

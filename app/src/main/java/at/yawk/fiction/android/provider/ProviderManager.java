@@ -3,7 +3,7 @@ package at.yawk.fiction.android.provider;
 import at.yawk.fiction.SearchQuery;
 import at.yawk.fiction.Story;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.inject.Inject;
@@ -17,8 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 public class ProviderManager {
-    private final Map<Class<?>, AndroidFictionProvider> providersByProvidingClass = new HashMap<>();
-    private final Map<Class<? extends AndroidFictionProvider>, AndroidFictionProvider> providers = new HashMap<>();
+    private final Map<Class<?>, AndroidFictionProvider> providersByProvidingClass
+            = new LinkedHashMap<>();
+    private final Map<Class<? extends AndroidFictionProvider>, AndroidFictionProvider> providers
+            = new LinkedHashMap<>();
 
     @Inject
     @SneakyThrows
