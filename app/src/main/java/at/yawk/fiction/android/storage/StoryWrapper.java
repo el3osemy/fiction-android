@@ -35,6 +35,8 @@ import org.joda.time.Instant;
 // there should only be one instance per story anyway.
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class StoryWrapper {
+    private final Transaction saveTransaction = new Transaction(this::save);
+
     final String objectId;
     @GuardedBy("lock")
     final StoryData data;
@@ -92,6 +94,7 @@ public class StoryWrapper {
 
     public void updateStory(Story changes) {
         lock.writeLock().lock();
+        saveTransaction.open();
         try {
             if (provider == null) {
                 provider = providerManager.getProvider(changes);
@@ -133,11 +136,12 @@ public class StoryWrapper {
                 bakeDownloadedChapterCount();
                 bakeReadChapterCount();
                 if (updatedChapterText) {
-                    data.lastActionTime = Instant.now();
+                    bumpLastActionTime();
                 }
-                save();
+                saveTransaction.requestSave();
             }
         } finally {
+            saveTransaction.commit();
             lock.writeLock().unlock();
         }
     }
@@ -148,22 +152,29 @@ public class StoryWrapper {
     public void setChapterRead(int index, boolean read) throws Exception {
         if (provider.useProvidedReadStatus()) {
             provider.setRead(getStory(), getStory().getChapters().get(index), read);
-            bakeReadChapterCount();
-            data.lastActionTime = Instant.now();
-            save();
+            saveTransaction.open();
+            try {
+                bakeReadChapterCount();
+                bumpLastActionTime();
+                saveTransaction.requestSave();
+            } finally {
+                saveTransaction.commit();
+            }
         } else {
             ChapterData holder = getChapterHolder(index);
             if (holder == null || holder.textHash == null) { return; }
             String newHash = read ? holder.textHash : null;
             lock.writeLock().lock();
+            saveTransaction.open();
             try {
                 if (!Objects.equal(holder.readHash, newHash)) {
                     holder.readHash = newHash;
                     bakeReadChapterCount();
-                    data.lastActionTime = Instant.now();
-                    save();
+                    bumpLastActionTime();
+                    saveTransaction.requestSave();
                 }
             } finally {
+                saveTransaction.commit();
                 lock.writeLock().unlock();
             }
         }
@@ -299,9 +310,18 @@ public class StoryWrapper {
         return data.getLastActionTime();
     }
 
+    public void bumpLastActionTime() {
+        setLastActionTime(Instant.now());
+    }
+
     public void setLastActionTime(Instant lastOpenTime) {
-        data.setLastActionTime(lastOpenTime);
-        save();
+        saveTransaction.open();
+        try {
+            data.setLastActionTime(lastOpenTime);
+            saveTransaction.requestSave();
+        } finally {
+            saveTransaction.commit();
+        }
     }
 
     @Data

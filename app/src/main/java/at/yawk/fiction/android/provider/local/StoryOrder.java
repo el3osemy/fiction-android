@@ -31,7 +31,7 @@ public enum StoryOrder implements Comparator<StoryWrapper> {
                     return 1;
                 }
             } else {
-                return right == null ? -1 : left.compareTo(right);
+                return right == null ? -1 : right.compareTo(left);
             }
         }
     };

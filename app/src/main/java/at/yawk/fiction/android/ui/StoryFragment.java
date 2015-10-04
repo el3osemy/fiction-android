@@ -108,7 +108,7 @@ public class StoryFragment extends ContentViewFragment {
                 } finally {
                     uiRunner.runOnUiThread(dialog::hide);
                 }
-                wrapper.setLastActionTime(Instant.now());
+                wrapper.bumpLastActionTime();
             });
         });
         titleView.setOnLongClickListener(v -> {
