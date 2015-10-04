@@ -122,7 +122,7 @@ public class StoryWrapper {
                         if (data.readChapters.contains(text)) {
                             holder.setReadHash(hash);
                         }
-                        updatedChapterText |= hash.equals(holder.getTextHash());
+                        updatedChapterText |= !hash.equals(holder.getTextHash());
                         chapter.setText(null);
                     }
                 }
