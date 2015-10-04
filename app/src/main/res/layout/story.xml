@@ -28,20 +28,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/description"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:contentDescription="Description"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:maxHeight="91dp"
-                android:text="Lorem ipsum dolor sit amet" />
+                android:id="@+id/descriptionContainer"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/coverImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@string/cover_image" />
+
+                <TextView
+                    android:id="@+id/description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Description"
+                    android:maxHeight="91dp"
+                    android:text="Lorem ipsum dolor sit amet"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/description"
+                android:layout_below="@id/descriptionContainer"
                 android:contentDescription="Tags"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textColor="@color/primary_text_default_material_dark"

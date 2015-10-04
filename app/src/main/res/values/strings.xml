@@ -30,4 +30,7 @@
     <string name="no_update_available">No Update available.</string>
     <string name="update_available">Download update</string>
     <string name="update_available_toast">An update is available. You can download it in the settings.</string>
+    <string name="cover_image">Cover Image</string>
+    <string name="download_covers_wifi">Download Covers on wifi</string>
+    <string name="download_covers_data">Download Covers on data</string>
 </resources>

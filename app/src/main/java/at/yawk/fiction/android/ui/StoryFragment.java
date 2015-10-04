@@ -2,7 +2,13 @@ package at.yawk.fiction.android.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
@@ -30,6 +37,10 @@ import at.yawk.fiction.android.storage.PojoMerger;
 import at.yawk.fiction.android.storage.StorageManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
+import com.squareup.picasso.Target;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +48,6 @@ import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.Instant;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -57,6 +67,7 @@ public class StoryFragment extends ContentViewFragment {
     @Inject DownloadManager downloadManager;
     @Inject FragmentUiRunner uiRunner;
     @Inject PojoMerger merger;
+    @Inject SharedPreferences sharedPreferences;
 
     private TaskContext taskContext = new TaskContext();
 
@@ -66,8 +77,12 @@ public class StoryFragment extends ContentViewFragment {
     @Bind(R.id.title) TextView titleView;
     @Bind(R.id.author) TextView authorView;
     @Bind(R.id.tags) TextView tagsView;
+    @Bind(R.id.descriptionContainer) ViewGroup descriptionContainer;
     @Bind(R.id.description) TextView descriptionView;
+    @Bind(R.id.coverImage) ImageView coverImage;
     @Bind(R.id.updateStory) Button updateStory;
+
+    private int collapsedDescriptionHeight;
 
     public void setStory(StoryWrapper wrapper) {
         Bundle args = new Bundle();
@@ -165,11 +180,74 @@ public class StoryFragment extends ContentViewFragment {
         }
 
         descriptionView.setMovementMethod(LinkMovementMethod.getInstance());
-        int defMaxHeight = getMaxHeight(descriptionView);
-        descriptionView.setOnClickListener(v -> {
-            boolean expanded = getMaxHeight(descriptionView) == Integer.MAX_VALUE;
-            descriptionView.setMaxHeight(expanded ? defMaxHeight : Integer.MAX_VALUE);
+
+        collapsedDescriptionHeight = getMaxHeight(descriptionView);
+        descriptionView.setOnClickListener(v -> setDescriptionCollapsed(!isDescriptionCollapsed()));
+
+        coverImage.setVisibility(View.GONE);
+
+        // when the image is loaded, adjust the min height of the description view to match it.
+        coverImage.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            int height = coverImage.getMeasuredHeight();
+            if (collapsedDescriptionHeight < height) {
+                collapsedDescriptionHeight = height;
+                setDescriptionCollapsed(isDescriptionCollapsed());
+            }
         });
+
+        Image image = wrapper.getStory().getImage();
+        if (image != null) {
+            URI[] candidates = new URI[]{ image.getImageUrl(), image.getThumbnailUrl() };
+            URI validUri = null;
+            for (URI candidate : candidates) {
+                if (isImageUriValid(candidate)) {
+                    validUri = candidate;
+                    break;
+                }
+            }
+
+            if (validUri != null) {
+                log.debug("Loading cover {}", validUri);
+
+                boolean loadCoverViaNetwork = false;
+
+                ConnectivityManager connectivityManager =
+                        (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                log.info("network {}", activeNetworkInfo);
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                    log.info("network {}", activeNetworkInfo.getSubtype());
+                    switch (activeNetworkInfo.getType()) {
+                    case ConnectivityManager.TYPE_WIFI:
+                    case ConnectivityManager.TYPE_ETHERNET:
+                        loadCoverViaNetwork = sharedPreferences.getBoolean("download_cover.wifi", true);
+                        break;
+                    default:
+                        loadCoverViaNetwork = sharedPreferences.getBoolean("download_cover.data", false);
+                        break;
+                    }
+                }
+
+                RequestCreator creator = Picasso.with(getActivity())
+                        .load(Uri.decode(validUri.toString()));
+                if (!loadCoverViaNetwork) {
+                    creator = creator.networkPolicy(NetworkPolicy.OFFLINE);
+                }
+                creator.into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        coverImage.setVisibility(View.VISIBLE);
+                        coverImage.setImageBitmap(bitmap);
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {}
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {}
+                });
+            }
+        }
 
         List<? extends Chapter> chapters = wrapper.getStory().getChapters();
         if (chapters == null || chapters.isEmpty()) {
@@ -197,6 +275,20 @@ public class StoryFragment extends ContentViewFragment {
                 toRemove.clear();
             }
         }
+    }
+
+    private boolean isDescriptionCollapsed() {
+        return getMaxHeight(descriptionView) != Integer.MAX_VALUE;
+    }
+
+    private void setDescriptionCollapsed(boolean collapsed) {
+        descriptionView.setMaxHeight(collapsed ? collapsedDescriptionHeight : Integer.MAX_VALUE);
+    }
+
+    private static boolean isImageUriValid(URI imageUri) {
+        return imageUri != null &&
+               imageUri.getScheme() != null &&
+               imageUri.getScheme().matches("https?");
     }
 
     private static int getMaxHeight(TextView descriptionView) {

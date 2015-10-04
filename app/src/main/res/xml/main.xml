@@ -8,4 +8,14 @@
         android:title="@string/theme" />
 
     <Preference android:key="update" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="download_cover.wifi"
+        android:title="@string/download_covers_wifi" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="download_cover.data"
+        android:title="@string/download_covers_data" />
 </PreferenceScreen>
