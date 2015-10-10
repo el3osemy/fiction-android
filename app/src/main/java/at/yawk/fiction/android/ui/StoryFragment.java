@@ -12,6 +12,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -70,6 +72,7 @@ public class StoryFragment extends ContentViewFragment {
     @Inject SharedPreferences sharedPreferences;
 
     private TaskContext taskContext = new TaskContext();
+    private final Handler uiRunnerHandler = new Handler(Looper.getMainLooper());
 
     private StoryWrapper wrapper;
 
@@ -254,18 +257,6 @@ public class StoryFragment extends ContentViewFragment {
             updateStory.setVisibility(View.VISIBLE);
         } else {
             updateStory.setVisibility(View.GONE);
-            for (int i = 0; i < chapters.size(); i++) {
-                ChapterHolder holder;
-                if (i >= chapterHolders.size()) {
-                    View view = getActivity().getLayoutInflater().inflate(R.layout.chapter, chapterGroup, false);
-                    chapterGroup.addView(view);
-                    chapterHolders.add(holder = new ChapterHolder(view, i));
-                } else {
-                    holder = chapterHolders.get(i);
-                }
-
-                holder.setChapter(chapters.get(i));
-            }
 
             if (chapters.size() < chapterHolders.size()) {
                 List<ChapterHolder> toRemove = chapterHolders.subList(chapters.size(), chapterHolders.size());
@@ -274,6 +265,38 @@ public class StoryFragment extends ContentViewFragment {
                 }
                 toRemove.clear();
             }
+
+            // spread out updates across multiple ticks - 10 at a time
+            Runnable updateTask = new Runnable() {
+                private int chapterIndex;
+
+                @Override
+                public void run() {
+                    //if (!isVisible()) { return; }
+
+                    int i = 0;
+                    while (i++ < 10 && chapterIndex < chapters.size()) {
+
+                        ChapterHolder holder;
+                        if (chapterIndex >= chapterHolders.size()) {
+                            // inflate attaches us to the group as well
+                            View view = getActivity().getLayoutInflater().inflate(R.layout.chapter, chapterGroup,false);
+                            chapterGroup.addView(view);
+                            chapterHolders.add(holder = new ChapterHolder(view, chapterIndex));
+                        } else {
+                            holder = chapterHolders.get(chapterIndex);
+                        }
+                        holder.setChapter(chapters.get(chapterIndex));
+
+                        chapterIndex++;
+                    }
+
+                    // reschedule
+                    uiRunnerHandler.postDelayed(this, 10);
+                }
+            };
+
+            updateTask.run();
         }
     }
 
