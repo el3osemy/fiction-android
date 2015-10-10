@@ -68,6 +68,11 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
     }
 
     @Override
+    public boolean isQueryOfflineCacheable(SearchQuery query) {
+        return false;
+    }
+
+    @Override
     public QueryEditorFragment<?> createQueryEditorFragment() {
         return new LocalQueryEditorFragment();
     }

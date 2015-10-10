@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.ui;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.Menu;
@@ -19,7 +20,9 @@ import at.yawk.fiction.android.download.task.StoryListUpdateTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
+import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
+import at.yawk.fiction.android.storage.OfflineQueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
@@ -39,6 +42,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     @Inject TaskManager taskManager;
     @Inject FragmentUiRunner uiRunner;
     @Inject DownloadManager downloadManager;
+    @Inject OfflineQueryManager offlineQueryManager;
+    @Inject SharedPreferences sharedPreferences;
 
     @Bind(R.id.storyList) ListView storyList;
     @Bind(R.id.refreshLayout) SwipeRefreshLayout refreshLayout;
@@ -48,8 +53,6 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     private View footerView;
 
     private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
-
-    private QueryWrapper query;
 
     Worker currentWorker;
 
@@ -64,12 +67,15 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-
-        query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
     }
 
-    private void initWorker() {
-        currentWorker = new Worker();
+    private void initWorker(QueryWrapper query) {
+        AndroidFictionProvider provider = providerManager.getProvider(query.getQuery());
+        boolean offlineCacheable = provider.isQueryOfflineCacheable(query.getQuery());
+        boolean offline = offlineCacheable &&
+                          sharedPreferences.getBoolean("offline_mode", false);
+
+        currentWorker = new Worker(provider, query, offline, !offline && offlineCacheable);
         storyList.setAdapter(currentWorker.adapter);
         currentWorker.checkFetchMore();
     }
@@ -97,9 +103,11 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        QueryWrapper query = WrapperParcelable.parcelableToObject(getArguments().getParcelable("query"));
+
         refreshLayout.setOnRefreshListener(() -> {
             refreshLayout.setRefreshing(false);
-            initWorker();
+            initWorker(query);
         });
 
         storyList.setOnItemClickListener(this);
@@ -107,7 +115,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         footerView = getActivity().getLayoutInflater().inflate(R.layout.query_overscroll, storyList, false);
         storyList.addFooterView(footerView, null, false);
 
-        initWorker();
+        initWorker(query);
 
         storyList.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -173,14 +181,23 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         private final Pageable<StoryWrapper> pageable;
         private final SimpleArrayAdapter<StoryWrapper> adapter;
 
+        private final QueryWrapper query;
+        private final boolean savePagesToOfflineCache;
+
         private int page = 0;
         private int pageCount = -1;
         private int failedAttemptCount = 0;
         private boolean hasMore = true;
         private boolean fetching = false;
 
-        Worker() {
-            pageable = providerManager.getProvider(query.getQuery()).searchWrappers(query.getQuery());
+        Worker(AndroidFictionProvider provider, QueryWrapper query, boolean offline, boolean savePagesToOfflineCache) {
+            this.query = query;
+            this.savePagesToOfflineCache = savePagesToOfflineCache;
+            if (offline) {
+                pageable = offlineQueryManager.load(query);
+            } else {
+                pageable = provider.searchWrappers(query.getQuery());
+            }
             adapter = new SimpleArrayAdapter<StoryWrapper>(getActivity(), R.layout.query_entry, stories) {
                 @Override
                 protected void decorateView(View view, int position) {
@@ -230,6 +247,9 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                     adapter.notifyDataSetChanged();
                     updateLoading();
                 });
+                if (savePagesToOfflineCache) {
+                    offlineQueryManager.save(query, this.page, page);
+                }
                 ok = true;
             } catch (Throwable e) {
                 log.error("Failed to fetch page {}", page, e);

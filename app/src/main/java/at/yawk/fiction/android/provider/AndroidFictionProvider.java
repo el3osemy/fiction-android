@@ -39,20 +39,42 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
         this.providingClasses = ImmutableSet.copyOf(providingClasses);
     }
 
+    /**
+     * Create a http client from our http client factory.
+     */
     protected HttpClient createHttpClient() {
         return httpClientFactory.createHttpClient();
     }
 
+    @JsonIgnore
+    protected abstract FictionProvider getFictionProvider();
+
+    /**
+     * @see FictionProvider#fetchStory(Story)
+     */
     public void fetchStory(Story story) throws Exception {
         getFictionProvider().fetchStory(story);
     }
 
-    public Pageable<? extends Story> search(SearchQuery searchQuery) {
-        return getFictionProvider().search(searchQuery);
+    /**
+     * @see FictionProvider#fetchChapter(Story, Chapter)
+     */
+    public void fetchChapter(Story story, Chapter chapter) throws Exception {
+        getFictionProvider().fetchChapter(story, chapter);
     }
 
+    /**
+     * @see FictionProvider#createQuery()
+     */
+    public SearchQuery createQuery() {
+        return getFictionProvider().createQuery();
+    }
+
+    /**
+     * Search a given query, returning a list of story wrappers.
+     */
     public Pageable<StoryWrapper> searchWrappers(SearchQuery query) {
-        Pageable<? extends Story> pageable = search(query);
+        Pageable<? extends Story> pageable = getFictionProvider().search(query);
         return i -> {
             Pageable.Page<? extends Story> storyPage = pageable.getPage(i);
             Pageable.Page<StoryWrapper> wrapperPage = new Pageable.Page<>();
@@ -63,12 +85,11 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
         };
     }
 
-    public void fetchChapter(Story story, Chapter chapter) throws Exception {
-        getFictionProvider().fetchChapter(story, chapter);
-    }
-
-    public SearchQuery createQuery() {
-        return getFictionProvider().createQuery();
+    /**
+     * @return {@code true} if the given query can be cached, {@code false} otherwise.
+     */
+    public boolean isQueryOfflineCacheable(SearchQuery query) {
+        return true;
     }
 
     @Nullable
@@ -93,13 +114,16 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
         throw new UnsupportedOperationException();
     }
 
-    @JsonIgnore
-    public abstract FictionProvider getFictionProvider();
-
     public abstract QueryEditorFragment<?> createQueryEditorFragment();
 
+    /**
+     * Get an id of this story unique to this fiction provider (but not necessarily unique to other providers).
+     */
     public abstract String getStoryId(Story story, String separator);
 
+    /**
+     * Get the tags of the given story.
+     */
     public abstract List<String> getTags(Story story);
 
     /**

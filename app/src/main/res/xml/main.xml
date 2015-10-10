@@ -18,4 +18,9 @@
         android:defaultValue="false"
         android:key="download_cover.data"
         android:title="@string/download_covers_data" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="offline_mode"
+        android:title="@string/offline_mode" />
 </PreferenceScreen>
