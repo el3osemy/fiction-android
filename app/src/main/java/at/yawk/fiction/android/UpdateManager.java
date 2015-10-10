@@ -41,6 +41,18 @@ public class UpdateManager {
     @Getter
     private boolean updatable;
 
+    @Getter(lazy = true)
+    private final String appBuild = loadAppBuild();
+
+    private String loadAppBuild() {
+        try {
+            return new String(ByteStreams.toByteArray(application.getResources().openRawResource(R.raw.build)),
+                              Charsets.UTF_8).trim();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void checkUpdateAsync() {
         taskManager.execute(taskContext, () -> {
             try {
@@ -52,12 +64,9 @@ public class UpdateManager {
     }
 
     private void checkUpdateSync() throws IOException {
-        String appBuild = new String(ByteStreams.toByteArray(application.getResources().openRawResource(R.raw.build)),
-                                     Charsets.UTF_8).trim();
+        log.info("App build is {}", getAppBuild());
 
-        log.info("App build is {}", appBuild);
-
-        if (appBuild.equals("dev")) {
+        if (getAppBuild().equals("dev")) {
             log.info("Skipping update check (dev)");
             return;
         }

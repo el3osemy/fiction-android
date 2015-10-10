@@ -77,11 +77,16 @@ public class MainPreferenceFragment extends PreferenceFragment {
             });
         } else {
             updatePreference.setTitle(R.string.no_update_available);
-            // do nothing on click
-            updatePreference.setSelectable(false);
-            updatePreference.setOnPreferenceClickListener(preference -> true);
-            updatePreference.setShouldDisableView(true);
-            updatePreference.setEnabled(false);
+            updatePreference.setSummary(getResources().getString(
+                    R.string.no_update_available_summary, updateManager.getAppBuild()));
+            updatePreference.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(
+                        "https://github.com/yawkat/fiction-android/commits/" + updateManager.getAppBuild()));
+                getActivity().startActivity(intent);
+                return true;
+            });
         }
     }
 }
