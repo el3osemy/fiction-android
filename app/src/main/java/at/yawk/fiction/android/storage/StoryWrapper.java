@@ -120,12 +120,12 @@ public class StoryWrapper {
                     if (text != null) {
                         ChapterData holder = getOrCreateChapterHolder(i);
                         String hash = textStorage.externalizeText(text);
+                        updatedChapterText |= !hash.equals(holder.getTextHash());
                         holder.setTextHash(hash);
                         //noinspection deprecation
                         if (data.readChapters.contains(text)) {
                             holder.setReadHash(hash);
                         }
-                        updatedChapterText |= !hash.equals(holder.getTextHash());
                         chapter.setText(null);
                     }
                 }
@@ -237,12 +237,14 @@ public class StoryWrapper {
     void bakeDownloadedChapterCount() {
         lock.readLock().lock();
         try {
-            List<? extends Chapter> chapters = getStory().getChapters();
-            int chapterCount = chapters == null ? 0 : chapters.size();
+            log.trace("bakeDownloadedChapterCount");
             int downloadedChapterCount = 0;
-            for (int i = 0; i < chapterCount; i++) {
-                if (isChapterDownloaded(i)) {
-                    downloadedChapterCount++;
+            List<? extends Chapter> chapters = getStory().getChapters();
+            if (chapters != null) {
+                for (int i = 0; i < chapters.size(); i++) {
+                    if (isChapterDownloaded(i)) {
+                        downloadedChapterCount++;
+                    }
                 }
             }
             this.downloadedChapterCount = downloadedChapterCount;
