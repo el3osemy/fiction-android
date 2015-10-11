@@ -12,25 +12,25 @@ import lombok.Data;
  */
 
 public class OfflineQueryManager {
-    @Inject ObjectStorageManager objectStorageManager;
-    @Inject StorageManager storageManager;
+    @Inject FileSystemStorage fileSystemStorage;
+    @Inject StoryManager storyManager;
 
     public void save(QueryWrapper query, int index, Pageable.Page<StoryWrapper> entries) {
         String key = query.getId() + "/" + index;
 
         OfflinePage offlinePage = new OfflinePage();
         offlinePage.setStoryIds(Lists.transform(entries.getEntries(), StoryWrapper::getId));
-        objectStorageManager.save(offlinePage, key);
+        fileSystemStorage.save(offlinePage, key);
     }
 
     public Pageable<StoryWrapper> load(QueryWrapper query) {
         return i -> {
             String key = query.getId() + "/" + i;
             try {
-                OfflinePage offlinePage = objectStorageManager.load(OfflinePage.class, key);
+                OfflinePage offlinePage = fileSystemStorage.load(OfflinePage.class, key);
 
                 Pageable.Page<StoryWrapper> page = new Pageable.Page<>();
-                page.setEntries(Lists.transform(offlinePage.getStoryIds(), storageManager::getStory));
+                page.setEntries(Lists.transform(offlinePage.getStoryIds(), storyManager::getStory));
                 page.setLast(false);
                 return page;
             } catch (NotFoundException notFound) {

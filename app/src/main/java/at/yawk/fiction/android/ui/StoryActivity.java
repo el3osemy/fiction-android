@@ -13,7 +13,7 @@ import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
-import at.yawk.fiction.android.storage.StorageManager;
+import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
 import javax.inject.Inject;
@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StoryActivity extends ContentViewActivity {
     private static final String EXTRA_STORY_ID = "storyId";
 
-    @Inject StorageManager storageManager;
+    @Inject StoryManager storyManager;
     @Inject ProviderManager providerManager;
     @Inject TaskManager taskManager;
     @Inject Toasts toasts;
@@ -52,7 +52,7 @@ public class StoryActivity extends ContentViewActivity {
 
         String id = getIntent().getStringExtra(EXTRA_STORY_ID);
         if (id != null) {
-            open(storageManager.getStory(id));
+            open(storyManager.getStory(id));
             return;
         }
 
@@ -61,7 +61,7 @@ public class StoryActivity extends ContentViewActivity {
             for (AndroidFictionProvider provider : providerManager.getProviders()) {
                 Story story = provider.getStory(data);
                 if (story != null) {
-                    StoryWrapper wrapper = storageManager.getStory(story);
+                    StoryWrapper wrapper = storyManager.getStory(story);
                     if (wrapper.hasData()) {
                         open(wrapper);
                     } else {

@@ -19,22 +19,22 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Singleton
-public class StorageManager {
-    @Inject ObjectStorageManager objectStorageManager;
+public class StoryManager {
+    @Inject FileSystemStorage fileSystemStorage;
     @Inject ProviderManager providerManager;
     Index index;
 
     final LoadingCache<String, StoryWrapper> storyCache;
 
     @Inject
-    StorageManager(Index index) {
+    StoryManager(Index index) {
         this.index = index;
-        index.storageManager = this;
+        index.storyManager = this;
 
         storyCache = CacheBuilder.newBuilder().softValues().build(CacheLoader.from(input -> {
             StoryWrapper wrapper;
             try {
-                StoryWrapper.StoryData data = objectStorageManager.load(StoryWrapper.StoryData.class, input);
+                StoryWrapper.StoryData data = fileSystemStorage.load(StoryWrapper.StoryData.class, input);
                 wrapper = new StoryWrapper(input, data);
                 wrapper.provider = providerManager.getProvider(data.getStory());
                 wrapper.bakeDownloadedChapterCount();
@@ -86,7 +86,7 @@ public class StorageManager {
      * Returned stories are not guaranteed to satisfy this condition - this is up to the implementation.
      */
     public Iterable<StoryWrapper> listStories(@Nullable Predicate<StoryIndexEntry> indexFilter) {
-        Iterable<String> keys = objectStorageManager.list("story");
+        Iterable<String> keys = fileSystemStorage.list("story");
         if (indexFilter != null) {
             keys = Iterables.filter(keys, key -> indexFilter.apply(index.findIndexEntry(key)));
         }

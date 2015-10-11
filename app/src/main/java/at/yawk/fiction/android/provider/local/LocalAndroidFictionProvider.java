@@ -7,7 +7,7 @@ import at.yawk.fiction.Story;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.Provider;
-import at.yawk.fiction.android.storage.StorageManager;
+import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import dagger.Module;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Provider(priority = 0)
 public class LocalAndroidFictionProvider extends AndroidFictionProvider {
-    @Inject StorageManager storageManager;
+    @Inject StoryManager storyManager;
 
     public LocalAndroidFictionProvider() {
         super("local", "Local",
@@ -56,7 +56,7 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
             }
 
             List<StoryWrapper> stories = new ArrayList<>();
-            for (StoryWrapper wrapper : storageManager.listStories(localSearchQuery::acceptIndex)) {
+            for (StoryWrapper wrapper : storyManager.listStories(localSearchQuery::acceptIndex)) {
                 if (localSearchQuery.accept(wrapper)) {
                     stories.add(wrapper);
                 }

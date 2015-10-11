@@ -5,7 +5,7 @@ import at.yawk.fiction.Chapter;
 import at.yawk.fiction.NotFoundException;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
-import at.yawk.fiction.android.storage.StorageManager;
+import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.impl.fanfiction.FfnStory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Importer implements Runnable {
     @Inject ObjectMapper objectMapper;
     @Inject ProviderManager providerManager;
-    @Inject StorageManager storageManager;
+    @Inject StoryManager storyManager;
     @Inject FfnAndroidFictionProvider provider;
 
     @Override
@@ -47,7 +47,7 @@ public class Importer implements Runnable {
                     if (Objects.equal(chapterNode.get("readHash"), chapterNode.get("textHash"))) {
                         FfnStory keyStory = new FfnStory();
                         keyStory.setId(tree.get("story").get("id").asInt());
-                        StoryWrapper story = storageManager.getStory(keyStory);
+                        StoryWrapper story = storyManager.getStory(keyStory);
                         if (story.getStory() == null) {
                             log.info("Fetching story {}", keyStory.getId());
                             try {

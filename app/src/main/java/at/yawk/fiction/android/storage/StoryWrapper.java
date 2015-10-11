@@ -43,9 +43,9 @@ public class StoryWrapper {
 
     final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    @Inject StorageManager storageManager;
-    @Inject ObjectStorageManager objectStorageManager;
-    @Inject TextStorage textStorage;
+    @Inject StoryManager storyManager;
+    @Inject FileSystemStorage fileSystemStorage;
+    @Inject TextManager textManager;
     @Inject PojoMerger pojoMerger;
     @Inject EventBus eventBus;
     @Inject ProviderManager providerManager;
@@ -63,7 +63,7 @@ public class StoryWrapper {
     /**
      * Get a unique id of this story.
      *
-     * @see StorageManager#getStory(String)
+     * @see StoryManager#getStory(String)
      */
     public String getId() {
         return objectId;
@@ -119,7 +119,7 @@ public class StoryWrapper {
                     FormattedText text = chapter.getText();
                     if (text != null) {
                         ChapterData holder = getOrCreateChapterHolder(i);
-                        String hash = textStorage.externalizeText(text);
+                        String hash = textManager.externalizeText(text);
                         updatedChapterText |= !hash.equals(holder.getTextHash());
                         holder.setTextHash(hash);
                         //noinspection deprecation
@@ -183,7 +183,7 @@ public class StoryWrapper {
     private void save() {
         lock.readLock().lock();
         try {
-            objectStorageManager.save(data, objectId);
+            fileSystemStorage.save(data, objectId);
         } finally {
             lock.readLock().unlock();
         }
@@ -279,7 +279,7 @@ public class StoryWrapper {
         ChapterData holder = getChapterHolder(index);
         if (holder == null) { return null; }
         String hash = holder.textHash;
-        return hash == null ? null : textStorage.getText(hash);
+        return hash == null ? null : textManager.getText(hash);
     }
 
     @Nullable

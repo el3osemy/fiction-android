@@ -14,14 +14,14 @@ import lombok.Data;
 class Index {
     private Holder holder;
 
-    ObjectStorageManager objectStorageManager;
-    StorageManager storageManager; // set by StorageManager
+    FileSystemStorage fileSystemStorage;
+    StoryManager storyManager; // set by StorageManager
 
     @Inject
-    Index(ObjectStorageManager objectStorageManager) {
-        this.objectStorageManager = objectStorageManager;
+    Index(FileSystemStorage fileSystemStorage) {
+        this.fileSystemStorage = fileSystemStorage;
         try {
-            holder = objectStorageManager.load(Holder.class, "index");
+            holder = fileSystemStorage.load(Holder.class, "index");
         } catch (NotFoundException e) {
             holder = new Holder();
         } catch (UnreadableException e) {
@@ -32,7 +32,7 @@ class Index {
     synchronized StoryIndexEntry findIndexEntry(String id) {
         StoryIndexEntry entry = holder.getStories().get(id);
         if (entry == null) {
-            StoryWrapper story = storageManager.getStory(id);
+            StoryWrapper story = storyManager.getStory(id);
             entry = story.createIndexEntry();
             holder.getStories().put(id, entry);
             save();
@@ -42,14 +42,14 @@ class Index {
 
     synchronized void invalidate(StoryWrapper wrapper) {
         StoryIndexEntry newEntry = wrapper.createIndexEntry();
-        StoryIndexEntry oldEntry = holder.getStories().put(storageManager.getObjectId(wrapper.getStory()), newEntry);
+        StoryIndexEntry oldEntry = holder.getStories().put(storyManager.getObjectId(wrapper.getStory()), newEntry);
         if (!Objects.equal(newEntry, oldEntry)) {
             save();
         }
     }
 
     private synchronized void save() {
-        objectStorageManager.save(holder, "index");
+        fileSystemStorage.save(holder, "index");
     }
 
     @Data

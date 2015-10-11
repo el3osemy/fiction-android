@@ -36,7 +36,7 @@ import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.storage.EpubBuilder;
 import at.yawk.fiction.android.storage.PojoMerger;
-import at.yawk.fiction.android.storage.StorageManager;
+import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
 import com.squareup.picasso.NetworkPolicy;
@@ -63,7 +63,7 @@ import org.jsoup.safety.Whitelist;
 @ContentView(R.layout.story)
 public class StoryFragment extends ContentViewFragment {
     @Inject Toasts toasts;
-    @Inject StorageManager storageManager;
+    @Inject StoryManager storyManager;
     @Inject TaskManager taskManager;
     @Inject EpubBuilder epubBuilder;
     @Inject DownloadManager downloadManager;
@@ -104,7 +104,7 @@ public class StoryFragment extends ContentViewFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        wrapper = storageManager.getStory(WrapperParcelable.<Story>parcelableToObject(getArguments().getParcelable(
+        wrapper = storyManager.getStory(WrapperParcelable.<Story>parcelableToObject(getArguments().getParcelable(
                 "story")));
     }
 

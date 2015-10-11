@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Singleton
-public class ObjectStorageManager {
+public class FileSystemStorage {
     @Inject RootFile root;
     @Inject ObjectMapper objectMapper;
 

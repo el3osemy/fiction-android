@@ -17,16 +17,16 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class QueryManager {
-    private final ObjectStorageManager objectStorageManager;
+    private final FileSystemStorage fileSystemStorage;
     private Holder holder;
 
     @Inject EventBus bus;
 
     @Inject
-    public QueryManager(ObjectStorageManager objectStorageManager) {
-        this.objectStorageManager = objectStorageManager;
+    public QueryManager(FileSystemStorage fileSystemStorage) {
+        this.fileSystemStorage = fileSystemStorage;
         try {
-            holder = objectStorageManager.load(Holder.class, "queryManager");
+            holder = fileSystemStorage.load(Holder.class, "queryManager");
         } catch (NotFoundException e) {
             holder = new Holder();
             holder.setQueries(new ArrayList<>());
@@ -37,7 +37,7 @@ public class QueryManager {
     }
 
     private synchronized void save() {
-        objectStorageManager.save(holder, "queryManager");
+        fileSystemStorage.save(holder, "queryManager");
         bus.post(new QueryListUpdateEvent());
     }
 

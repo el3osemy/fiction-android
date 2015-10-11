@@ -18,14 +18,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Singleton
-public class TextStorage {
+public class TextManager {
     private static final char[] HEX = "0123456789abcdef".toCharArray();
     private static final int SIZE_LIMIT = 256;
 
-    private final ObjectStorageManager objectStorage;
+    private final FileSystemStorage objectStorage;
 
     @Inject
-    TextStorage(ObjectStorageManager objectStorage) {
+    TextManager(FileSystemStorage objectStorage) {
         this.objectStorage = objectStorage;
     }
 

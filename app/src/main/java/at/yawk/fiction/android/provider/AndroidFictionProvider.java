@@ -6,7 +6,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.inject.ExternalInjectable;
-import at.yawk.fiction.android.storage.StorageManager;
+import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,7 +28,7 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
     private final String name;
     private final Set<Class<?>> providingClasses;
 
-    @Inject StorageManager storageManager;
+    @Inject StoryManager storyManager;
     @Inject @Getter HttpClientFactory httpClientFactory;
 
     HttpClient httpClient;
@@ -78,7 +78,7 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
         return i -> {
             Pageable.Page<? extends Story> storyPage = pageable.getPage(i);
             Pageable.Page<StoryWrapper> wrapperPage = new Pageable.Page<>();
-            wrapperPage.setEntries(Lists.transform(storyPage.getEntries(), storageManager::mergeStory));
+            wrapperPage.setEntries(Lists.transform(storyPage.getEntries(), storyManager::mergeStory));
             wrapperPage.setLast(storyPage.isLast());
             wrapperPage.setPageCount(storyPage.getPageCount());
             return wrapperPage;
