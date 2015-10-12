@@ -4,10 +4,8 @@ import android.util.Base64;
 import at.yawk.fiction.FormattedText;
 import at.yawk.fiction.HtmlText;
 import at.yawk.fiction.RawText;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
-import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -41,8 +39,8 @@ public class TextManager {
 
     public String externalizeText(FormattedText text) {
         String hash;
-        if (text instanceof ExternalizedText) {
-            hash = Base64.encodeToString(((ExternalizedText) text).hash,
+        if (text instanceof TextStorage.ExternalizedText) {
+            hash = Base64.encodeToString(((TextStorage.ExternalizedText) text).hash,
                                          Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
         } else {
             ExternalizationStrategy<? super FormattedText> strategy = getStrategy(text);
@@ -75,7 +73,7 @@ public class TextManager {
             return (ExternalizationStrategy<? super T>) HTML_TEXT_EXTERNALIZATION_STRATEGY;
         } else if (text instanceof RawText) {
             return (ExternalizationStrategy<? super T>) RAW_TEXT_EXTERNALIZATION_STRATEGY;
-        } else if (text instanceof ExternalizedText) {
+        } else if (text instanceof TextStorage.ExternalizedText) {
             return (ExternalizationStrategy<? super T>) EXTERNALIZED_TEXT_EXTERNALIZATION_STRATEGY;
         } else {
             throw new UnsupportedOperationException("Unsupported text type " + text.getClass().getName());
@@ -132,46 +130,22 @@ public class TextManager {
                 }
             };
 
-    private static final ExternalizationStrategy<ExternalizedText> EXTERNALIZED_TEXT_EXTERNALIZATION_STRATEGY =
-            new ExternalizationStrategy<ExternalizedText>() {
+    private static final ExternalizationStrategy<TextStorage.ExternalizedText> EXTERNALIZED_TEXT_EXTERNALIZATION_STRATEGY =
+            new ExternalizationStrategy<TextStorage.ExternalizedText>() {
                 @Override
-                public byte[] hash(ExternalizedText text) {
+                public byte[] hash(TextStorage.ExternalizedText text) {
                     return text.hash;
                 }
 
                 @Override
-                public boolean isExternalizable(ExternalizedText text) {
+                public boolean isExternalizable(TextStorage.ExternalizedText text) {
                     return false;
                 }
 
                 @Override
-                public int length(ExternalizedText text) {
+                public int length(TextStorage.ExternalizedText text) {
                     throw new UnsupportedOperationException();
                 }
             };
 
-    public static class ExternalizedText implements FormattedText {
-        @JsonProperty byte[] hash;
-
-        ExternalizedText(byte[] hash) {
-            this.hash = hash;
-        }
-
-        // jackson constructor
-        @SuppressWarnings("unused")
-        ExternalizedText() {}
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) { return true; }
-            if (!(o instanceof ExternalizedText)) { return false; }
-            ExternalizedText that = (ExternalizedText) o;
-            return Arrays.equals(hash, that.hash);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(hash);
-        }
-    }
 }
