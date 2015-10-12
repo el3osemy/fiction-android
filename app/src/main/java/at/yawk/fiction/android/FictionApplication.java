@@ -2,6 +2,8 @@ package at.yawk.fiction.android;
 
 import android.app.Application;
 import at.yawk.fiction.android.inject.Injector;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +17,7 @@ public class FictionApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         Injector.init(this);
         Injector.inject(this);

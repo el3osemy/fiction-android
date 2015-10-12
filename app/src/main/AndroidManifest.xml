@@ -91,6 +91,9 @@
             android:name=".ui.DownloadManagerActivity"
             android:label="@string/downloads" />
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="69e79a83e12beba215965cf73cc755ae6c53030e" />
     </application>
 
 </manifest>

@@ -1,4 +1,19 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
 apply plugin: 'retrolambda'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'imagemagick'
@@ -78,6 +93,9 @@ dependencies {
     compile 'org.flywaydb:flyway-core:3.2.1'
 
     testCompile 'org.testng:testng:6.9.6'
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
+        transitive = true;
+    }
 }
 
 mdicons {
