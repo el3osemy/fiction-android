@@ -12,9 +12,12 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.UpdateManager;
+import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
+import at.yawk.fiction.android.storage.Index;
 import java.io.File;
 import javax.inject.Inject;
 
@@ -24,6 +27,9 @@ import javax.inject.Inject;
 public class MainPreferenceFragment extends PreferenceFragment {
     @Inject ProviderManager providerManager;
     @Inject UpdateManager updateManager;
+    @Inject Toasts toasts;
+    @Inject TaskManager taskManager;
+    @Inject Index index;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,5 +94,12 @@ public class MainPreferenceFragment extends PreferenceFragment {
                 return true;
             });
         }
+
+        Preference rebuildIndex = getPreferenceManager().findPreference("rebuild_index");
+        rebuildIndex.setOnPreferenceClickListener(preference -> {
+            toasts.toast("Rebuilding index");
+            taskManager.execute(index::buildIndex);
+            return true;
+        });
     }
 }

@@ -23,4 +23,8 @@
         android:defaultValue="false"
         android:key="offline_mode"
         android:title="@string/offline_mode" />
+
+    <Preference
+            android:key="rebuild_index"
+            android:title="@string/rebuild_index" />
 </PreferenceScreen>

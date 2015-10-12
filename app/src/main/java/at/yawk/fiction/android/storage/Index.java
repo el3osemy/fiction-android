@@ -1,59 +1,58 @@
 package at.yawk.fiction.android.storage;
 
-import com.google.common.base.Objects;
-import java.util.HashMap;
-import java.util.Map;
+import com.j256.ormlite.dao.Dao;
+import java.sql.SQLException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.Data;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yawkat
  */
+@Slf4j
 @Singleton
-class Index {
-    private Holder holder;
+public class Index {
+    private final SqlStorage sqlStorage;
+    final Dao<StoryIndexEntry, String> indexDao;
 
-    FileSystemStorage fileSystemStorage;
-    StoryManager storyManager; // set by StorageManager
+    StoryManager storyManager; // set by StoryManager
 
     @Inject
-    Index(FileSystemStorage fileSystemStorage) {
-        this.fileSystemStorage = fileSystemStorage;
-        try {
-            holder = fileSystemStorage.load(Holder.class, "index");
-        } catch (NotFoundException e) {
-            holder = new Holder();
-        } catch (UnreadableException e) {
-            throw new RuntimeException(e);
+    @SneakyThrows(SQLException.class)
+    Index(SqlStorage sqlStorage) {
+        this.sqlStorage = sqlStorage;
+        indexDao = sqlStorage.createDao(StoryIndexEntry.class);
+    }
+
+    void initStoryManager() {
+        if (sqlStorage.getMigrationCount() > 0) {
+            buildIndex();
         }
     }
 
+    @SneakyThrows(SQLException.class)
+    public void buildIndex() {
+        indexDao.updateRaw("DELETE FROM storyIndex");
+        for (StoryWrapper wrapper : storyManager.listStories()) {
+            indexDao.createOrUpdate(wrapper.createIndexEntry());
+        }
+    }
+
+    @SneakyThrows(SQLException.class)
     synchronized StoryIndexEntry findIndexEntry(String id) {
-        StoryIndexEntry entry = holder.getStories().get(id);
+        StoryIndexEntry entry = indexDao.queryForId(id);
         if (entry == null) {
             StoryWrapper story = storyManager.getStory(id);
             entry = story.createIndexEntry();
-            holder.getStories().put(id, entry);
-            save();
+            indexDao.create(entry);
         }
         return entry;
     }
 
+    @SneakyThrows(SQLException.class)
     synchronized void invalidate(StoryWrapper wrapper) {
         StoryIndexEntry newEntry = wrapper.createIndexEntry();
-        StoryIndexEntry oldEntry = holder.getStories().put(storyManager.getObjectId(wrapper.getStory()), newEntry);
-        if (!Objects.equal(newEntry, oldEntry)) {
-            save();
-        }
-    }
-
-    private synchronized void save() {
-        fileSystemStorage.save(holder, "index");
-    }
-
-    @Data
-    private static class Holder {
-        Map<String, StoryIndexEntry> stories = new HashMap<>();
+        indexDao.createOrUpdate(newEntry);
     }
 }

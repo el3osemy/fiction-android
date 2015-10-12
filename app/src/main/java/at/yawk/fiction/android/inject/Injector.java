@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.provider.ProviderLoader;
+import at.yawk.fiction.android.storage.StoryManager;
 import butterknife.ButterKnife;
 import com.google.common.base.Supplier;
 import com.google.common.collect.MapMaker;
@@ -38,6 +39,9 @@ public class Injector {
 
     public static void init(Application application) {
         injector = new Injector(application);
+
+        // initialize the story manager
+        injector.global.get(StoryManager.class).initialize();
     }
 
     private ObjectGraph module(Object context, Supplier<ObjectGraph> factory) {

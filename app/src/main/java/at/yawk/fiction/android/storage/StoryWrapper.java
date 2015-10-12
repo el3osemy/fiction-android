@@ -71,11 +71,13 @@ public class StoryWrapper {
 
     StoryIndexEntry createIndexEntry() throws IllegalStateException {
         StoryIndexEntry entry = new StoryIndexEntry();
-        List<? extends Chapter> chapters = getStory().getChapters();
+        entry.setStoryId(getId());
         entry.setProviderId(provider.getId());
-        entry.setTotalChapterCount(chapters == null ? 0 : chapters.size());
+        entry.setTotalChapterCount(getChapterCount());
         entry.setReadChapterCount(readChapterCount);
         entry.setDownloadedChapterCount(downloadedChapterCount);
+        entry.setLastActionTime(getLastActionTime());
+        entry.setTitle(getStory().getTitle());
         return entry;
     }
 
@@ -299,12 +301,16 @@ public class StoryWrapper {
     }
 
     public ProgressStatus getReadProgressType() {
-        List<? extends Chapter> chapters = getStory().getChapters();
-        return ProgressStatus.of(getReadChapterCount(), chapters == null ? 0 : chapters.size());
+        return ProgressStatus.of(getReadChapterCount(), getChapterCount());
     }
 
     public ProgressStatus getDownloadProgressType() {
-        return ProgressStatus.of(getDownloadedChapterCount(), getStory().getChapters().size());
+        return ProgressStatus.of(getDownloadedChapterCount(), getChapterCount());
+    }
+
+    private int getChapterCount() {
+        List<? extends Chapter> chapters = getStory().getChapters();
+        return chapters == null ? 0 : chapters.size();
     }
 
     @Nullable

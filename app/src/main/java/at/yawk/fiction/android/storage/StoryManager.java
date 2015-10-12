@@ -1,17 +1,22 @@
 package at.yawk.fiction.android.storage;
 
 import at.yawk.fiction.Story;
+import at.yawk.fiction.android.Consumer;
 import at.yawk.fiction.android.inject.Injector;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
-import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
-import javax.annotation.Nullable;
+import com.j256.ormlite.dao.CloseableIterable;
+import com.j256.ormlite.dao.CloseableIterator;
+import com.j256.ormlite.stmt.QueryBuilder;
+import java.sql.SQLException;
+import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,14 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 public class StoryManager {
-    @Inject FileSystemStorage fileSystemStorage;
-    @Inject ProviderManager providerManager;
-    Index index;
-
-    final LoadingCache<String, StoryWrapper> storyCache;
+    private final FileSystemStorage fileSystemStorage;
+    private final ProviderManager providerManager;
+    private final Index index;
+    private final LoadingCache<String, StoryWrapper> storyCache;
 
     @Inject
-    StoryManager(Index index) {
+    StoryManager(FileSystemStorage fileSystemStorage, ProviderManager providerManager, Index index) {
+        this.fileSystemStorage = fileSystemStorage;
+        this.providerManager = providerManager;
         this.index = index;
         index.storyManager = this;
 
@@ -36,7 +42,7 @@ public class StoryManager {
             try {
                 StoryWrapper.StoryData data = fileSystemStorage.load(StoryWrapper.StoryData.class, input);
                 wrapper = new StoryWrapper(input, data);
-                wrapper.provider = providerManager.getProvider(data.getStory());
+                wrapper.provider = this.providerManager.getProvider(data.getStory());
                 wrapper.bakeDownloadedChapterCount();
                 wrapper.bakeReadChapterCount();
             } catch (NotFoundException e) {
@@ -47,6 +53,10 @@ public class StoryManager {
             Injector.inject(wrapper);
             return wrapper;
         }));
+    }
+
+    public void initialize() {
+        index.initStoryManager();
     }
 
     String getObjectId(Story story) {
@@ -77,7 +87,7 @@ public class StoryManager {
     }
 
     public Iterable<StoryWrapper> listStories() {
-        return listStories(null);
+        return Iterables.transform(fileSystemStorage.list("story"), this::getStory);
     }
 
     /**
@@ -85,11 +95,26 @@ public class StoryManager {
      *
      * Returned stories are not guaranteed to satisfy this condition - this is up to the implementation.
      */
-    public Iterable<StoryWrapper> listStories(@Nullable Predicate<StoryIndexEntry> indexFilter) {
-        Iterable<String> keys = fileSystemStorage.list("story");
-        if (indexFilter != null) {
-            keys = Iterables.filter(keys, key -> indexFilter.apply(index.findIndexEntry(key)));
-        }
-        return Iterables.transform(keys, this::getStory);
+    public CloseableIterable<StoryWrapper> listStories(Consumer<QueryBuilder<StoryIndexEntry, String>> queryBuilder) {
+        QueryBuilder<StoryIndexEntry, String> builder = index.indexDao.queryBuilder();
+        queryBuilder.consume(builder);
+        return new CloseableIterable<StoryWrapper>() {
+            @Override
+            @SneakyThrows(SQLException.class)
+            public CloseableIterator<StoryWrapper> closeableIterator() {
+                CloseableIterator<StoryIndexEntry> handle = builder.iterator();
+                return new TransformedCloseableIterator<StoryIndexEntry, StoryWrapper>(handle) {
+                    @Override
+                    protected StoryWrapper map(StoryIndexEntry entry) {
+                        return getStory(entry.getStoryId());
+                    }
+                };
+            }
+
+            @Override
+            public Iterator<StoryWrapper> iterator() {
+                return closeableIterator();
+            }
+        };
     }
 }

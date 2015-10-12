@@ -7,10 +7,13 @@ import at.yawk.fiction.Story;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.Provider;
+import at.yawk.fiction.android.storage.StoryIndexEntry;
 import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
+import com.j256.ormlite.stmt.Where;
 import dagger.Module;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Provider(priority = 0)
 public class LocalAndroidFictionProvider extends AndroidFictionProvider {
+    private static final long LOCAL_QUERY_PAGE_SIZE = 20;
+
     @Inject StoryManager storyManager;
 
     public LocalAndroidFictionProvider() {
@@ -48,21 +53,25 @@ public class LocalAndroidFictionProvider extends AndroidFictionProvider {
         log.debug("Query: {}", localSearchQuery);
         return i -> {
             Pageable.Page<StoryWrapper> page = new Pageable.Page<>();
-            page.setLast(true);
-            page.setPageCount(1);
-            if (i != 0) {
-                page.setEntries(Collections.emptyList());
-                return page;
-            }
 
             List<StoryWrapper> stories = new ArrayList<>();
-            for (StoryWrapper wrapper : storyManager.listStories(localSearchQuery::acceptIndex)) {
+            for (StoryWrapper wrapper : storyManager.listStories(builder -> {
+                Where<StoryIndexEntry, String> where = builder.where();
+                localSearchQuery.apply(builder, where);
+
+                try {
+                    builder.offset(LOCAL_QUERY_PAGE_SIZE * i);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                builder.limit(LOCAL_QUERY_PAGE_SIZE);
+            })) {
                 if (localSearchQuery.accept(wrapper)) {
                     stories.add(wrapper);
                 }
             }
-            Collections.sort(stories, localSearchQuery.getOrder());
             page.setEntries(stories);
+            page.setLast(stories.size() < LOCAL_QUERY_PAGE_SIZE);
             return page;
         };
     }

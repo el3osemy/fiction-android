@@ -29,10 +29,19 @@ public class TaskManager {
     @Inject
     TaskManager() {}
 
+    public void execute(Runnable task) {
+        executor.execute(() -> {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                log.error("Error in task", t);
+            }
+        });
+    }
+
     public void execute(TaskContext context, Runnable task) {
         TaskContext.FutureHolder holder = context.add();
         Future<?> future = executor.submit(() -> {
-            log.info("exec");
             try {
                 task.run();
             } catch (Throwable t) {
