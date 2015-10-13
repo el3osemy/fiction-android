@@ -1,5 +1,6 @@
 package at.yawk.fiction.android.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -272,7 +273,8 @@ public class StoryFragment extends ContentViewFragment {
 
                 @Override
                 public void run() {
-                    //if (!isVisible()) { return; }
+                    Activity activity = getActivity();
+                    if (activity == null) { return; }
 
                     int i = 0;
                     while (i++ < 10 && chapterIndex < chapters.size()) {
@@ -280,7 +282,7 @@ public class StoryFragment extends ContentViewFragment {
                         ChapterHolder holder;
                         if (chapterIndex >= chapterHolders.size()) {
                             // inflate attaches us to the group as well
-                            View view = getActivity().getLayoutInflater().inflate(R.layout.chapter, chapterGroup,false);
+                            View view = activity.getLayoutInflater().inflate(R.layout.chapter, chapterGroup, false);
                             chapterGroup.addView(view);
                             chapterHolders.add(holder = new ChapterHolder(view, chapterIndex));
                         } else {
