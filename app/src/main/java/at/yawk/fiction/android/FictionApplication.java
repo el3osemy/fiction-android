@@ -19,9 +19,14 @@ public class FictionApplication extends Application {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
 
-        Injector.init(this);
-        Injector.inject(this);
+        try {
+            Injector.init(this);
+            Injector.inject(this);
 
-        updateManager.checkUpdateAsync();
+            updateManager.checkUpdateAsync();
+        } catch (Throwable t) {
+            log.error("Failed to initialize", t);
+            throw t;
+        }
     }
 }
