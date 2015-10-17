@@ -18,12 +18,15 @@ public class FictionApplication extends Application {
     public void onCreate() {
         super.onCreate();
         try {
+            log.info("Starting up...");
             Fabric.with(this, new Crashlytics());
 
+            log.info("Setting up injector...");
             Injector.init(this);
             Injector.inject(this);
 
             updateManager.checkUpdateAsync();
+            log.info("Startup complete!");
         } catch (Throwable t) {
             log.error("Failed to initialize", t);
             throw t;
