@@ -17,9 +17,9 @@ public class FictionApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
-
         try {
+            Fabric.with(this, new Crashlytics());
+
             Injector.init(this);
             Injector.inject(this);
 

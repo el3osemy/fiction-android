@@ -34,13 +34,13 @@ final class AndroidLogger implements Logger {
     private void doLog(Marker marker, int level, String msg, Throwable throwable) {
         if (throwable != null) {
             msg = msg + '\n' + Log.getStackTraceString(throwable);
-
-            if (level >= Log.ERROR) {
-                Crashlytics.getInstance().core.logException(throwable);
-            }
         }
 
         provider.log(getTag(marker), level, msg);
+
+        if (throwable != null && level >= Log.ERROR) {
+            Crashlytics.getInstance().core.logException(throwable);
+        }
     }
 
     private void log(Marker marker, int level, String msg) {
