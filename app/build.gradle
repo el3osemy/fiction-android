@@ -57,6 +57,7 @@ android {
         }
     }
     dexOptions {
+        incremental true
         javaMaxHeapSize "4g"
     }
     packagingOptions {
@@ -91,11 +92,12 @@ dependencies {
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'org.sqldroid:sqldroid:1.0.3'
     compile 'org.flywaydb:flyway-core:3.2.1'
+    compile 'com.android.support:multidex:'
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
+        transitive = true
+    }
 
     testCompile 'org.testng:testng:6.9.6'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
-        transitive = true;
-    }
 }
 
 mdicons {

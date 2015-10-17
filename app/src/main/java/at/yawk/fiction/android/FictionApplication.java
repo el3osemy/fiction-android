@@ -1,6 +1,6 @@
 package at.yawk.fiction.android;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 import at.yawk.fiction.android.inject.Injector;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author yawkat
  */
 @Slf4j
-public class FictionApplication extends Application {
+public class FictionApplication extends MultiDexApplication {
     @Inject UpdateManager updateManager;
 
     @Override
