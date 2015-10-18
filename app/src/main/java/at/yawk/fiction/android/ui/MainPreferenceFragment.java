@@ -88,8 +88,7 @@ public class MainPreferenceFragment extends PreferenceFragment {
             updatePreference.setOnPreferenceClickListener(preference -> {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(
-                        "https://github.com/yawkat/fiction-android/commits/" + updateManager.getAppBuild()));
+                intent.setData(Uri.parse("http://ci.yawk.at/job/fiction-android/changes"));
                 getActivity().startActivity(intent);
                 return true;
             });

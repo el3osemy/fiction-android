@@ -2,6 +2,7 @@ package at.yawk.fiction.android;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
@@ -11,8 +12,6 @@ import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
-import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -46,9 +45,8 @@ public class UpdateManager {
 
     private String loadAppBuild() {
         try {
-            return new String(ByteStreams.toByteArray(application.getResources().openRawResource(R.raw.build)),
-                              Charsets.UTF_8).trim();
-        } catch (IOException e) {
+            return application.getPackageManager().getPackageInfo(application.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

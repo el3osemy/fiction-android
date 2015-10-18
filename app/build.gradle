@@ -44,17 +44,13 @@ android {
         applicationId "at.yawk.fiction.android"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode Integer.parseInt(getenv("BUILD_NUMBER", "-1"))
+        versionName getenv("BUILD_NUMBER", "dev")
         multiDexEnabled = true
     }
     productFlavors {
-        'public' {
-
-        }
-        'private' {
-
-        }
+        'public' {}
+        'private' {}
     }
     dexOptions {
         incremental true
