@@ -82,8 +82,8 @@ public class UpdateManager {
         Status remoteRevision = downloadRevision();
         this.lastKnownStatus = remoteRevision;
 
-        if (remoteRevision.getHash().equals(appBuild)) {
-            log.info("We are on latest version ({})", remoteRevision.getHash());
+        if (remoteRevision.getBuild().equals(appBuild)) {
+            log.info("We are on latest version ({})", remoteRevision.getBuild());
             updatable = false;
             return;
         }
@@ -111,7 +111,7 @@ public class UpdateManager {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Status {
-        private String hash;
+        private String build;
         private URL download;
     }
 }
