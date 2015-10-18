@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
@@ -153,6 +154,12 @@ public class StoryFragment extends ContentViewFragment {
     private List<ChapterHolder> chapterHolders = new ArrayList<>();
 
     private void refresh() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            log.warn("No activity present in StoryFragment.refresh, skipping");
+            return;
+        }
+
         titleView.setText(wrapper.getStory().getTitle());
 
         Author author = wrapper.getStory().getAuthor();
@@ -216,7 +223,7 @@ public class StoryFragment extends ContentViewFragment {
                 boolean loadCoverViaNetwork = false;
 
                 ConnectivityManager connectivityManager =
-                        (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                        (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
                 log.info("network {}", activeNetworkInfo);
                 if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
@@ -232,7 +239,7 @@ public class StoryFragment extends ContentViewFragment {
                     }
                 }
 
-                RequestCreator creator = Picasso.with(getActivity())
+                RequestCreator creator = Picasso.with(activity)
                         .load(Uri.decode(validUri.toString()));
                 if (!loadCoverViaNetwork) {
                     creator = creator.networkPolicy(NetworkPolicy.OFFLINE);
