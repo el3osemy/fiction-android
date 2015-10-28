@@ -8,10 +8,12 @@ import at.yawk.fiction.*;
 import at.yawk.fiction.android.inject.ExternalInjectable;
 import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
+import at.yawk.fiction.android.ui.AsyncAction;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -133,5 +135,12 @@ public abstract class AndroidFictionProvider implements ExternalInjectable {
     @Nullable
     public Story getStory(Uri uri) {
         return null;
+    }
+
+    /**
+     * Get a list of additional actions for this story.
+     */
+    public List<AsyncAction> getAdditionalActions(Story story) {
+        return Collections.emptyList();
     }
 }

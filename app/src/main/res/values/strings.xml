@@ -36,4 +36,5 @@
     <string name="download_covers_data">Download Covers on data</string>
     <string name="offline_mode">Offline Mode</string>
     <string name="rebuild_index">Rebuild Index</string>
+    <string name="manage_shelves">Manage Shelves</string>
 </resources>

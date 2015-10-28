@@ -47,9 +47,9 @@ import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -132,11 +132,14 @@ public class StoryFragment extends ContentViewFragment {
             });
         });
         titleView.setOnLongClickListener(v -> {
-            showDialog(new AsyncAction(R.string.open_in_browser, () -> {
+            List<AsyncAction> actions = new ArrayList<>();
+            actions.add(new AsyncAction(R.string.open_in_browser, () -> {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(wrapper.getStory().getUri().toString()));
                 getActivity().startActivity(intent);
             }));
+            actions.addAll(wrapper.getProvider().getAdditionalActions(wrapper.getStory()));
+            showDialog(actions);
             return false;
         });
         updateStory.setOnClickListener(v -> taskManager.execute(taskContext, () -> {
@@ -342,13 +345,23 @@ public class StoryFragment extends ContentViewFragment {
     }
 
     void showDialog(AsyncAction... actions) {
+        showDialog(Arrays.asList(actions));
+    }
+
+    void showDialog(List<AsyncAction> actions) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String[] actionNames = new String[actions.length];
-        for (int i = 0; i < actions.length; i++) {
-            actionNames[i] = getResources().getString(actions[i].description);
+        String[] actionNames = new String[actions.size()];
+        for (int i = 0; i < actions.size(); i++) {
+            actionNames[i] = getResources().getString(actions.get(i).getDescription());
         }
         builder.setItems(actionNames, (dialog, which) -> {
-            taskManager.execute(taskContext, actions[which].task);
+            taskManager.execute(taskContext, () -> {
+                FragmentActivity activity = getActivity();
+                if (activity != null) {
+                    actions.get(which).getTask()
+                            .consume(new AsyncAction.AsyncActionContext(activity, uiRunner, taskContext));
+                }
+            });
         });
         builder.show();
     }
@@ -445,9 +458,4 @@ public class StoryFragment extends ContentViewFragment {
         }
     }
 
-    @RequiredArgsConstructor
-    private static class AsyncAction {
-        final int description;
-        final Runnable task;
-    }
 }

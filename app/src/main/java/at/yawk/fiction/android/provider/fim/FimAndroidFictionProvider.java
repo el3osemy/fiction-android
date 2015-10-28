@@ -5,12 +5,15 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.support.v7.app.AlertDialog;
 import at.yawk.fiction.Chapter;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
+import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.Provider;
+import at.yawk.fiction.android.ui.AsyncAction;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fimfiction.*;
@@ -27,6 +30,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -46,6 +50,7 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
     @Inject PageParserProvider pageParserProvider;
     @Inject ObjectMapper objectMapper;
     @Inject SharedPreferences sharedPreferences;
+    @Inject TaskManager taskManager;
 
     @Nullable
     private FimAuthentication lastAuthentication = null;
@@ -152,6 +157,48 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
             }
         }
         return super.getStory(uri);
+    }
+
+    @Override
+    public List<AsyncAction> getAdditionalActions(Story story) {
+        return Collections.singletonList(new AsyncAction(
+                R.string.manage_shelves,
+                ctx -> {
+                    Map<FimShelf, Boolean> shelves;
+                    try {
+                        shelves = fictionProvider.fetchStoryShelves(story);
+                    } catch (Exception e) {
+                        throw new RuntimeException();
+                    }
+
+                    FimShelf[] shelfArray = new FimShelf[shelves.size()];
+                    CharSequence[] nameArray = new CharSequence[shelves.size()];
+                    boolean[] statusArray = new boolean[shelves.size()];
+                    int i = 0;
+                    for (Map.Entry<FimShelf, Boolean> entry : shelves.entrySet()) {
+                        shelfArray[i] = entry.getKey();
+                        nameArray[i] = entry.getKey().getName();
+                        statusArray[i] = entry.getValue();
+                        i++;
+                    }
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ctx.getContext());
+                    builder.setMultiChoiceItems(
+                            nameArray,
+                            statusArray,
+                            (dialog, which, isChecked) -> {
+                                taskManager.execute(ctx.getTaskContext(), () -> {
+                                    try {
+                                        fictionProvider.setStoryShelf(story, shelfArray[which], isChecked);
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                            }
+                    );
+                    ctx.getUiRunner().runOnUiThread(builder::show);
+                }
+        ));
     }
 
     @Override
