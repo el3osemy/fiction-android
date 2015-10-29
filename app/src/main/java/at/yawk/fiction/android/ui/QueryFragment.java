@@ -213,7 +213,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                     fetching = true;
                     taskManager.execute(taskContext, () -> {
                         if (!fetchOne()) {
-                            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+                            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                         }
                         synchronized (QueryFragment.this) {
                             fetching = false;
