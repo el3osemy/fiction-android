@@ -14,6 +14,7 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.stmt.QueryBuilder;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.SneakyThrows;
@@ -25,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 public class StoryManager {
+    private static final boolean LOG_STORY_CACHE_STATS = false;
+
     private final FileSystemStorage fileSystemStorage;
     private final ProviderManager providerManager;
     private final Index index;
@@ -53,6 +56,21 @@ public class StoryManager {
             Injector.inject(wrapper);
             return wrapper;
         }));
+
+        if (LOG_STORY_CACHE_STATS) {
+            Thread thread = new Thread(() -> {
+                while (!Thread.interrupted()) {
+                    log.debug("Story cache size: {}", storyCache.size());
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }, "story cache watcher");
+            thread.setDaemon(true);
+            thread.start();
+        }
     }
 
     public void initialize() {
