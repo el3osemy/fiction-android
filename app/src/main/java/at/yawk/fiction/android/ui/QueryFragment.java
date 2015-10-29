@@ -16,6 +16,7 @@ import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
 import at.yawk.fiction.android.download.DownloadManager;
+import at.yawk.fiction.android.download.task.QueryDownloadTask;
 import at.yawk.fiction.android.download.task.StoryListUpdateTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
@@ -151,10 +152,15 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         storyViewMap.put(wrapper, view);
     }
 
+    private boolean canFetchPages() {
+        return currentWorker.provider.isQueryOfflineCacheable(currentWorker.query.getQuery());
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.query_story_list, menu);
+        menu.findItem(R.id.fetchPages).setEnabled(canFetchPages());
     }
 
     @Override
@@ -162,6 +168,18 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         switch (item.getItemId()) {
         case R.id.updateAll:
             downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(currentWorker.stories)));
+            return true;
+        case R.id.fetchPages:
+            if (!canFetchPages()) {
+                toasts.toast("Cannot fetch query of this provider");
+            } else {
+                int pageCount = currentWorker.pageCount;
+                if (pageCount < 0) {
+                    toasts.toast("Cannot fetch pages because we don't know how many there are!");
+                } else {
+                    downloadManager.enqueue(new QueryDownloadTask(currentWorker.query, pageCount));
+                }
+            }
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -181,6 +199,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         private final Pageable<StoryWrapper> pageable;
         private final SimpleArrayAdapter<StoryWrapper> adapter;
 
+        private final AndroidFictionProvider provider;
         private final QueryWrapper query;
         private final boolean savePagesToOfflineCache;
 
@@ -191,6 +210,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         private boolean fetching = false;
 
         Worker(AndroidFictionProvider provider, QueryWrapper query, boolean offline, boolean savePagesToOfflineCache) {
+            this.provider = provider;
             this.query = query;
             this.savePagesToOfflineCache = savePagesToOfflineCache;
             if (offline) {

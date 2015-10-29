@@ -3,7 +3,12 @@
     xmlns:appcompat="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/updateAll"
+        android:icon="@mipmap/ic_refresh_white_24dp"
+        appcompat:showAsAction="never"
+        android:title="Search all stories for updates" />
+    <item
+        android:id="@+id/fetchPages"
         android:icon="@mipmap/ic_file_download_white_24dp"
         appcompat:showAsAction="ifRoom"
-        android:title="Search For Updates" />
+        android:title="Fetch all pages for offline reading" />
 </menu>
