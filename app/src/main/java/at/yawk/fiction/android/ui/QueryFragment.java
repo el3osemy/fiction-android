@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,7 +56,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
     private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
 
-    Worker currentWorker;
+    @Nullable Worker currentWorker;
 
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
@@ -76,9 +77,15 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         boolean offline = offlineCacheable &&
                           sharedPreferences.getBoolean("offline_mode", false);
 
-        currentWorker = new Worker(provider, query, offline, !offline && offlineCacheable);
-        storyList.setAdapter(currentWorker.adapter);
-        currentWorker.checkFetchMore();
+        try {
+            currentWorker = new Worker(provider, query, offline, !offline && offlineCacheable);
+            storyList.setAdapter(currentWorker.adapter);
+            currentWorker.checkFetchMore();
+        } catch (Throwable t) {
+            // in case the provider throws something somewhere
+            log.error("Failed to initialize download worker", t);
+            toasts.toast("Failed to initialize download worker", t);
+        }
     }
 
     @Subscribe(Subscribe.EventQueue.UI)
@@ -124,7 +131,9 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                currentWorker.checkFetchMore();
+                if (currentWorker != null) {
+                    currentWorker.checkFetchMore();
+                }
             }
         });
     }
@@ -153,7 +162,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     }
 
     private boolean canFetchPages() {
-        return currentWorker.provider.isQueryOfflineCacheable(currentWorker.query.getQuery());
+        return currentWorker != null &&
+               currentWorker.provider.isQueryOfflineCacheable(currentWorker.query.getQuery());
     }
 
     @Override
@@ -167,10 +177,12 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.updateAll:
-            downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(currentWorker.stories)));
+            if (currentWorker != null) {
+                downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(currentWorker.stories)));
+            }
             return true;
         case R.id.fetchPages:
-            if (!canFetchPages()) {
+            if (currentWorker == null || !canFetchPages()) {
                 toasts.toast("Cannot fetch query of this provider");
             } else {
                 int pageCount = currentWorker.pageCount;
