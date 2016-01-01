@@ -24,6 +24,7 @@ public class ProviderLoader {
     public ProviderLoader() {}
 
     public ObjectGraph load(ObjectGraph graph) {
+        log.info("Scanning for fiction providers...");
         try {
             DexFile dexFile = new DexFile(application.getApplicationInfo().sourceDir);
             Enumeration<String> entries = dexFile.entries();
@@ -31,6 +32,7 @@ public class ProviderLoader {
             Map<AndroidFictionProvider, Provider> annotations = new HashMap<>();
             while (entries.hasMoreElements()) {
                 String providerClassName = entries.nextElement();
+                if (!providerClassName.startsWith("at.yawk.fiction.android.provider")) { continue; }
                 Class<?> providerClass;
                 try {
                     providerClass = Class.forName(providerClassName, false, ProviderManager.class.getClassLoader());
@@ -61,6 +63,7 @@ public class ProviderLoader {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        log.info("Scan complete");
         Object[] modules = new Object[providers.size()];
         for (int i = 0; i < providers.size(); i++) {
             modules[i] = providers.get(i).createModule();
