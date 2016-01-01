@@ -72,6 +72,7 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
 
     @Override
     public boolean useProvidedReadStatus() {
+        getFictionProvider(); // make sure we're initialized
         return useProvidedReadStatus;
     }
 
