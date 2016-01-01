@@ -309,9 +309,9 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                 List<StoryWrapper> additions = new ArrayList<>(page.getEntries()); // eager copy
 
                 log.trace("Done, passing on to UI");
-                stories.addAll(additions);
                 hasMore = !page.isLast();
                 runOnUiThread(() -> {
+                    stories.addAll(additions);
                     adapter.notifyDataSetChanged();
                     updateLoading();
                 });
