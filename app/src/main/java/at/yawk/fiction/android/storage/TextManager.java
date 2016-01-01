@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 public class TextManager {
     private static final char[] HEX = "0123456789abcdef".toCharArray();
-    private static final int SIZE_LIMIT = 256;
 
     private final FileSystemStorage objectStorage;
 
@@ -33,6 +32,7 @@ public class TextManager {
             return objectStorage.load(FormattedText.class, getStorageId(hash));
         } catch (NotFoundException | UnreadableException e) {
             log.warn("Could not load text {}", hash, e);
+            objectStorage.delete(getStorageId(hash));
             return null;
         }
     }
@@ -83,8 +83,6 @@ public class TextManager {
     private interface ExternalizationStrategy<T extends FormattedText> {
         byte[] hash(T text);
 
-        boolean isExternalizable(T text);
-
         int length(T text);
     }
 
@@ -96,11 +94,6 @@ public class TextManager {
                             .putString("html", Charsets.UTF_8)
                             .putString(text.getHtml(), Charsets.UTF_8)
                             .hash().asBytes();
-                }
-
-                @Override
-                public boolean isExternalizable(HtmlText text) {
-                    return text.getHtml().length() > SIZE_LIMIT;
                 }
 
                 @Override
@@ -120,11 +113,6 @@ public class TextManager {
                 }
 
                 @Override
-                public boolean isExternalizable(RawText text) {
-                    return text.getText().length() > SIZE_LIMIT;
-                }
-
-                @Override
                 public int length(RawText text) {
                     return text.getText().length();
                 }
@@ -135,11 +123,6 @@ public class TextManager {
                 @Override
                 public byte[] hash(TextStorage.ExternalizedText text) {
                     return text.hash;
-                }
-
-                @Override
-                public boolean isExternalizable(TextStorage.ExternalizedText text) {
-                    return false;
                 }
 
                 @Override
