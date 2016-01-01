@@ -3,6 +3,7 @@ package at.yawk.fiction.android.ui;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,15 +26,24 @@ import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.OfflineQueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
+import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import butterknife.Bind;
+import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -46,6 +56,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     @Inject DownloadManager downloadManager;
     @Inject OfflineQueryManager offlineQueryManager;
     @Inject SharedPreferences sharedPreferences;
+    @Inject StoryManager storyManager;
 
     @Bind(R.id.storyList) ListView storyList;
     @Bind(R.id.refreshLayout) SwipeRefreshLayout refreshLayout;
@@ -57,6 +68,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     private final WeakBiMap<StoryWrapper, View> storyViewMap = new WeakBiMap<>();
 
     @Nullable Worker currentWorker;
+
+    @Nullable Pattern searchQuery = null;
 
     public void setQuery(QueryWrapper query) {
         Bundle args = new Bundle();
@@ -171,6 +184,29 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.query_story_list, menu);
         menu.findItem(R.id.fetchPages).setEnabled(canFetchPages());
+        ((SearchView) menu.findItem(R.id.filter).getActionView())
+                .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        setSearchQuery(query);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        setSearchQuery(newText);
+                        return true;
+                    }
+
+                    private void setSearchQuery(String queryPattern) {
+                        searchQuery = queryPattern.isEmpty() ? null :
+                                Pattern.compile(queryPattern, Pattern.CASE_INSENSITIVE);
+                        if (currentWorker != null) {
+                            currentWorker.stories.notifyFilterChanged();
+                            currentWorker.adapter.notifyDataSetChanged();
+                        }
+                    }
+                });
     }
 
     @Override
@@ -207,7 +243,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
     }
 
     private class Worker {
-        private final List<StoryWrapper> stories = new CopyOnWriteArrayList<>();
+        private final FilteredStoryList stories = new FilteredStoryList();
         private final Pageable<StoryWrapper> pageable;
         private final SimpleArrayAdapter<StoryWrapper> adapter;
 
@@ -322,6 +358,77 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
         boolean isValid() {
             return QueryFragment.this.currentWorker == this;
+        }
+    }
+
+    @ThreadSafe
+    private class FilteredStoryList extends AbstractList<StoryWrapper> {
+        private final List<LazyStory> allStories = new CopyOnWriteArrayList<>();
+        private List<LazyStory> filteredStories = new CopyOnWriteArrayList<>();
+
+        private boolean accept(LazyStory story) {
+            if (searchQuery != null && !searchQuery.matcher(story.getTitle()).find()) {
+                return false;
+            }
+            return true;
+        }
+
+        public synchronized void notifyFilterChanged() {
+            List<LazyStory> filteredLocal = new ArrayList<>();
+            for (LazyStory story : allStories) {
+                if (accept(story)) {
+                    filteredLocal.add(story);
+                }
+            }
+            filteredStories = new CopyOnWriteArrayList<>(filteredLocal);
+        }
+
+        @Override
+        public synchronized boolean add(StoryWrapper object) {
+            LazyStory lazy = new LazyStory(object);
+            allStories.add(lazy);
+            if (accept(lazy)) { filteredStories.add(lazy); }
+            return true;
+        }
+
+        @Override
+        public StoryWrapper get(int location) {
+            return filteredStories.get(location).getItem();
+        }
+
+        @Override
+        public int size() {
+            return filteredStories.size();
+        }
+
+        @Override
+        public Iterator<StoryWrapper> iterator() {
+            return Iterators.transform(filteredStories.iterator(), LazyStory::getItem);
+        }
+    }
+
+    private class LazyStory {
+        private final String id;
+        @Getter private final String title;
+        private Reference<StoryWrapper> item;
+
+        LazyStory(StoryWrapper wrapper) {
+            id = wrapper.getId();
+            title = wrapper.getStory().getTitle();
+            item = makeReference(wrapper);
+        }
+
+        public StoryWrapper getItem() {
+            StoryWrapper cached = item.get();
+            if (cached == null) {
+                cached = storyManager.getStory(id);
+                item = makeReference(cached);
+            }
+            return cached;
+        }
+
+        private Reference<StoryWrapper> makeReference(StoryWrapper wrapper) {
+            return new SoftReference<>(wrapper);
         }
     }
 }

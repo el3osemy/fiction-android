@@ -123,7 +123,7 @@ mdicons {
         action {
             colors "white"
             sizes "24dp"
-            names "settings"
+            names "settings", "search"
         }
         hardware {
             colors "white"

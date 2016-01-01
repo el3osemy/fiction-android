@@ -9,6 +9,12 @@
     <item
         android:id="@+id/fetchPages"
         android:icon="@mipmap/ic_file_download_white_24dp"
-        appcompat:showAsAction="ifRoom"
+        appcompat:showAsAction="never"
         android:title="Fetch all pages for offline reading" />
+    <item
+            android:id="@+id/filter"
+            android:icon="@mipmap/ic_search_white_24dp"
+            appcompat:showAsAction="always"
+            appcompat:actionViewClass="android.support.v7.widget.SearchView"
+            android:title="Filter by title"/>
 </menu>
