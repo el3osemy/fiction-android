@@ -367,7 +367,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         private List<LazyStory> filteredStories = new CopyOnWriteArrayList<>();
 
         private boolean accept(LazyStory story) {
-            if (searchQuery != null && !searchQuery.matcher(story.getTitle()).find()) {
+            if (searchQuery != null
+                && (story.getTitle() == null || !searchQuery.matcher(story.getTitle()).find())) {
                 return false;
             }
             return true;
@@ -409,7 +410,8 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
 
     private class LazyStory {
         private final String id;
-        @Getter private final String title;
+        // yes, this can be null for some stories.
+        @Getter @Nullable private final String title;
         private Reference<StoryWrapper> item;
 
         LazyStory(StoryWrapper wrapper) {
