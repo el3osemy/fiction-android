@@ -96,7 +96,7 @@ public class UpdateManager {
      * Get the current revision status or {@code null} if the device is not connected.
      */
     private Status downloadRevision() throws IOException {
-        URL url = new URL("http://ci.yawk.at/job/fiction-android/lastStableBuild/artifact/release.json");
+        URL url = new URL("https://ci.yawk.at/job/fiction-android/lastStableBuild/artifact/release.json");
         InputStream in = url.openStream();
         //noinspection TryFinallyCanBeTryWithResources
         try {
