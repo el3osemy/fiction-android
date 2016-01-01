@@ -134,8 +134,13 @@ public class StoryFragment extends ContentViewFragment {
         titleView.setOnLongClickListener(v -> {
             List<AsyncAction> actions = new ArrayList<>();
             actions.add(new AsyncAction(R.string.open_in_browser, () -> {
+                URI uri = wrapper.getStory().getUri();
+                if (uri == null) {
+                    toasts.toast("No URI available");
+                    return;
+                }
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(wrapper.getStory().getUri().toString()));
+                intent.setData(Uri.parse(uri.toString()));
                 getActivity().startActivity(intent);
             }));
             actions.addAll(wrapper.getProvider().getAdditionalActions(wrapper.getStory()));
