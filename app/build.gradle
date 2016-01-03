@@ -8,6 +8,7 @@ buildscript {
     }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply plugin: 'io.fabric'
 
 repositories {
@@ -71,12 +72,16 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
 }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile files('../dep/build/libs/dep-all.jar')
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     provided 'org.projectlombok:lombok:1.16.4'
     provided 'com.google.code.findbugs:annotations:2.0.2'
     compile 'org.slf4j:slf4j-api:1.7.12'
