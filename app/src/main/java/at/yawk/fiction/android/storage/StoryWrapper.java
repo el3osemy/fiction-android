@@ -53,7 +53,7 @@ public class StoryWrapper {
 
     @Getter int downloadedChapterCount = -1;
     @Getter int readChapterCount = -1;
-    @Getter AndroidFictionProvider provider;
+    AndroidFictionProvider provider;
 
     StoryWrapper() {
         // required for dagger
@@ -352,5 +352,11 @@ public class StoryWrapper {
         @Nullable String readHash;
 
         @JsonIgnore transient boolean downloading;
+    }
+
+    // MANUAL GETTERS FOR KOTLIN
+
+    public AndroidFictionProvider getProvider() {
+        return provider;
     }
 }

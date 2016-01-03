@@ -13,12 +13,10 @@ import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.context.Toasts;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.SupportFragmentModule;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.impl.fimfiction.*;
 import butterknife.Bind;
 import com.google.common.collect.Lists;
-import dagger.Module;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -203,12 +201,4 @@ public class FimQueryEditorFragment extends QueryEditorFragment<FimSearchQuery> 
         super.onDestroy();
         taskContext.destroy();
     }
-
-    @Override
-    public Object createModule() {
-        return new M();
-    }
-
-    @Module(addsTo = SupportFragmentModule.class, injects = FimQueryEditorFragment.class)
-    static class M {}
 }

@@ -5,12 +5,10 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.SupportFragmentModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import butterknife.Bind;
-import dagger.Module;
 import javax.inject.Inject;
 
 /**
@@ -72,12 +70,4 @@ public class LocalQueryEditorFragment extends QueryEditorFragment<LocalSearchQue
             providers.addView(checkBox);
         }
     }
-
-    @Override
-    public Object createModule() {
-        return new M();
-    }
-
-    @Module(addsTo = SupportFragmentModule.class, injects = LocalQueryEditorFragment.class)
-    static class M {}
 }

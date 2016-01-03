@@ -8,5 +8,9 @@ import lombok.Value;
  */
 @Value
 public class TaskUpdateEvent {
-    private DownloadManagerMetrics.Task task;
+    private final DownloadManagerMetrics.Task task;
+
+    public TaskUpdateEvent(DownloadManagerMetrics.Task task) {
+        this.task = task;
+    }
 }

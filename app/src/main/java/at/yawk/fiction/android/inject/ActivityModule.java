@@ -2,47 +2,22 @@ package at.yawk.fiction.android.inject;
 
 import android.app.Activity;
 import android.content.Context;
-import at.yawk.fiction.android.ui.*;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Singleton;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 /**
  * @author yawkat
  */
-@Module(
-        addsTo = BaseModule.class,
-        injects = {
-                StoryActivity.class,
-                QueryOverviewActivity.class,
-                QueryWrapperActivity.class,
-                MainPreferenceActivity.class,
-                DownloadManagerActivity.class,
-        },
-        library = true
-)
-public class ActivityModule {
+public class ActivityModule implements Module {
     final Activity activity;
 
     ActivityModule(Activity activity) {
         this.activity = activity;
     }
 
-    @SuppressWarnings("unused")
-    @Deprecated
-    ActivityModule() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Provides
-    @Singleton
-    Activity activity() {
-        return activity;
-    }
-
-    @Provides
-    @Singleton
-    Context context() {
-        return activity;
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(Activity.class).toInstance(activity);
+        binder.bind(Context.class).toInstance(activity);
     }
 }

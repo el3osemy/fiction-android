@@ -10,7 +10,6 @@ import at.yawk.fiction.Chapter;
 import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.TaskManager;
-import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.Provider;
 import at.yawk.fiction.android.ui.AsyncAction;
@@ -21,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.squareup.okhttp.OkHttpClient;
-import dagger.Module;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.CookieHandler;
@@ -201,12 +199,4 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
                 }
         ));
     }
-
-    @Override
-    public Object createModule() {
-        return new M();
-    }
-
-    @Module(addsTo = BaseModule.class, injects = FimAndroidFictionProvider.class)
-    static class M {}
 }

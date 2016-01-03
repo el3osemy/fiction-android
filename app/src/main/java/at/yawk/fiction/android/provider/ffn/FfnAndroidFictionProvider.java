@@ -2,13 +2,11 @@ package at.yawk.fiction.android.provider.ffn;
 
 import android.net.Uri;
 import at.yawk.fiction.Story;
-import at.yawk.fiction.android.inject.BaseModule;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import at.yawk.fiction.android.provider.Provider;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.impl.PageParserProvider;
 import at.yawk.fiction.impl.fanfiction.*;
-import dagger.Module;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -80,12 +78,4 @@ public class FfnAndroidFictionProvider extends AndroidFictionProvider {
         }
         return super.getStory(uri);
     }
-
-    @Override
-    public Object createModule() {
-        return new M();
-    }
-
-    @Module(addsTo = BaseModule.class, injects = FfnAndroidFictionProvider.class)
-    static class M {}
 }

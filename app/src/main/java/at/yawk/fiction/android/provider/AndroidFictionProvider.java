@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import at.yawk.fiction.*;
-import at.yawk.fiction.android.inject.ExternalInjectable;
 import at.yawk.fiction.android.storage.StoryManager;
 import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.android.ui.AsyncAction;
@@ -25,7 +24,7 @@ import lombok.Getter;
  * @author yawkat
  */
 @Getter
-public abstract class AndroidFictionProvider implements ExternalInjectable {
+public abstract class AndroidFictionProvider {
     private final String id;
     private final String name;
     private final Set<Class<?>> providingClasses;

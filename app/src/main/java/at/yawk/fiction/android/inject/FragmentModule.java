@@ -1,35 +1,21 @@
 package at.yawk.fiction.android.inject;
 
 import android.app.Fragment;
-import at.yawk.fiction.android.ui.MainPreferenceFragment;
-import dagger.Module;
-import javax.inject.Singleton;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 /**
  * @author yawkat
  */
-@Module(
-        addsTo = ActivityModule.class,
-        injects = {
-                MainPreferenceFragment.class,
-        }
-)
-public class FragmentModule {
+public class FragmentModule implements Module {
     final Fragment fragment;
 
     FragmentModule(Fragment fragment) {
         this.fragment = fragment;
     }
 
-    @SuppressWarnings("unused")
-    @Deprecated
-    FragmentModule() {
-        throw new UnsupportedOperationException();
-    }
-
-    //@Provides
-    @Singleton
-    public Fragment fragment() {
-        return fragment;
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(Fragment.class).toInstance(fragment);
     }
 }

@@ -15,7 +15,7 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
 
-apply plugin: 'retrolambda'
+apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'imagemagick'
 apply plugin: 'com.tmiyamon.mdicons'
@@ -86,8 +86,8 @@ dependencies {
     provided 'com.google.code.findbugs:annotations:2.0.2'
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.squareup.dagger:dagger:1.2.2'
-    provided 'com.squareup.dagger:dagger-compiler:1.2.2'
+    compile 'com.google.guava:guava:19.0'
+    compile 'com.google.inject:guice:4.0:no_aop'
     compile 'org.apmem.tools:layouts:1.9@aar'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.j256.ormlite:ormlite-android:4.48'

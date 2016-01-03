@@ -16,5 +16,6 @@ shadowJar {
     dependencies {
         exclude(dependency('org.slf4j:slf4j-api'))
         exclude(dependency('org.slf4j:slf4j-simple'))
+        exclude(dependency('com.google.guava:guava'))
     }
 }

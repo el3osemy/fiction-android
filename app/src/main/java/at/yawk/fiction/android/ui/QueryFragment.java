@@ -17,8 +17,8 @@ import at.yawk.fiction.Pageable;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
 import at.yawk.fiction.android.download.DownloadManager;
-import at.yawk.fiction.android.download.task.QueryDownloadTask;
-import at.yawk.fiction.android.download.task.StoryListUpdateTask;
+import at.yawk.fiction.android.download.DownloadQueryPagesTask;
+import at.yawk.fiction.android.download.UpdateStoryListTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
@@ -214,7 +214,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         switch (item.getItemId()) {
         case R.id.updateAll:
             if (currentWorker != null) {
-                downloadManager.enqueue(new StoryListUpdateTask(new ArrayList<>(currentWorker.stories)));
+                downloadManager.enqueue(new UpdateStoryListTask(new ArrayList<>(currentWorker.stories)));
             }
             return true;
         case R.id.fetchPages:
@@ -225,7 +225,7 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                 if (pageCount < 0) {
                     toasts.toast("Cannot fetch pages because we don't know how many there are!");
                 } else {
-                    downloadManager.enqueue(new QueryDownloadTask(currentWorker.query, pageCount));
+                    downloadManager.enqueue(new DownloadQueryPagesTask(currentWorker.query));
                 }
             }
             return true;

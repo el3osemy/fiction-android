@@ -9,12 +9,10 @@ import at.yawk.fiction.android.context.FragmentUiRunner;
 import at.yawk.fiction.android.context.TaskContext;
 import at.yawk.fiction.android.context.TaskManager;
 import at.yawk.fiction.android.inject.ContentView;
-import at.yawk.fiction.android.inject.SupportFragmentModule;
 import at.yawk.fiction.android.ui.QueryEditorFragment;
 import at.yawk.fiction.android.ui.StringArrayAdapter;
 import at.yawk.fiction.impl.fanfiction.*;
 import butterknife.Bind;
-import dagger.Module;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -169,14 +167,6 @@ public class FfnQueryEditorFragment extends QueryEditorFragment<FfnSearchQuery> 
         super.onDestroy();
         taskContext.destroy();
     }
-
-    @Override
-    public Object createModule() {
-        return new M();
-    }
-
-    @Module(addsTo = SupportFragmentModule.class, injects = FfnQueryEditorFragment.class)
-    static class M {}
 
     @RequiredArgsConstructor
     private enum SubCategoryOrder implements Comparator<FfnSubCategory> {

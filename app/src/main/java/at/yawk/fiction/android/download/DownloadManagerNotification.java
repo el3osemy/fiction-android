@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 @Singleton
 public class DownloadManagerNotification {
     @Inject Application application;
-    @Inject DownloadManager metrics;
+    @Inject DownloadManagerMetrics metrics;
 
     @GuardedBy("this")
     private volatile int nextId = 0;

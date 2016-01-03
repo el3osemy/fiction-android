@@ -1,10 +1,12 @@
 package at.yawk.fiction.android.download;
 
+import com.google.inject.ImplementedBy;
 import java.util.Collection;
 
 /**
  * @author yawkat
  */
+@ImplementedBy(DownloadManagerImpl.class)
 public interface DownloadManagerMetrics {
     Collection<Task> getTasks();
 

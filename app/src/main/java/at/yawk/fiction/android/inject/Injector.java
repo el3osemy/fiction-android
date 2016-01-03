@@ -6,13 +6,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import at.yawk.fiction.android.context.ObjectMapperProvider;
 import at.yawk.fiction.android.download.DownloadManagerNotification;
+import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.provider.ProviderLoader;
+import at.yawk.fiction.android.provider.ProviderManager;
 import at.yawk.fiction.android.storage.StoryManager;
 import butterknife.ButterKnife;
 import com.google.common.base.Supplier;
 import com.google.common.collect.MapMaker;
-import dagger.ObjectGraph;
+import com.google.inject.Guice;
+import com.google.inject.Module;
 import java.util.concurrent.ConcurrentMap;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,29 +27,31 @@ import lombok.extern.slf4j.Slf4j;
 public class Injector {
     private static Injector injector;
 
-    private final BaseModule base;
-    private final ObjectGraph global;
+    private final com.google.inject.Injector global;
 
-    private final ConcurrentMap<Object, ObjectGraph> contextMap = new MapMaker().weakKeys().weakValues().makeMap();
+    private final ConcurrentMap<Object, com.google.inject.Injector> contextMap =
+            new MapMaker().weakKeys().weakValues().makeMap();
 
     private Injector(Application application) {
-        base = new BaseModule(application);
-        ObjectGraph baseGraph = ObjectGraph.create(base);
-        global = baseGraph.get(ProviderLoader.class).load(baseGraph);
+        Module base = new BaseModule(application);
+        global = Guice.createInjector(base, new ObjectMapperProvider());
+        ProviderLoader providerLoader = global.getInstance(ProviderLoader.class);
+        providerLoader.load(global);
+        global.getInstance(ProviderManager.class).loadProviders(providerLoader);
 
         // make sure the download manager ui is available
-        global.get(DownloadManagerNotification.class);
+        global.getInstance(DownloadManagerNotification.class);
     }
 
     public static void init(Application application) {
         injector = new Injector(application);
 
         // initialize the story manager
-        injector.global.get(StoryManager.class).initialize();
+        injector.global.getInstance(StoryManager.class).initialize();
     }
 
-    private ObjectGraph module(Object context, Supplier<ObjectGraph> factory) {
-        ObjectGraph graph = contextMap.get(context);
+    private com.google.inject.Injector module(Object context, Supplier<com.google.inject.Injector> factory) {
+        com.google.inject.Injector graph = contextMap.get(context);
         if (graph == null) {
             graph = factory.get();
             if (contextMap.putIfAbsent(context, graph) != null) {
@@ -55,35 +61,23 @@ public class Injector {
         return graph;
     }
 
-    private ObjectGraph activity(Activity activity) {
-        return module(activity, () -> global.plus(new ActivityModule(activity)));
+    private com.google.inject.Injector activity(Activity activity) {
+        return module(activity, () -> global.createChildInjector(new ActivityModule(activity)));
     }
 
-    private ObjectGraph supportFragment(Fragment fragment) {
-        return module(fragment, () -> {
-            SupportFragmentModule module = new SupportFragmentModule(fragment);
-            return activity(fragment.getActivity()).plus(
-                    fragment instanceof ExternalInjectable ?
-                            new Object[]{ module, ((ExternalInjectable) fragment).createModule() } :
-                            new Object[]{ module }
-            );
-        });
+    private com.google.inject.Injector supportFragment(Fragment fragment) {
+        return module(fragment, () -> activity(fragment.getActivity())
+                .createChildInjector(new SupportFragmentModule(fragment)));
     }
 
-    private ObjectGraph fragment(android.app.Fragment fragment) {
-        return module(fragment, () -> {
-            FragmentModule module = new FragmentModule(fragment);
-            return activity(fragment.getActivity()).plus(
-                    fragment instanceof ExternalInjectable ?
-                            new Object[]{ module, ((ExternalInjectable) fragment).createModule() } :
-                            new Object[]{ module }
-            );
-        });
+    private com.google.inject.Injector fragment(android.app.Fragment fragment) {
+        return module(fragment, () -> activity(fragment.getActivity())
+                .createChildInjector(new FragmentModule(fragment)));
     }
 
-    private void inject(ObjectGraph graph, Object o) {
-        graph.inject(o);
-        base.eventBus.addWeakListeners(o);
+    private void inject(com.google.inject.Injector graph, Object o) {
+        graph.injectMembers(o);
+        graph.getInstance(EventBus.class).addWeakListeners(o);
     }
 
     public static void inject(Object o) {

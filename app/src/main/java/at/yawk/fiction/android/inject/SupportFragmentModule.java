@@ -1,40 +1,21 @@
 package at.yawk.fiction.android.inject;
 
 import android.support.v4.app.Fragment;
-import at.yawk.fiction.android.ui.DownloadManagerFragment;
-import at.yawk.fiction.android.ui.QueryFragment;
-import at.yawk.fiction.android.ui.StoryFragment;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Singleton;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 /**
  * @author yawkat
  */
-@Module(
-        addsTo = ActivityModule.class,
-        injects = {
-                QueryFragment.class,
-                StoryFragment.class,
-                DownloadManagerFragment.class,
-        }
-)
-public class SupportFragmentModule {
+public class SupportFragmentModule implements Module {
     final Fragment fragment;
 
     SupportFragmentModule(Fragment fragment) {
         this.fragment = fragment;
     }
 
-    @SuppressWarnings("unused")
-    @Deprecated
-    SupportFragmentModule() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Provides
-    @Singleton
-    public Fragment fragment() {
-        return fragment;
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(Fragment.class).toInstance(fragment);
     }
 }

@@ -2,12 +2,13 @@ package at.yawk.fiction.android.provider;
 
 import android.app.Application;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dagger.ObjectGraph;
+import com.google.inject.Injector;
 import dalvik.system.DexFile;
 import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,61 +18,58 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 public class ProviderLoader {
     @Inject ObjectMapper objectMapper;
-    @Getter private final List<AndroidFictionProvider> providers = new ArrayList<>();
     @Inject Application application;
 
-    @Inject
+    @Getter private final List<AndroidFictionProvider> providers = new ArrayList<>();
+
     public ProviderLoader() {}
 
-    public ObjectGraph load(ObjectGraph graph) {
-        log.info("Scanning for fiction providers...");
-        try {
-            DexFile dexFile = new DexFile(application.getApplicationInfo().sourceDir);
-            Enumeration<String> entries = dexFile.entries();
+    @SneakyThrows
+    private Map<Class<? extends AndroidFictionProvider>, Provider> findProviderClasses() {
+        Map<Class<? extends AndroidFictionProvider>, Provider> providerClasses = new HashMap<>();
+        DexFile dexFile = new DexFile(application.getApplicationInfo().sourceDir);
+        Enumeration<String> entries = dexFile.entries();
 
-            Map<AndroidFictionProvider, Provider> annotations = new HashMap<>();
-            while (entries.hasMoreElements()) {
-                String providerClassName = entries.nextElement();
-                if (!providerClassName.startsWith("at.yawk.fiction.android.provider")) { continue; }
-                Class<?> providerClass;
-                try {
-                    providerClass = Class.forName(providerClassName, false, ProviderManager.class.getClassLoader());
-                } catch (Throwable e) {
-                    continue;
-                }
-
-                Provider providerAnnotation = providerClass.getAnnotation(Provider.class);
-                if (providerAnnotation == null) {
-                    continue;
-                }
-
-                log.info("Adding provider {}", providerClass.getName());
-                AndroidFictionProvider provider = (AndroidFictionProvider) providerClass.newInstance();
-
-                annotations.put(provider, providerAnnotation);
-
-                //noinspection Convert2streamapi
-                for (Class<?> provided : provider.getProvidingClasses()) {
-                    objectMapper.registerSubtypes(provided);
-                }
-
-                providers.add(provider);
+        Map<AndroidFictionProvider, Provider> annotations = new HashMap<>();
+        while (entries.hasMoreElements()) {
+            String providerClassName = entries.nextElement();
+            if (!providerClassName.startsWith("at.yawk.fiction.android.provider")) { continue; }
+            Class<?> providerClass;
+            try {
+                providerClass = Class.forName(providerClassName, false, ProviderManager.class.getClassLoader());
+            } catch (Throwable e) {
+                continue;
             }
 
-            Collections.sort(providers, (lhs, rhs) ->
-                    annotations.get(lhs).priority() - annotations.get(rhs).priority());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            Provider providerAnnotation = providerClass.getAnnotation(Provider.class);
+            if (providerAnnotation == null) {
+                continue;
+            }
+
+            //noinspection unchecked
+            providerClasses.put((Class<? extends AndroidFictionProvider>) providerClass, providerAnnotation);
         }
+
+        return providerClasses;
+    }
+
+    public void load(Injector injector) {
+        log.info("Scanning for fiction providers...");
+
+        List<Map.Entry<Class<? extends AndroidFictionProvider>, Provider>> entries =
+                new ArrayList<>(findProviderClasses().entrySet());
+        Collections.sort(entries, (lhs, rhs) -> lhs.getValue().priority() - rhs.getValue().priority());
+        for (Map.Entry<Class<? extends AndroidFictionProvider>, Provider> entry : entries) {
+            log.info("Adding provider {}", entry.getKey().getName());
+            AndroidFictionProvider provider = injector.getInstance(entry.getKey());
+
+            for (Class<?> provided : provider.getProvidingClasses()) {
+                objectMapper.registerSubtypes(provided);
+            }
+
+            providers.add(provider);
+        }
+
         log.info("Scan complete");
-        Object[] modules = new Object[providers.size()];
-        for (int i = 0; i < providers.size(); i++) {
-            modules[i] = providers.get(i).createModule();
-        }
-        ObjectGraph combined = graph.plus(modules);
-        for (AndroidFictionProvider provider : providers) {
-            combined.inject(provider);
-        }
-        return combined;
     }
 }

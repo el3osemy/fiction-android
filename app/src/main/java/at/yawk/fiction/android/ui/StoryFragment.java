@@ -29,9 +29,8 @@ import android.widget.TextView;
 import at.yawk.fiction.*;
 import at.yawk.fiction.android.R;
 import at.yawk.fiction.android.context.*;
+import at.yawk.fiction.android.download.DownloadChaptersTask;
 import at.yawk.fiction.android.download.DownloadManager;
-import at.yawk.fiction.android.download.task.ChapterDownloadTask;
-import at.yawk.fiction.android.download.task.ChapterRangeDownloadTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
@@ -48,6 +47,7 @@ import com.squareup.picasso.Target;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -406,17 +406,25 @@ public class StoryFragment extends ContentViewFragment {
             });
 
             View.OnClickListener refreshListener = v ->
-                    downloadManager.enqueue(new ChapterDownloadTask(wrapper, this.index));
+                    downloadManager.enqueue(new DownloadChaptersTask(wrapper, Collections.singleton(this.index)));
             view.findViewById(R.id.chapterDownload).setOnClickListener(refreshListener);
             view.findViewById(R.id.chapterDownload).setOnLongClickListener(v -> {
+                List<Integer> toDownload = new ArrayList<>();
+                for (int i = 0; i <= index; i++) {
+                    if (!wrapper.isChapterDownloaded(i)) { toDownload.add(i); }
+                }
                 showDialog(new AsyncAction(R.string.download_until_here, () ->
-                        downloadManager.enqueue(new ChapterRangeDownloadTask(wrapper, 0, index + 1, true))));
+                        downloadManager.enqueue(new DownloadChaptersTask(wrapper, toDownload))));
                 return true;
             });
             view.findViewById(R.id.chapterRefresh).setOnClickListener(refreshListener);
             view.findViewById(R.id.chapterRefresh).setOnLongClickListener(v -> {
+                List<Integer> toDownload = new ArrayList<>();
+                for (int i = 0; i <= index; i++) {
+                    toDownload.add(i);
+                }
                 showDialog(new AsyncAction(R.string.refresh_until_here, () ->
-                        downloadManager.enqueue(new ChapterRangeDownloadTask(wrapper, 0, index + 1, false))));
+                        downloadManager.enqueue(new DownloadChaptersTask(wrapper, toDownload))));
                 return true;
             });
         }

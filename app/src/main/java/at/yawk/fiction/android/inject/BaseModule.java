@@ -5,30 +5,15 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import at.yawk.fiction.android.FictionApplication;
-import at.yawk.fiction.android.context.ObjectMapperProvider;
-import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.event.EventBus;
-import at.yawk.fiction.android.provider.ProviderLoader;
-import at.yawk.fiction.android.storage.QueryManager;
-import at.yawk.fiction.android.storage.SqlStorage;
-import at.yawk.fiction.android.storage.StoryManager;
-import at.yawk.fiction.android.storage.StoryWrapper;
 import at.yawk.fiction.impl.PageParserProvider;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Singleton;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 /**
  * @author yawkat
  */
-@Module(
-        library = true,
-        includes = { ObjectMapperProvider.class },
-        injects = { ProviderLoader.class, StoryWrapper.class, DownloadManagerNotification.class, QueryManager.class,
-                FictionApplication.class, SqlStorage.class, StoryManager.class }
-)
-public class BaseModule {
+public class BaseModule implements Module {
     final EventBus eventBus = new EventBus(new Handler(Looper.getMainLooper()));
     final Application application;
 
@@ -36,27 +21,11 @@ public class BaseModule {
         this.application = application;
     }
 
-    @Provides
-    @Singleton
-    public EventBus eventBus() {
-        return eventBus;
-    }
-
-    @Provides
-    @Singleton
-    public Application application() {
-        return application;
-    }
-
-    @Provides
-    @Singleton
-    PageParserProvider pageParserProvider() {
-        return new PageParserProvider();
-    }
-
-    @Provides
-    @Singleton
-    SharedPreferences preferences() {
-        return PreferenceManager.getDefaultSharedPreferences(application);
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(SharedPreferences.class).toInstance(PreferenceManager.getDefaultSharedPreferences(application));
+        binder.bind(PageParserProvider.class).toInstance(new PageParserProvider());
+        binder.bind(Application.class).toInstance(application);
+        binder.bind(EventBus.class).toInstance(eventBus);
     }
 }

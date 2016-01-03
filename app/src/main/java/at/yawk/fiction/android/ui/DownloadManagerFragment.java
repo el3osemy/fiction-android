@@ -6,7 +6,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.download.DownloadManager;
 import at.yawk.fiction.android.download.DownloadManagerMetrics;
 import at.yawk.fiction.android.download.ManagerUpdateEvent;
 import at.yawk.fiction.android.download.task.TaskUpdateEvent;
@@ -24,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ContentView(R.layout.download_list)
 public class DownloadManagerFragment extends ContentViewFragment {
-    @Inject DownloadManager downloadManager;
+    @Inject DownloadManagerMetrics downloadManager;
 
     @Bind(R.id.downloadList) ListView downloadList;
     @Bind(R.id.noDownloads) View noDownloads;
