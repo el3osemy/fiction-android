@@ -77,7 +77,13 @@ public class DownloadManagerNotification {
                 builder.setSmallIcon(R.mipmap.ic_file_download_white_24dp);
                 builder.setContentTitle(task.getName());
                 List<String> contentText = new ArrayList<>();
-                if (max != -1) { contentText.add(current + "/" + max + " complete"); }
+
+                if (max != -1) {
+                    contentText.add(current + "/" + max + " complete");
+                } else if (
+                        task.getStatusMessage() != null) {
+                    contentText.add(task.getStatusMessage());
+                }
                 if (allTasks.size() > 1) {
                     int otherTaskCount = allTasks.size() - 1;
                     contentText.add(otherTaskCount + " other task" + (otherTaskCount > 1 ? "s" : "") + " queued");

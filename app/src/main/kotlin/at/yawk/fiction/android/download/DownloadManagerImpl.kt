@@ -42,11 +42,15 @@ class DownloadManagerImpl @Inject internal constructor(
             @JvmName("getName0") get
         override var cancelled = false
         @Volatile var complete = false
+        var statusMessage: String? = null
+            @JvmName("getStatusMessage0") get
 
         var currentProgress = 0
         var maxProgress = -1
 
-        override fun getName(): String = name
+        override fun getName() = name
+
+        override fun getStatusMessage() = statusMessage
 
         override fun isRunning(): Boolean {
             return !cancelled && !complete
@@ -65,11 +69,13 @@ class DownloadManagerImpl @Inject internal constructor(
                 is ProgressListener.Determinate -> {
                     currentProgress = progress.complete
                     maxProgress = progress.total
+                    statusMessage = progress.message
                     fireTaskUpdateEvent()
                 }
                 is ProgressListener.Indeterminate -> {
                     currentProgress = 0
                     maxProgress = -1
+                    statusMessage = progress.message
                     fireTaskUpdateEvent()
                 }
                 is ProgressListener.Complete -> complete(false)

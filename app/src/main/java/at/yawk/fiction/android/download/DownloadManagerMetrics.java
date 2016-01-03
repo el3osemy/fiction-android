@@ -2,6 +2,7 @@ package at.yawk.fiction.android.download;
 
 import com.google.inject.ImplementedBy;
 import java.util.Collection;
+import javax.annotation.Nullable;
 
 /**
  * @author yawkat
@@ -14,6 +15,9 @@ public interface DownloadManagerMetrics {
         boolean isRunning();
 
         String getName();
+
+        @Nullable
+        String getStatusMessage();
 
         long getCurrentProgress();
 
