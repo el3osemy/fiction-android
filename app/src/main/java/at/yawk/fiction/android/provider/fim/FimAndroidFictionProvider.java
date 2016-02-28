@@ -76,10 +76,7 @@ public class FimAndroidFictionProvider extends AndroidFictionProvider {
 
     @Override
     public void setRead(Story story, Chapter chapter, boolean read) throws Exception {
-        while (chapter.getRead() == null ||
-               chapter.getRead() != read) {
-            getFictionProvider().toggleRead(chapter);
-        }
+        getFictionProvider().setRead(chapter, read);
     }
 
     @Override

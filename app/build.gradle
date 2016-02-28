@@ -99,6 +99,7 @@ dependencies {
     }
 
     testCompile 'org.testng:testng:6.9.6'
+    testCompile 'com.google.guava:guava:19.0'
 }
 
 mdicons {
