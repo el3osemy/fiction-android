@@ -3,16 +3,14 @@ package at.yawk.fiction.android.storage;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.webkit.MimeTypeMap;
-import at.yawk.fiction.*;
+import at.yawk.fiction.Chapter;
+import at.yawk.fiction.FormattedText;
+import at.yawk.fiction.HtmlText;
+import at.yawk.fiction.RawText;
+import at.yawk.fiction.Story;
 import at.yawk.fiction.android.provider.AndroidFictionProvider;
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import nl.siegmann.epublib.domain.Author;
@@ -24,6 +22,12 @@ import nl.siegmann.epublib.service.MediatypeService;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author yawkat
@@ -37,7 +41,7 @@ public class EpubBuilder {
 
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(file), MimeTypeMap.getSingleton().getMimeTypeFromExtension("epub"));
+        intent.setDataAndType(Uri.fromFile(file), "application/epub+zip");
         activity.startActivity(intent);
     }
 
