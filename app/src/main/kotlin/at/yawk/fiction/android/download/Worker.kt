@@ -10,7 +10,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Semaphore
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.first
 
 /**
  * @author yawkat
@@ -20,7 +19,8 @@ internal class Worker @Inject constructor(
         val pojoMerger: PojoMerger,
         val taskManager: TaskManager,
         val providerManager: ProviderManager,
-        val offlineQueryManager: OfflineQueryManager
+        val offlineQueryManager: OfflineQueryManager,
+        val kindleSender: KindleSender
 ) {
     private val workBalancer: WorkBalancer = SemaphoreWorkBalancer(
             Executor { taskManager.execute(it) },
@@ -42,6 +42,7 @@ internal class Worker @Inject constructor(
                 }
                 return "Updating ${task.stories.size} stories"
             }
+            is SendBookToKindleTask -> return "Sending '${getStoryName(task.story)}' to kindle"
             else -> throw UnsupportedOperationException()
         }
     }
@@ -51,6 +52,14 @@ internal class Worker @Inject constructor(
             is DownloadChaptersTask -> downloadChapters(task, listener, group)
             is DownloadQueryPagesTask -> downloadQueryPages(task, listener, group)
             is UpdateStoryListTask -> updateStoryList(task, listener, group)
+            is SendBookToKindleTask -> workBalancer.execute(group, Runnable {
+                listener.postProgress(ProgressListener.Indeterminate("Sending"))
+                try {
+                    kindleSender.send(task.story)
+                } finally {
+                    listener.postProgress(ProgressListener.Complete)
+                }
+            })
             else -> throw UnsupportedOperationException()
         }
     }

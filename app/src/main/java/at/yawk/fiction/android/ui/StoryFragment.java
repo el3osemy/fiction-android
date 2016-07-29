@@ -26,11 +26,23 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import at.yawk.fiction.*;
+import at.yawk.fiction.Author;
+import at.yawk.fiction.Chapter;
+import at.yawk.fiction.FormattedText;
+import at.yawk.fiction.HtmlText;
+import at.yawk.fiction.Image;
+import at.yawk.fiction.RawText;
+import at.yawk.fiction.Story;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.*;
+import at.yawk.fiction.android.context.FragmentUiRunner;
+import at.yawk.fiction.android.context.TaskContext;
+import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.Toasts;
+import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.download.DownloadChaptersTask;
 import at.yawk.fiction.android.download.DownloadManager;
+import at.yawk.fiction.android.download.KindleSender;
+import at.yawk.fiction.android.download.SendBookToKindleTask;
 import at.yawk.fiction.android.event.StoryUpdateEvent;
 import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
@@ -72,6 +84,7 @@ public class StoryFragment extends ContentViewFragment {
     @Inject FragmentUiRunner uiRunner;
     @Inject PojoMerger merger;
     @Inject SharedPreferences sharedPreferences;
+    @Inject KindleSender kindleSender;
 
     private TaskContext taskContext = new TaskContext();
     private final Handler uiRunnerHandler = new Handler(Looper.getMainLooper());
@@ -143,6 +156,10 @@ public class StoryFragment extends ContentViewFragment {
                 intent.setData(Uri.parse(uri.toString()));
                 getActivity().startActivity(intent);
             }));
+            if (kindleSender.getEnabled()) {
+                actions.add(new AsyncAction(R.string.send_to_kindle, () ->
+                        downloadManager.enqueue(new SendBookToKindleTask(wrapper))));
+            }
             actions.addAll(wrapper.getProvider().getAdditionalActions(wrapper.getStory()));
             showDialog(actions);
             return false;

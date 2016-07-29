@@ -37,4 +37,5 @@
     <string name="offline_mode">Offline Query Browsing</string>
     <string name="rebuild_index">Rebuild Index</string>
     <string name="manage_shelves">Manage Shelves</string>
+    <string name="send_to_kindle">Send to Kindle</string>
 </resources>
