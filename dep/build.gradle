@@ -8,6 +8,10 @@ dependencies {
     compile 'nl.siegmann.epublib:epublib-core:3.1'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.squareup.okhttp:okhttp-apache:2.5.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.4'
+    compile('com.fasterxml.jackson.module:jackson-module-kotlin:2.7.4') {
+        transitive = false
+    }
 }
 
 shadowJar {
