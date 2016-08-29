@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/order"
+        android:layout_gravity="center_horizontal" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/orderDirection"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/title"
+            android:layout_weight="1"
+            android:hint="Title" />
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/freeText"
+            android:layout_weight="1"
+            android:hint="Free Text Search" />
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/author"
+            android:layout_weight="1"
+            android:hint="Author" />
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/period"
+            android:layout_weight="1"
+            android:hint="Period" />
+
+    <CheckBox
+            android:id="@+id/complete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Complete"
+            android:checked="false" />
+
+    <CheckBox
+            android:id="@+id/singleChapter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Single Chapter"
+            android:checked="false" />
+
+    <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rating"
+            android:layout_gravity="center_horizontal" />
+
+    <org.apmem.tools.layouts.FlowLayout
+        android:id="@+id/fandoms"
+        orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/addFandom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Fandom"
+            style="@style/Base.Widget.AppCompat.Button.Small" />
+    </org.apmem.tools.layouts.FlowLayout>
+
+    <org.apmem.tools.layouts.FlowLayout
+            android:id="@+id/tags"
+            orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <Button
+                android:id="@+id/addTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Tag"
+                style="@style/Base.Widget.AppCompat.Button.Small" />
+    </org.apmem.tools.layouts.FlowLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/minWords"
+                android:layout_weight="1"
+                android:hint="Min Words" />
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/maxWords"
+                android:layout_weight="1"
+                android:hint="Max Words" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/minHits"
+                android:layout_weight="1"
+                android:hint="Min Hits" />
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/maxHits"
+                android:layout_weight="1"
+                android:hint="Max Hits" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/minKudos"
+                android:layout_weight="1"
+                android:hint="Min Kudos" />
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/maxKudos"
+                android:layout_weight="1"
+                android:hint="Max Kudos" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/minComments"
+                android:layout_weight="1"
+                android:hint="Min Comments" />
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/maxComments"
+                android:layout_weight="1"
+                android:hint="Max Comments" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/minBookmarks"
+                android:layout_weight="1"
+                android:hint="Min Bookmarks" />
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/maxBookmarks"
+                android:layout_weight="1"
+                android:hint="Max Bookmarks" />
+    </LinearLayout>
+</LinearLayout>
