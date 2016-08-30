@@ -6,6 +6,7 @@ import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.impl.AndroidLoggingProviderImpl;
 
 /**
  * @author yawkat
@@ -17,6 +18,8 @@ public class FictionApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        AndroidLoggingProviderImpl.init(this);
+
         try {
             log.info("Starting up...");
             Fabric.with(this, new Crashlytics());

@@ -90,7 +90,7 @@ public class EpubBuilder {
         AndroidFictionProvider provider = wrapper.getProvider();
         String id = provider.getStoryId(story, "/");
 
-        File file = new File(root.getRoot(), "epub/" + provider.getId() + "/" + id + ".epub");
+        File file = new File(root.getRootNow(), "epub/" + provider.getId() + "/" + id + ".epub");
         //noinspection ResultOfMethodCallIgnored
         file.getParentFile().mkdirs();
 

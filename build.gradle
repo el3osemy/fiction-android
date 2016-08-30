@@ -27,7 +27,7 @@ allprojects {
         mavenCentral()
         mavenLocal()
         maven {
-            url "http://mvn.yawk.at"
+            url "https://mvn.yawk.at"
         }
     }
 }

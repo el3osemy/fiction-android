@@ -1,32 +1,49 @@
 package org.slf4j.impl;
 
+import android.Manifest;
+import android.content.Context;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import at.yawk.fiction.android.storage.RootFile;
 import com.google.common.base.Charsets;
-import java.io.*;
-import lombok.SneakyThrows;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 
 /**
  * @author yawkat
  */
-class AndroidLoggingProviderImpl implements AndroidLoggingProvider {
+public class AndroidLoggingProviderImpl implements AndroidLoggingProvider {
     private static final int FILE_LOG_LEVEL = Log.INFO;
 
-    private final BufferedWriter fileOutput;
+    @Nullable
+    private static BufferedWriter fileOutput = null;
 
-    @SneakyThrows
-    AndroidLoggingProviderImpl() {
-        File root = RootFile.makeRootDirectory();
-        File logDirectory = new File(root, "log");
-        //noinspection ResultOfMethodCallIgnored
-        logDirectory.mkdirs();
+    public static void init(Context context) {
+        RootFile.getRoot(context, root -> {
+            try {
+                Log.i("", ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) + "");
 
-        String timestamp = LocalDateTime.now(DateTimeZone.UTC).toString();
-        File logFile = new File(logDirectory, timestamp + ".log");
+                File logDirectory = new File(root, "log");
+                //noinspection ResultOfMethodCallIgnored
+                logDirectory.mkdirs();
+                if (!logDirectory.isDirectory()) {
+                    throw new IOException("Failed to create log directory");
+                }
 
-        fileOutput = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile), Charsets.UTF_8));
+                String timestamp = LocalDateTime.now(DateTimeZone.UTC).toString();
+                File logFile = new File(logDirectory, timestamp + ".log");
+
+                fileOutput = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile), Charsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -47,6 +64,8 @@ class AndroidLoggingProviderImpl implements AndroidLoggingProvider {
     }
 
     private synchronized void writeToLog(String tag, int level, String msg) throws IOException {
+        if (fileOutput == null) return;
+
         fileOutput.write('[');
         fileOutput.write(getLevelName(level));
         fileOutput.write("] [");
