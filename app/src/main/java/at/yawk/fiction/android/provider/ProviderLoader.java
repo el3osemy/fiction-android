@@ -1,11 +1,16 @@
 package at.yawk.fiction.android.provider;
 
 import android.app.Application;
+import at.yawk.fiction.android.provider.ao3.Ao3AndroidFictionProvider;
+import at.yawk.fiction.android.provider.ffn.FfnAndroidFictionProvider;
+import at.yawk.fiction.android.provider.fim.FimAndroidFictionProvider;
+import at.yawk.fiction.android.provider.local.LocalAndroidFictionProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,18 +37,30 @@ public class ProviderLoader {
     @SneakyThrows
     private Map<Class<? extends AndroidFictionProvider>, Provider> findProviderClasses() {
         Map<Class<? extends AndroidFictionProvider>, Provider> providerClasses = new HashMap<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(application.getAssets().open("providers")));
         try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.isEmpty()) {
-                    Class<? extends AndroidFictionProvider> cl =
-                            Class.forName(line).asSubclass(AndroidFictionProvider.class);
-                    providerClasses.put(cl, cl.getAnnotation(Provider.class));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(application.getAssets().open("providers")));
+            try {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.isEmpty()) {
+                        Class<? extends AndroidFictionProvider> cl =
+                                Class.forName(line).asSubclass(AndroidFictionProvider.class);
+                        providerClasses.put(cl, cl.getAnnotation(Provider.class));
+                    }
                 }
+            } finally {
+                reader.close();
             }
-        } finally {
-            reader.close();
+        } catch (Exception e) {
+            log.error("Could not find providers file", e);
+            for (Class<? extends AndroidFictionProvider> cl : Arrays.asList(
+                    LocalAndroidFictionProvider.class,
+                    FimAndroidFictionProvider.class,
+                    FfnAndroidFictionProvider.class,
+                    Ao3AndroidFictionProvider.class
+            )) {
+                providerClasses.put(cl, cl.getAnnotation(Provider.class));
+            }
         }
         return providerClasses;
     }
