@@ -3,8 +3,13 @@ package at.yawk.fiction.android.provider;
 import android.app.Application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
-import dalvik.system.DexFile;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
@@ -27,29 +32,19 @@ public class ProviderLoader {
     @SneakyThrows
     private Map<Class<? extends AndroidFictionProvider>, Provider> findProviderClasses() {
         Map<Class<? extends AndroidFictionProvider>, Provider> providerClasses = new HashMap<>();
-        DexFile dexFile = new DexFile(application.getApplicationInfo().sourceDir);
-        Enumeration<String> entries = dexFile.entries();
-
-        Map<AndroidFictionProvider, Provider> annotations = new HashMap<>();
-        while (entries.hasMoreElements()) {
-            String providerClassName = entries.nextElement();
-            if (!providerClassName.startsWith("at.yawk.fiction.android.provider")) { continue; }
-            Class<?> providerClass;
-            try {
-                providerClass = Class.forName(providerClassName, false, ProviderManager.class.getClassLoader());
-            } catch (Throwable e) {
-                continue;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(application.getAssets().open("providers")));
+        try {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    Class<? extends AndroidFictionProvider> cl =
+                            Class.forName(line).asSubclass(AndroidFictionProvider.class);
+                    providerClasses.put(cl, cl.getAnnotation(Provider.class));
+                }
             }
-
-            Provider providerAnnotation = providerClass.getAnnotation(Provider.class);
-            if (providerAnnotation == null) {
-                continue;
-            }
-
-            //noinspection unchecked
-            providerClasses.put((Class<? extends AndroidFictionProvider>) providerClass, providerAnnotation);
+        } finally {
+            reader.close();
         }
-
         return providerClasses;
     }
 
