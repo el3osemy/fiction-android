@@ -13,9 +13,16 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import at.yawk.fiction.Chapter;
+import at.yawk.fiction.FormattedText;
+import at.yawk.fiction.HtmlText;
 import at.yawk.fiction.Pageable;
+import at.yawk.fiction.RawText;
 import at.yawk.fiction.android.R;
-import at.yawk.fiction.android.context.*;
+import at.yawk.fiction.android.context.FragmentUiRunner;
+import at.yawk.fiction.android.context.TaskContext;
+import at.yawk.fiction.android.context.TaskManager;
+import at.yawk.fiction.android.context.Toasts;
+import at.yawk.fiction.android.context.WrapperParcelable;
 import at.yawk.fiction.android.download.DownloadManager;
 import at.yawk.fiction.android.download.DownloadQueryPagesTask;
 import at.yawk.fiction.android.download.UpdateStoryListTask;
@@ -40,6 +47,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
@@ -199,11 +207,15 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
                     }
 
                     private void setSearchQuery(String queryPattern) {
-                        searchQuery = queryPattern.isEmpty() ? null :
-                                Pattern.compile(queryPattern, Pattern.CASE_INSENSITIVE);
-                        if (currentWorker != null) {
-                            currentWorker.stories.notifyFilterChanged();
-                            currentWorker.adapter.notifyDataSetChanged();
+                        try {
+                            searchQuery = queryPattern.isEmpty() ? null :
+                                    Pattern.compile(queryPattern, Pattern.CASE_INSENSITIVE);
+                            if (currentWorker != null) {
+                                currentWorker.stories.notifyFilterChanged();
+                                currentWorker.adapter.notifyDataSetChanged();
+                            }
+                        } catch (PatternSyntaxException ignored) {
+                            // don't update
                         }
                     }
                 });
@@ -367,11 +379,11 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         private List<LazyStory> filteredStories = new CopyOnWriteArrayList<>();
 
         private boolean accept(LazyStory story) {
-            if (searchQuery != null
-                && (story.getTitle() == null || !searchQuery.matcher(story.getTitle()).find())) {
-                return false;
-            }
-            return true;
+            if (searchQuery == null) { return true; }
+            if (story.getTitle() == null || searchQuery.matcher(story.getTitle()).find()) { return true; }
+            if (story.getDescription() != null && searchQuery.matcher(story.getDescription()).find()) { return true; }
+
+            return false;
         }
 
         public synchronized void notifyFilterChanged() {
@@ -412,11 +424,20 @@ public class QueryFragment extends ContentViewFragment implements AdapterView.On
         private final String id;
         // yes, this can be null for some stories.
         @Getter @Nullable private final String title;
+        @Getter @Nullable private final String description;
         private Reference<StoryWrapper> item;
 
         LazyStory(StoryWrapper wrapper) {
             id = wrapper.getId();
             title = wrapper.getStory().getTitle();
+            FormattedText description = wrapper.getStory().getDescription();
+            if (description instanceof RawText) {
+                this.description = ((RawText) description).getText();
+            } else if (description instanceof HtmlText) {
+                this.description = ((HtmlText) description).getHtml();
+            } else {
+                this.description = null;
+            }
             item = makeReference(wrapper);
         }
 
