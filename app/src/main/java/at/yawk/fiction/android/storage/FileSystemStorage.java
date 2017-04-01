@@ -20,7 +20,7 @@ public class FileSystemStorage {
     @Inject ObjectMapper objectMapper;
 
     public <T> T load(Class<T> type, String key) throws NotFoundException, UnreadableException {
-        File file = new File(root.getRootNow(), key);
+        File file = new File(root.getRoot(), key);
         if (file.exists()) {
             try {
                 return objectMapper.readValue(file, type);
@@ -35,8 +35,8 @@ public class FileSystemStorage {
     }
 
     public void save(Object o, String key) {
-        File file = new File(root.getRootNow(), key);
-        File tmp = new File(root.getRootNow(), key + ".tmp");
+        File file = new File(root.getRoot(), key);
+        File tmp = new File(root.getRoot(), key + ".tmp");
         //noinspection ResultOfMethodCallIgnored
         file.getParentFile().mkdirs();
         try {
@@ -53,11 +53,11 @@ public class FileSystemStorage {
     }
 
     public boolean exists(String key) {
-        return new File(root.getRootNow(), key).exists();
+        return new File(root.getRoot(), key).exists();
     }
 
     public void delete(String key) {
-        File file = new File(root.getRootNow(), key);
+        File file = new File(root.getRoot(), key);
         //noinspection ResultOfMethodCallIgnored
         file.delete();
     }
@@ -67,7 +67,7 @@ public class FileSystemStorage {
             @Override
             public Iterator<String> iterator() {
                 return new Iterator<String>() {
-                    private DirectoryNode node = new DirectoryNode(null, key + '/', new File(root.getRootNow(), key));
+                    private DirectoryNode node = new DirectoryNode(null, key + '/', new File(root.getRoot(), key));
                     private String next;
 
                     @Override
@@ -118,7 +118,7 @@ public class FileSystemStorage {
                             if (entry.endsWith(".tmp")) { return; }
 
                             String entryPath = path + entry;
-                            File file = new File(root.getRootNow(), entryPath);
+                            File file = new File(root.getRoot(), entryPath);
                             if (file.isDirectory()) {
                                 node = new DirectoryNode(this, entryPath + '/', file);
                             } else {

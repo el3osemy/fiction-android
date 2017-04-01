@@ -1,22 +1,14 @@
 package at.yawk.fiction.android.ui;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.TextView;
 import at.yawk.fiction.android.Cleanup;
 import at.yawk.fiction.android.Importer;
@@ -27,7 +19,6 @@ import at.yawk.fiction.android.event.Subscribe;
 import at.yawk.fiction.android.inject.ContentView;
 import at.yawk.fiction.android.storage.QueryManager;
 import at.yawk.fiction.android.storage.QueryWrapper;
-import at.yawk.fiction.android.storage.RootFile;
 import butterknife.Bind;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -41,8 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @ContentView(R.layout.query_overview)
 @ContentViewActivity.NoActionBar
 public class QueryOverviewActivity extends ContentViewActivity {
-    private static final int PERM_REQUEST = 1;
-
     @Inject QueryManager queryManager;
     @Inject Importer importer;
     @Inject Cleanup cleanup;
@@ -58,29 +47,9 @@ public class QueryOverviewActivity extends ContentViewActivity {
     private ActionBarDrawerToggle drawerToggle;
 
     @Override
-    protected void inject() {
-        if (RootFile.hasPermission(this)) {
-            super.inject();
-            onCreate0();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQUEST);
-        }
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-        case PERM_REQUEST:
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                RootFile.hasPermission(this); // will run callbacks
-                startActivity(Intent.makeRestartActivityTask(getComponentName()));
-                finish();
-            }
-        }
-    }
-
-    private void onCreate0() {
         setSupportActionBar(toolbar);
 
         updateQueries(true);
@@ -94,9 +63,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                if (actionMode != null) {
-                    actionMode.finish();
-                }
+                if (actionMode != null) { actionMode.finish(); }
             }
         };
         drawerParent.setDrawerListener(drawerToggle);
@@ -229,9 +196,7 @@ public class QueryOverviewActivity extends ContentViewActivity {
     @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (RootFile.hasPermission(this)) {
-            drawerToggle.syncState();
-        }
+        drawerToggle.syncState();
     }
 
     private void editQuery(@Nullable QueryWrapper query) {

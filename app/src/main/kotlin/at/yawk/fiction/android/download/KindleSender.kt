@@ -30,7 +30,7 @@ class KindleSender @Inject constructor(application: Application, objectMapper: O
 
     data class Config(
             val enabled: Boolean,
-            val url: String?,
-            val apiKey: String?
+            val url: String,
+            val apiKey: String
     )
 }

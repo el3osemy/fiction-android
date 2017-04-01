@@ -11,7 +11,6 @@ import at.yawk.fiction.android.download.DownloadManagerNotification;
 import at.yawk.fiction.android.event.EventBus;
 import at.yawk.fiction.android.provider.ProviderLoader;
 import at.yawk.fiction.android.provider.ProviderManager;
-import at.yawk.fiction.android.storage.RootFile;
 import at.yawk.fiction.android.storage.StoryManager;
 import butterknife.ButterKnife;
 import com.google.common.base.Supplier;
@@ -47,10 +46,8 @@ public class Injector {
     public static void init(Application application) {
         injector = new Injector(application);
 
-        injector.global.getInstance(RootFile.class).getRoot(f -> {
-            // initialize the story manager
-            injector.global.getInstance(StoryManager.class).initialize();
-        });
+        // initialize the story manager
+        injector.global.getInstance(StoryManager.class).initialize();
     }
 
     private com.google.inject.Injector module(Object context, Supplier<com.google.inject.Injector> factory) {

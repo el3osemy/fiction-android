@@ -29,12 +29,6 @@ public class ContentViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        inject();
-    }
-
-    protected void inject() {
         Injector.injectActivity(this);
 
         boolean dialog = getClass().isAnnotationPresent(Dialog.class);
@@ -50,6 +44,8 @@ public class ContentViewActivity extends AppCompatActivity {
 
         // choice settings can only be strings: https://code.google.com/p/android/issues/detail?id=2096
         setTheme(themeSet[Integer.parseInt(preferences.getString("theme", "0"))]);
+
+        super.onCreate(savedInstanceState);
 
         setContentView(Injector.buildAndInjectContentView(this, getLayoutInflater(), null));
     }
